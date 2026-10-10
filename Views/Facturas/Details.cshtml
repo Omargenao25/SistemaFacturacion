@@ -1,0 +1,161 @@
+﻿@model SistemaFacturacion.Models.Factura
+
+@{
+    ViewData["Title"] = "Detalle de Factura";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2>Factura @Model.NumeroFactura</h2>
+            <small class="text-muted">
+                Fecha: @Model.Fecha.ToString("dd/MM/yyyy HH:mm")
+            </small>
+        </div>
+
+        <div>
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Historial
+            </a>
+        </div>
+
+    </div>
+
+    <hr />
+
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+
+            <h5>Cliente</h5>
+
+            <p class="mb-1">
+                <strong>
+                    @Model.Cliente?.Nombre
+                    @Model.Cliente?.Apellido
+                </strong>
+            </p>
+
+            <p class="mb-1">
+                Teléfono:
+                @Model.Cliente?.Telefono
+            </p>
+
+            <p class="mb-1">
+                Correo:
+                @Model.Cliente?.Correo
+            </p>
+
+            <p class="mb-1">
+                Dirección:
+                @Model.Cliente?.Direccion
+            </p>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <h5>Información de factura</h5>
+
+            <p class="mb-1">
+                <strong>Número:</strong>
+                @Model.NumeroFactura
+            </p>
+
+            <p class="mb-1">
+                <strong>Estado:</strong>
+                @Model.Estado
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <table class="table table-bordered">
+
+        <thead class="table-dark">
+
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Subtotal</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var detalle in Model.Detalles)
+            {
+                <tr>
+
+                    <td>
+                        @detalle.Producto?.Nombre
+                    </td>
+
+                    <td>
+                        @detalle.Cantidad
+                    </td>
+
+                    <td>
+                        RD$ @detalle.Precio.ToString("N2")
+                    </td>
+
+                    <td>
+                        RD$ @detalle.Subtotal.ToString("N2")
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+
+    <div class="row justify-content-end">
+
+        <div class="col-md-4">
+
+            <table class="table">
+
+                <tr>
+                    <th>Subtotal</th>
+                    <td class="text-end">
+                        RD$ @Model.Subtotal.ToString("N2")
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>ITBIS</th>
+                    <td class="text-end">
+                        RD$ @Model.Impuesto.ToString("N2")
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Descuento</th>
+                    <td class="text-end">
+                        RD$ @Model.Descuento.ToString("N2")
+                    </td>
+                </tr>
+
+                <tr class="table-success">
+                    <th>TOTAL</th>
+                    <td class="text-end fw-bold">
+                        RD$ @Model.Total.ToString("N2")
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

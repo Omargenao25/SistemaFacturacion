@@ -12,5 +12,12 @@ namespace SistemaFacturacion.Data
         }
 
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<DetalleFactura> DetallesFactura { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
+
+
     }
 }

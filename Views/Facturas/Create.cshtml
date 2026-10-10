@@ -1,0 +1,461 @@
+﻿@model SistemaFacturacion.ViewModels.CrearFacturaViewModel
+@using SistemaFacturacion.Models
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Nueva Factura";
+
+    var productos =
+        ViewBag.Productos as List<Producto>
+        ?? new List<Producto>();
+}
+
+<div class="container mt-4">
+
+    <h2>Nueva Factura</h2>
+
+    <hr />
+
+    <form asp-action="Create" method="post" id="facturaForm">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger">
+        </div>
+
+        <div class="row mb-4">
+
+            <div class="col-md-6">
+                <label asp-for="IdCliente"
+                       class="form-label">
+                    Cliente
+                </label>
+
+                <select asp-for="IdCliente"
+                        asp-items="ViewBag.Clientes"
+                        class="form-select">
+
+                    <option value="">
+                        -- Seleccione un cliente --
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="IdCliente"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="MetodoPago"
+                       class="form-label">
+                    Método de pago
+                </label>
+
+                <select asp-for="MetodoPago"
+                        class="form-select">
+
+                    <option value="Efectivo">
+                        Efectivo
+                    </option>
+
+                    <option value="Tarjeta">
+                        Tarjeta
+                    </option>
+
+                    <option value="Transferencia">
+                        Transferencia
+                    </option>
+
+                </select>
+            </div>
+
+        </div>
+
+
+        <h4>Productos</h4>
+
+        <table class="table table-bordered"
+               id="tablaProductos">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th>Producto</th>
+                    <th width="130">Cantidad</th>
+                    <th width="150">Precio</th>
+                    <th width="160">Subtotal</th>
+                    <th width="80"></th>
+                </tr>
+
+            </thead>
+
+            <tbody id="detalleBody">
+            </tbody>
+
+        </table>
+
+        <button type="button"
+                class="btn btn-secondary mb-4"
+                id="agregarProducto">
+
+            + Agregar producto
+
+        </button>
+
+
+        <div class="row justify-content-end">
+
+            <div class="col-md-5">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Subtotal
+                    </label>
+
+                    <input id="subtotalVisual"
+                           class="form-control"
+                           value="RD$ 0.00"
+                           readonly />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        ITBIS (18%)
+                    </label>
+
+                    <input id="impuestoVisual"
+                           class="form-control"
+                           value="RD$ 0.00"
+                           readonly />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label asp-for="Descuento"
+                           class="form-label">
+                        Descuento
+                    </label>
+
+                    <input asp-for="Descuento"
+                           class="form-control"
+                           type="number"
+                           min="0"
+                           step="0.01" />
+
+                    <span asp-validation-for="Descuento"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-bold">
+                        TOTAL
+                    </label>
+
+                    <input id="totalVisual"
+                           class="form-control fw-bold"
+                           value="RD$ 0.00"
+                           readonly />
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <hr />
+
+        <button type="submit"
+                class="btn btn-primary btn-lg">
+
+            Generar Factura
+
+        </button>
+
+    </form>
+</div>
+
+
+<template id="productoTemplate">
+
+    <tr class="fila-producto">
+
+        <td>
+
+            <select name="Detalles[__index__].IdProducto"
+                    class="form-select producto-select"
+                    required>
+
+                <option value="">
+                    -- Seleccione --
+                </option>
+
+                @foreach (var producto in productos)
+                {
+                    <option value="@producto.IdProducto"
+                            data-precio="@producto.Precio.ToString(CultureInfo.InvariantCulture)"
+                            data-stock="@producto.Stock">
+
+                        @producto.Codigo - @producto.Nombre
+                        (Stock: @producto.Stock)
+
+                    </option>
+                }
+
+            </select>
+
+        </td>
+
+        <td>
+
+            <input name="Detalles[__index__].Cantidad"
+                   type="number"
+                   value="1"
+                   min="1"
+                   class="form-control cantidad" />
+
+        </td>
+
+        <td class="precio">
+            RD$ 0.00
+        </td>
+
+        <td class="subtotal-fila">
+            RD$ 0.00
+        </td>
+
+        <td>
+
+            <button type="button"
+                    class="btn btn-danger btn-sm eliminar">
+
+                X
+
+            </button>
+
+        </td>
+
+    </tr>
+
+</template>
+
+
+@section Scripts {
+
+    <script>
+
+        const body =
+            document.getElementById("detalleBody");
+
+        const template =
+            document.getElementById("productoTemplate");
+
+        const descuento =
+            document.getElementById("Descuento");
+
+
+        function agregarFila() {
+
+            let index =
+                body.querySelectorAll(".fila-producto").length;
+
+            let html =
+                template.innerHTML.replaceAll(
+                    "__index__",
+                    index
+                );
+
+            body.insertAdjacentHTML(
+                "beforeend",
+                html
+            );
+
+            actualizarEventos();
+
+            recalcular();
+        }
+
+
+        function actualizarEventos() {
+
+            document
+                .querySelectorAll(".producto-select")
+                .forEach(select => {
+
+                    select.onchange = recalcular;
+
+                });
+
+
+            document
+                .querySelectorAll(".cantidad")
+                .forEach(input => {
+
+                    input.oninput = recalcular;
+
+                });
+
+
+            document
+                .querySelectorAll(".eliminar")
+                .forEach(boton => {
+
+                    boton.onclick = function () {
+
+                        this.closest("tr").remove();
+
+                        reindexar();
+
+                        recalcular();
+                    };
+
+                });
+        }
+
+
+        function reindexar() {
+
+            document
+                .querySelectorAll(".fila-producto")
+                .forEach((fila, index) => {
+
+                    const producto =
+                        fila.querySelector(
+                            ".producto-select"
+                        );
+
+                    const cantidad =
+                        fila.querySelector(
+                            ".cantidad"
+                        );
+
+                    producto.name =
+                        `Detalles[${index}].IdProducto`;
+
+                    cantidad.name =
+                        `Detalles[${index}].Cantidad`;
+
+                });
+        }
+
+
+        function recalcular() {
+
+            let subtotalGeneral = 0;
+
+            document
+                .querySelectorAll(".fila-producto")
+                .forEach(fila => {
+
+                    const select =
+                        fila.querySelector(
+                            ".producto-select"
+                        );
+
+                    const cantidadInput =
+                        fila.querySelector(
+                            ".cantidad"
+                        );
+
+                    const opcion =
+                        select.options[
+                            select.selectedIndex
+                        ];
+
+                    const precio =
+                        parseFloat(
+                            opcion?.dataset?.precio || 0
+                        );
+
+                    const cantidad =
+                        parseInt(
+                            cantidadInput.value || 0
+                        );
+
+                    const subtotal =
+                        precio * cantidad;
+
+                    fila.querySelector(
+                        ".precio"
+                    ).textContent =
+                        "RD$ " +
+                        precio.toFixed(2);
+
+                    fila.querySelector(
+                        ".subtotal-fila"
+                    ).textContent =
+                        "RD$ " +
+                        subtotal.toFixed(2);
+
+                    subtotalGeneral += subtotal;
+                });
+
+
+            const impuesto =
+                subtotalGeneral * 0.18;
+
+            const valorDescuento =
+                parseFloat(descuento.value || 0);
+
+            const total =
+                subtotalGeneral +
+                impuesto -
+                valorDescuento;
+
+
+            document.getElementById(
+                "subtotalVisual"
+            ).value =
+                "RD$ " +
+                subtotalGeneral.toFixed(2);
+
+
+            document.getElementById(
+                "impuestoVisual"
+            ).value =
+                "RD$ " +
+                impuesto.toFixed(2);
+
+
+            document.getElementById(
+                "totalVisual"
+            ).value =
+                "RD$ " +
+                Math.max(total, 0).toFixed(2);
+        }
+
+
+        document.getElementById(
+            "agregarProducto"
+        ).addEventListener(
+            "click",
+            agregarFila
+        );
+
+
+        descuento.addEventListener(
+            "input",
+            recalcular
+        );
+
+
+        document.getElementById(
+            "facturaForm"
+        ).addEventListener(
+            "submit",
+            reindexar
+        );
+
+
+        agregarFila();
+
+    </script>
+
+}
