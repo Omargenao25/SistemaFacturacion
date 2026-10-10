@@ -1,8 +1,306 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using SistemaFacturacion.Models
+
+@{
+    ViewData["Title"] = "Inicio";
+
+    var productosBajoStock =
+        ViewBag.ProductosBajoStock as List<Producto>
+        ?? new List<Producto>();
+
+    var ultimasFacturas =
+        ViewBag.UltimasFacturas as List<Factura>
+        ?? new List<Factura>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            Panel Principal
+        </h2>
+
+        <p class="text-muted">
+            Resumen general del sistema de facturación.
+        </p>
+
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Clientes
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        @ViewBag.TotalClientes
+                    </h2>
+
+                    <a asp-controller="Clientes"
+                       asp-action="Index">
+
+                        Ver clientes
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Productos
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        @ViewBag.TotalProductos
+                    </h2>
+
+                    <a asp-controller="Productos"
+                       asp-action="Index">
+
+                        Ver productos
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Facturas
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        @ViewBag.TotalFacturas
+                    </h2>
+
+                    <a asp-controller="Facturas"
+                       asp-action="Index">
+
+                        Ver historial
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Ventas de hoy
+                    </h6>
+
+                    <h2 class="fw-bold">
+                        RD$ @(((decimal)ViewBag.VentasHoy).ToString("N2"))
+                    </h2>
+
+                    <a asp-controller="Facturas"
+                       asp-action="Create">
+
+                        Nueva factura
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <div class="col-md-7">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-dark text-white">
+
+                    Últimas Facturas
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (!ultimasFacturas.Any())
+                    {
+                        <p class="text-muted mb-0">
+                            Todavía no existen facturas.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table table-hover">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Factura</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var factura in ultimasFacturas)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                @factura.NumeroFactura
+                                            </td>
+
+                                            <td>
+                                                @factura.Cliente?.Nombre
+                                                @factura.Cliente?.Apellido
+                                            </td>
+
+                                            <td>
+                                                @factura.Fecha.ToString("dd/MM/yyyy")
+                                            </td>
+
+                                            <td>
+                                                RD$ @factura.Total.ToString("N2")
+                                            </td>
+
+                                            <td>
+
+                                                <a asp-controller="Facturas"
+                                                   asp-action="Details"
+                                                   asp-route-id="@factura.IdFactura"
+                                                   class="btn btn-sm btn-outline-primary">
+
+                                                    Ver
+
+                                                </a>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-5">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    Productos con bajo stock
+                </div>
+
+                <div class="card-body">
+
+                    @if (!productosBajoStock.Any())
+                    {
+                        <div class="alert alert-success mb-0">
+
+                            No hay productos con bajo stock.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Stock</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var producto in productosBajoStock)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @producto.Nombre
+                                        </td>
+
+                                        <td>
+
+                                            <span class="badge bg-danger">
+                                                @producto.Stock
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
 </div>

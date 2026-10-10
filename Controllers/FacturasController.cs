@@ -213,6 +213,16 @@ namespace SistemaFacturacion.Controllers
                 .ToListAsync();
         }
 
+        public async Task<IActionResult> Index()
+        {
+            var facturas = await _context.Facturas
+                .Include(f => f.Cliente)
+                .OrderByDescending(f => f.Fecha)
+                .ToListAsync();
+
+            return View(facturas);
+        }
+
         // Temporalmente dejamos preparado Details.
         public async Task<IActionResult> Details(int id)
         {
@@ -226,6 +236,66 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
 
             return View(factura);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Anular(int id)
+        {
+            var factura = await _context.Facturas
+                .Include(f => f.Detalles)
+                .ThenInclude(d => d.Producto)
+                .FirstOrDefaultAsync(f => f.IdFactura == id);
+
+            if (factura == null)
+            {
+                return NotFound();
+            }
+
+            if (factura.Estado == "Anulada")
+            {
+                TempData["Mensaje"] = "La factura ya se encuentra anulada.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = factura.IdFactura }
+                );
+            }
+
+            await using var transaccion =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Devolver los productos al inventario
+                foreach (var detalle in factura.Detalles)
+                {
+                    if (detalle.Producto != null)
+                    {
+                        detalle.Producto.Stock += detalle.Cantidad;
+                    }
+                }
+
+                // Cambiar estado
+                factura.Estado = "Anulada";
+
+                await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
+
+                TempData["Mensaje"] =
+                    "La factura fue anulada correctamente y el inventario fue actualizado.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = factura.IdFactura }
+                );
+            }
+            catch
+            {
+                await transaccion.RollbackAsync();
+                throw;
+            }
         }
     }
 }
