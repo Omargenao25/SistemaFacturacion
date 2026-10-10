@@ -233,7 +233,14 @@ namespace SistemaFacturacion.Controllers
                 .FirstOrDefaultAsync(f => f.IdFactura == id);
 
             if (factura == null)
+            {
                 return NotFound();
+            }
+
+            var pago = await _context.Pagos
+                .FirstOrDefaultAsync(p => p.IdFactura == id);
+
+            ViewBag.Pago = pago;
 
             return View(factura);
         }
