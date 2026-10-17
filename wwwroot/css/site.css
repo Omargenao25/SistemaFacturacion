@@ -1,22 +1,489 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+/* ============================
+   GENERAL
+============================ */
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    background: #f5f7fb;
+    color: #1f2937;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* ============================
+   SIDEBAR
+============================ */
+
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: #111827;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    transition: all 0.25s ease;
+}
+
+
+.sidebar-brand {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2563eb;
+    font-size: 22px;
+}
+
+
+.sidebar-brand h5 {
+    font-weight: 700;
+}
+
+
+.sidebar-brand small {
+    color: #9ca3af;
+}
+
+
+.sidebar-menu {
+    padding: 18px 12px;
+}
+
+
+.menu-title {
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 22px 12px 8px 12px;
+}
+
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #d1d5db;
+    padding: 11px 14px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+
+    .sidebar-link i {
+        width: 22px;
+        font-size: 18px;
+    }
+
+
+    .sidebar-link:hover {
+        background: #1f2937;
+        color: white;
+        transform: translateX(2px);
+    }
+
+
+    .sidebar-link:active {
+        background: #2563eb;
+    }
+
+
+/* ============================
+   MAIN
+============================ */
+
+.main-wrapper {
+    flex: 1;
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ============================
+   TOPBAR
+============================ */
+
+.topbar {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+
+.sidebar-toggle {
+    display: none;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+}
+
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+
+.system-status {
+    color: #6b7280;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    background: #22c55e;
+}
+
+
+/* ============================
+   CONTENT
+============================ */
+
+.main-content {
+    flex: 1;
+    padding: 32px;
+}
+
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+
+.page-subtitle {
+    color: #6b7280;
+    margin: 0;
+}
+
+
+/* ============================
+   CARDS
+============================ */
+
+.card {
+    border: none;
+    border-radius: 12px;
+    background: white;
+}
+
+
+    .card.shadow-sm {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    }
+
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 17px 20px;
+    font-weight: 600;
+}
+
+
+.card-body {
+    padding: 20px;
+}
+
+
+/* ============================
+   DASHBOARD CARDS
+============================ */
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+
+.stat-label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+
+/* ============================
+   TABLES
+============================ */
+
+.table-container {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+
+.table {
+    margin-bottom: 0;
+}
+
+
+    .table thead th {
+        border-bottom: none;
+        color: #6b7280;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 14px 12px;
+    }
+
+
+    .table tbody td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        border-color: #f0f1f3;
+    }
+
+
+    .table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+
+/* ============================
+   FORMS
+============================ */
+
+.form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+}
+
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    padding: 10px 12px;
+    box-shadow: none;
+}
+
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+
+/* ============================
+   BUTTONS
+============================ */
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 9px 16px;
+}
+
+
+.btn-primary {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+
+.btn-danger {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+
+/* ============================
+   BADGES
+============================ */
+
+.badge {
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+
+/* ============================
+   ALERTS
+============================ */
+
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+
+/* ============================
+   FOOTER
+============================ */
+
+.app-footer {
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 18px 30px;
+    display: flex;
+    justify-content: space-between;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+
+/* ============================
+   LOGIN PARTIAL
+============================ */
+
+.user-area .navbar-nav {
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+
+.user-area .nav-link {
+    color: #374151 !important;
+}
+
+
+/* ============================
+   MOBILE
+============================ */
+
+@media (max-width: 991px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+
+        .sidebar.sidebar-open {
+            transform: translateX(0);
+        }
+
+
+    .main-wrapper {
+        margin-left: 0;
+    }
+
+
+    .sidebar-toggle {
+        display: block;
+    }
+
+
+    .main-content {
+        padding: 20px;
+    }
+
+
+    .system-status {
+        display: none;
+    }
+}
+
+
+/* ============================
+   IMPRESIÓN
+============================ */
+
+@media print {
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .app-footer {
+        display: none !important;
+    }
+
+
+    .main-wrapper {
+        margin-left: 0 !important;
+    }
+
+
+    .main-content {
+        padding: 0 !important;
+    }
+
+
+    body {
+        background: white !important;
+    }
 }

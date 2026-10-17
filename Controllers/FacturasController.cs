@@ -155,6 +155,7 @@ namespace SistemaFacturacion.Controllers
                         IdProducto = producto.IdProducto,
                         Cantidad = item.Cantidad,
                         Precio = producto.Precio,
+                        CostoUnitario = producto.Costo,
                         Subtotal = producto.Precio * item.Cantidad
                     };
 
@@ -213,12 +214,84 @@ namespace SistemaFacturacion.Controllers
                 .ToListAsync();
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+     string? buscar,
+     string? estado,
+     DateTime? desde,
+     DateTime? hasta)
         {
-            var facturas = await _context.Facturas
+            var consulta = _context.Facturas
                 .Include(f => f.Cliente)
+                .AsQueryable();
+
+
+            // BUSCAR POR NÚMERO DE FACTURA O CLIENTE
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                buscar = buscar.Trim();
+
+                consulta = consulta.Where(f =>
+                    f.NumeroFactura.Contains(buscar) ||
+                    (
+                        f.Cliente != null &&
+                        (
+                            f.Cliente.Nombre.Contains(buscar) ||
+                            f.Cliente.Apellido.Contains(buscar) ||
+                            (f.Cliente.Nombre + " " + f.Cliente.Apellido)
+                                .Contains(buscar)
+                        )
+                    )
+                );
+            }
+
+
+            // FILTRAR POR ESTADO
+            if (!string.IsNullOrWhiteSpace(estado) &&
+                estado != "Todos")
+            {
+                consulta = consulta.Where(
+                    f => f.Estado == estado
+                );
+            }
+
+
+            // FILTRAR DESDE FECHA
+            if (desde.HasValue)
+            {
+                var fechaDesde = desde.Value.Date;
+
+                consulta = consulta.Where(
+                    f => f.Fecha >= fechaDesde
+                );
+            }
+
+
+            // FILTRAR HASTA FECHA
+            if (hasta.HasValue)
+            {
+                var fechaHasta =
+                    hasta.Value.Date.AddDays(1);
+
+                consulta = consulta.Where(
+                    f => f.Fecha < fechaHasta
+                );
+            }
+
+
+            var facturas = await consulta
                 .OrderByDescending(f => f.Fecha)
                 .ToListAsync();
+
+
+            // Mantener los filtros escritos
+            ViewBag.Buscar = buscar;
+            ViewBag.Estado = estado;
+            ViewBag.Desde =
+                desde?.ToString("yyyy-MM-dd");
+
+            ViewBag.Hasta =
+                hasta?.ToString("yyyy-MM-dd");
+
 
             return View(facturas);
         }

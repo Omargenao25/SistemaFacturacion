@@ -295,6 +295,9 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CostoUnitario")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("IdFactura")
                         .HasColumnType("int");
 

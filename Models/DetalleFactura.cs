@@ -24,6 +24,9 @@ namespace SistemaFacturacion.Models
         public decimal Precio { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
+        public decimal CostoUnitario { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Subtotal { get; set; }
     }
 }

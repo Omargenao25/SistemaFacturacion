@@ -1,7 +1,20 @@
 ﻿@model IEnumerable<SistemaFacturacion.Models.Factura>
 
+@using SistemaFacturacion.Models
+@using SistemaFacturacion.ViewModels
+
 @{
     ViewData["Title"] = "Reportes";
+
+    var productosMasVendidos =
+        ViewBag.ProductosMasVendidos
+        as List<ProductoVendidoReporteViewModel>
+        ?? new List<ProductoVendidoReporteViewModel>();
+
+    var productosBajoStock =
+        ViewBag.ProductosBajoStock
+        as List<Producto>
+        ?? new List<Producto>();
 }
 
 <div class="container mt-4">
@@ -145,6 +158,266 @@
 
     </div>
 
+    <div class="row g-4 mb-4">
+
+        <!-- PRODUCTOS MÁS VENDIDOS -->
+        <div class="col-md-7">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header bg-dark text-white">
+
+                    <strong>
+                        Productos más vendidos
+                    </strong>
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (!productosMasVendidos.Any())
+                    {
+                        <div class="alert alert-info mb-0">
+
+                            No existen ventas en este período.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table table-hover">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            #
+                                        </th>
+
+                                        <th>
+                                            Producto
+                                        </th>
+
+                                        <th class="text-center">
+                                            Unidades
+                                        </th>
+
+                                        <th class="text-end">
+                                            Vendido
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    @{
+                                        int posicion = 1;
+                                    }
+
+                                    @foreach (
+                                   var producto
+                                   in productosMasVendidos)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                @posicion
+                                            </td>
+
+                                            <td>
+                                                <strong>
+                                                    @producto.Nombre
+                                                </strong>
+                                            </td>
+
+                                            <td class="text-center">
+
+                                                @producto.CantidadVendida
+
+                                            </td>
+
+                                            <td class="text-end">
+
+                                                RD$
+                                                @producto.TotalVendido.ToString("N2")
+
+                                            </td>
+
+                                        </tr>
+
+                                        posicion++;
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BAJO INVENTARIO -->
+        <div class="col-md-5">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+
+                    <strong>
+                        Productos con bajo inventario
+                    </strong>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    @if (!productosBajoStock.Any())
+                    {
+                        <div class="alert alert-success mb-0">
+
+                            No hay productos con bajo inventario.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+
+                            <table class="table table-hover">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Producto
+                                        </th>
+
+                                        <th>
+                                            Categoría
+                                        </th>
+
+                                        <th class="text-center">
+                                            Stock
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    @foreach (
+                                   var producto
+                                   in productosBajoStock)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                @producto.Nombre
+                                            </td>
+
+
+                                            <td>
+
+                                                @producto.Categoria?.Nombre
+
+                                            </td>
+
+
+                                            <td class="text-center">
+
+                                                @if (producto.Stock == 0)
+                                                {
+                                                    <span class="badge bg-danger">
+
+                                                        Agotado
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+
+                                                        @producto.Stock
+
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Costo de productos
+                </small>
+
+                <h4>
+                    RD$ @(((decimal)ViewBag.CostoTotal).ToString("N2"))
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+                    Ganancia bruta estimada
+                </small>
+
+                <h4 class="text-success">
+                    RD$ @(((decimal)ViewBag.GananciaBruta).ToString("N2"))
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <table class="table table-striped table-bordered">
 
