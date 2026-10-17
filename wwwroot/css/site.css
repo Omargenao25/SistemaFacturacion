@@ -543,3 +543,103 @@ body { color: var(--nx-ink); }
     .nx-panel-header { padding:16px; }
 }
 @media print { .mobile-nav-backdrop { display:none!important; } .nx-panel { box-shadow:none!important; } }
+
+
+/* ===== Nexora / Emisión de facturas ===== */
+.nx-invoice-page { width:100%; max-width:1480px; margin:0 auto 40px; }
+.nx-invoice-page .validation-summary-valid { display:none; }
+.nx-invoice-page .validation-summary-errors { border:1px solid #fecaca; }
+.nx-invoice-card {
+    background:#fff;
+    border:1px solid var(--nx-border,#e7ebf2);
+    border-radius:17px;
+    overflow:hidden;
+    box-shadow:0 12px 32px rgba(21,35,62,.045);
+}
+.nx-invoice-card-header {
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:20px 23px;
+    border-bottom:1px solid #edf0f5;
+}
+.nx-invoice-card-header h2 { margin:0; font-weight:750; letter-spacing:-.25px; font-size:1.06rem; }
+.nx-invoice-card-header p { margin:4px 0 0; font-size:.82rem; color:#728097; line-height:1.4; }
+.nx-invoice-step {
+    display:flex; flex:0 0 39px; width:39px; height:39px;
+    align-items:center; justify-content:center;
+    background:#edf3ff; color:#2c60d8; border-radius:12px;
+    font-size:.82rem; font-weight:800; letter-spacing:.4px;
+}
+.nx-invoice-card-body { padding:23px; }
+.nx-invoice-field-hint { margin-top:7px; font-size:.77rem; color:#8490a3; }
+.nx-invoice-hint-badge {
+    display:inline-flex; align-items:center; gap:7px; font-size:.78rem; font-weight:650;
+    padding:7px 12px; border-radius:30px; color:#4566a2; background:#eef4ff;
+}
+.nx-invoice-table-wrap { overflow-x:auto; }
+.nx-invoice-table { margin-bottom:0; min-width:650px; }
+.nx-invoice-table thead th {
+    background:#f8fafd; color:#718099; border-bottom:1px solid #edf0f5;
+    font-weight:750; font-size:.71rem; letter-spacing:.55px;
+    text-transform:uppercase; padding:15px 13px;
+}
+.nx-invoice-table tbody td { padding:17px 13px; border-color:#edf0f5; }
+.nx-invoice-table tbody tr:last-child td { border-bottom:0; }
+.nx-invoice-table td:first-child { min-width:270px; }
+.nx-invoice-table .nx-invoice-qty-col { width:105px; }
+.nx-invoice-table .cantidad { width:96px; }
+.nx-invoice-table .producto-select { min-width:255px; }
+.nx-invoice-table .precio, .nx-invoice-table .subtotal-fila { white-space:nowrap; color:#2f3d56; }
+.nx-invoice-table .eliminar { padding:7px 10px; border-color:#f4cbd0; }
+.nx-invoice-card-footer {
+    padding:18px 23px; border-top:1px solid #edf0f5;
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+}
+.nx-invoice-card-footer .btn { font-size:.87rem; }
+.nx-invoice-summary { position:sticky; top:92px; }
+.nx-invoice-summary-body { padding:22px 23px 24px; }
+.nx-invoice-summary-row {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:15px;
+}
+.nx-invoice-summary-row label { font-weight:550; color:#66758c; font-size:.9rem; }
+.nx-invoice-amount {
+    text-align:right; flex:1; min-width:0; width:100%;
+    background:transparent; outline:0; border:0; box-shadow:none;
+    font-variant-numeric:tabular-nums; font-size:.96rem; font-weight:750; color:#1c2a45;
+    pointer-events:none;
+}
+.nx-invoice-discount {
+    padding-top:19px; margin-top:17px; border-top:1px dashed #dbe2ec;
+}
+.nx-invoice-discount .form-control { background:#fbfcff; }
+.nx-invoice-total {
+    padding:20px; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:13px; margin:22px 0 18px;
+}
+.nx-invoice-total label {
+    display:block; color:#456291; font-size:.78rem; font-weight:800;
+    letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px;
+}
+.nx-invoice-total-value {
+    display:block; width:100%; color:#19428f; font-weight:850;
+    background:transparent; border:0; outline:0; box-shadow:none;
+    font-size:clamp(1.4rem,2.4vw,1.9rem); line-height:1.4;
+    letter-spacing:-.7px; font-variant-numeric:tabular-nums;
+    pointer-events:none;
+}
+.nx-invoice-total span { display:block; color:#6b83aa; font-size:.75rem; margin-top:6px; }
+.nx-invoice-submit { padding:13px 16px; font-weight:750; }
+.nx-invoice-summary-note {
+    text-align:center; font-size:.76rem; line-height:1.55; color:#8a96aa;
+    margin:14px 4px 0;
+}
+@media(max-width:1199px) { .nx-invoice-summary { position:static; } }
+@media(max-width:575px) {
+    .nx-invoice-card-header { padding:17px; gap:10px; }
+    .nx-invoice-card-body { padding:17px; }
+    .nx-invoice-card-footer { padding:16px 17px; }
+    .nx-invoice-summary-body { padding:18px; }
+    .nx-invoice-step { flex-basis:35px; width:35px; height:35px; }
+}
