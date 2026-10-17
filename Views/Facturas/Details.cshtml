@@ -1,338 +1,148 @@
-﻿@model SistemaFacturacion.Models.Factura
+@model SistemaFacturacion.Models.Factura
 @using SistemaFacturacion.Models
-
 @{
-    ViewData["Title"] = "Detalle de Factura";
-
+    ViewData["Title"] = "Detalle de factura";
     var pago = ViewBag.Pago as Pago;
+    var anulada = Model.Estado == "Anulada";
 }
 
-<div class="container mt-4">
+<div class="nx-details-page">
+    <div class="page-intro no-print">
+        <div>
+            <div class="page-eyebrow">Nexora / Facturación</div>
+            <h1 class="page-title">Detalle de factura</h1>
+            <p class="page-subtitle">Consulta, imprime o administra el comprobante de esta venta.</p>
+        </div>
+        <div class="nx-receipt-actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial
+            </a>
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1" aria-hidden="true"></i> Imprimir
+            </button>
+            @if (!anulada)
+            {
+                <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger"
+                            onclick="return confirm('¿Está seguro de que desea anular esta factura? El inventario será restaurado.');">
+                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Anular factura
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
 
     @if (TempData["Mensaje"] != null)
     {
-        <div class="alert alert-success no-print">
-            @TempData["Mensaje"]
+        <div class="alert alert-success no-print" role="status">
+            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@TempData["Mensaje"]
         </div>
     }
 
+    <article class="nx-receipt" aria-label="Comprobante de venta @Model.NumeroFactura">
+        <div class="nx-receipt-topline"></div>
+        <div class="nx-receipt-inner">
+            <div class="nx-receipt-header">
+                <div class="nx-receipt-company">
+                    <span class="nx-receipt-brand-mark"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="nx-receipt-brand-name">NEXORA</div>
+                        <div class="nx-receipt-brand-subtitle">Sistema de gestión comercial y facturación</div>
+                    </div>
+                </div>
+                <div class="nx-receipt-identity">
+                    <div class="nx-receipt-document-type">Comprobante de venta</div>
+                    <div class="nx-receipt-reference">@Model.NumeroFactura</div>
+                    <div class="nx-receipt-document-note">Documento interno · No fiscal</div>
+                </div>
+            </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="nx-receipt-separator"></div>
 
-        <div>
-            <h2>
-                Factura @Model.NumeroFactura
-            </h2>
+            <div class="nx-receipt-info-grid">
+                <section class="nx-receipt-info-block">
+                    <h2>Facturado a</h2>
+                    <div class="nx-receipt-person">@(Model.Cliente == null ? "Cliente no disponible" : $"{Model.Cliente.Nombre} {Model.Cliente.Apellido}")</div>
+                    <div class="nx-receipt-info-line"><span>Teléfono</span><span>@(Model.Cliente?.Telefono ?? "No registrado")</span></div>
+                    <div class="nx-receipt-info-line"><span>Correo</span><span class="nx-receipt-break">@(Model.Cliente?.Correo ?? "No registrado")</span></div>
+                    <div class="nx-receipt-info-line"><span>Dirección</span><span class="nx-receipt-break">@(Model.Cliente?.Direccion ?? "No registrada")</span></div>
+                </section>
 
-            <small class="text-muted">
-                Fecha: @Model.Fecha.ToString("dd/MM/yyyy HH:mm")
-            </small>
-        </div>
+                <section class="nx-receipt-info-block">
+                    <h2>Datos de la operación</h2>
+                    <div class="nx-receipt-info-line"><span>Fecha</span><strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    <div class="nx-receipt-info-line">
+                        <span>Estado</span>
+                        <strong class="nx-receipt-state @(anulada ? "is-void" : "is-issued")">
+                            @(anulada ? "Anulada" : Model.Estado)
+                        </strong>
+                    </div>
+                    <div class="nx-receipt-info-line"><span>Pago</span><strong>@(pago?.MetodoPago ?? "No registrado")</strong></div>
+                    @if (pago != null)
+                    {
+                        <div class="nx-receipt-info-line"><span>Monto registrado</span><strong class="nx-receipt-money">RD$ @pago.Monto.ToString("N2")</strong></div>
+                    }
+                </section>
+            </div>
 
-
-        <div class="no-print">
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-
-                Historial
-
-            </a>
-
-
-            <button type="button"
-                    class="btn btn-primary"
-                    onclick="window.print()">
-
-                Imprimir Factura
-
-            </button>
-
-
-            @if (Model.Estado == "Emitida")
+            @if (anulada)
             {
-                <form asp-action="Anular"
-                      asp-route-id="@Model.IdFactura"
-                      method="post"
-                      class="d-inline">
-
-                    <button type="submit"
-                            class="btn btn-danger"
-                            onclick="return confirm('¿Está seguro de que desea anular esta factura? El inventario será restaurado.');">
-
-                        Anular Factura
-
-                    </button>
-
-                </form>
+                <div class="nx-receipt-void" role="status">
+                    <i class="bi bi-exclamation-octagon me-2" aria-hidden="true"></i>
+                    FACTURA ANULADA — Este comprobante ya no representa una venta vigente.
+                </div>
             }
 
+            <section class="nx-receipt-items" aria-label="Productos facturados">
+                <h2>Detalle de productos</h2>
+                <div class="table-responsive">
+                    <table class="table nx-receipt-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Descripción</th>
+                                <th scope="col" class="text-center">Cant.</th>
+                                <th scope="col" class="text-end">Precio unitario</th>
+                                <th scope="col" class="text-end">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in Model.Detalles)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@(detalle.Producto?.Nombre ?? "Producto no disponible")</td>
+                                    <td class="text-center nx-receipt-money">@detalle.Cantidad</td>
+                                    <td class="text-end nx-receipt-money">RD$ @detalle.Precio.ToString("N2")</td>
+                                    <td class="text-end nx-receipt-money fw-semibold">RD$ @detalle.Subtotal.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="nx-receipt-bottom">
+                <div class="nx-receipt-note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <div>
+                        <strong>Información del comprobante</strong>
+                        <p>Este documento corresponde al registro interno de la venta en Nexora. No constituye un comprobante fiscal.</p>
+                    </div>
+                </div>
+                <section class="nx-receipt-totals" aria-label="Totales de la factura">
+                    <div class="nx-receipt-total-row"><span>Subtotal</span><strong>RD$ @Model.Subtotal.ToString("N2")</strong></div>
+                    <div class="nx-receipt-total-row"><span>ITBIS</span><strong>RD$ @Model.Impuesto.ToString("N2")</strong></div>
+                    <div class="nx-receipt-total-row"><span>Descuento</span><strong>- RD$ @Model.Descuento.ToString("N2")</strong></div>
+                    <div class="nx-receipt-grand-total">
+                        <span>Total <small>RD$</small></span>
+                        <strong>@Model.Total.ToString("N2")</strong>
+                    </div>
+                </section>
+            </div>
+
+            <div class="nx-receipt-footer">
+                <strong>¡Gracias por su compra!</strong>
+                <span>Nexora · Gestión comercial</span>
+            </div>
         </div>
-
-    </div>
-
-
-    @if (Model.Estado == "Anulada")
-    {
-        <div class="alert alert-danger text-center fw-bold">
-            FACTURA ANULADA
-        </div>
-    }
-
-
-    <hr />
-
-
-    <div class="row mb-4">
-
-        <!-- DATOS DEL CLIENTE -->
-        <div class="col-md-6">
-
-            <h5>Cliente</h5>
-
-            <p class="mb-1">
-                <strong>
-                    @Model.Cliente?.Nombre
-                    @Model.Cliente?.Apellido
-                </strong>
-            </p>
-
-            <p class="mb-1">
-                <strong>Teléfono:</strong>
-                @(Model.Cliente?.Telefono ?? "No registrado")
-            </p>
-
-            <p class="mb-1">
-                <strong>Correo:</strong>
-                @(Model.Cliente?.Correo ?? "No registrado")
-            </p>
-
-            <p class="mb-1">
-                <strong>Dirección:</strong>
-                @(Model.Cliente?.Direccion ?? "No registrada")
-            </p>
-
-        </div>
-
-
-        <!-- DATOS DE LA FACTURA -->
-        <div class="col-md-6">
-
-            <h5>Información de factura</h5>
-
-            <p class="mb-1">
-
-                <strong>Número:</strong>
-                @Model.NumeroFactura
-
-            </p>
-
-
-            <p class="mb-1">
-
-                <strong>Estado:</strong>
-
-                @if (Model.Estado == "Emitida")
-                {
-                    <span class="badge bg-success">
-                        Emitida
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-danger">
-                        Anulada
-                    </span>
-                }
-
-            </p>
-
-
-            <p class="mb-1">
-
-                <strong>Método de pago:</strong>
-
-                @(pago?.MetodoPago ?? "No registrado")
-
-            </p>
-
-
-            @if (pago != null)
-            {
-                <p class="mb-1">
-
-                    <strong>Monto pagado:</strong>
-
-                    RD$ @pago.Monto.ToString("N2")
-
-                </p>
-            }
-
-        </div>
-
-    </div>
-
-
-    <!-- DETALLE DE PRODUCTOS -->
-    <div class="table-responsive">
-
-        <table class="table table-bordered">
-
-            <thead class="table-dark">
-
-                <tr>
-                    <th>Producto</th>
-                    <th class="text-center">Cantidad</th>
-                    <th class="text-end">Precio</th>
-                    <th class="text-end">Subtotal</th>
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @foreach (var detalle in Model.Detalles)
-                {
-                    <tr>
-
-                        <td>
-                            @detalle.Producto?.Nombre
-                        </td>
-
-                        <td class="text-center">
-                            @detalle.Cantidad
-                        </td>
-
-                        <td class="text-end">
-                            RD$ @detalle.Precio.ToString("N2")
-                        </td>
-
-                        <td class="text-end">
-                            RD$ @detalle.Subtotal.ToString("N2")
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <!-- TOTALES -->
-    <div class="row justify-content-end mt-3">
-
-        <div class="col-md-5">
-
-            <table class="table">
-
-                <tr>
-
-                    <th>
-                        Subtotal
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Subtotal.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr>
-
-                    <th>
-                        ITBIS
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Impuesto.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr>
-
-                    <th>
-                        Descuento
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Descuento.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr class="table-success">
-
-                    <th>
-                        TOTAL
-                    </th>
-
-                    <td class="text-end fw-bold fs-5">
-                        RD$ @Model.Total.ToString("N2")
-                    </td>
-
-                </tr>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <div class="text-center mt-5 text-muted">
-        <small>
-            Gracias por su compra.
-        </small>
-    </div>
-
+    </article>
 </div>
-
-
-<style>
-
-    @@media print {
-
-        .no-print,
-        header,
-        footer,
-        nav {
-            display: none !important;
-        }
-
-        body {
-            background: white !important;
-        }
-
-        .container {
-            max-width: 100% !important;
-            width: 100% !important;
-        }
-
-        .table-dark {
-            color: black !important;
-            background: white !important;
-        }
-
-        .table-dark th {
-            color: black !important;
-            background: white !important;
-            border: 1px solid black !important;
-        }
-
-        .alert-danger {
-            border: 2px solid black;
-            color: black;
-            background: white;
-        }
-
-    }
-
-</style>
