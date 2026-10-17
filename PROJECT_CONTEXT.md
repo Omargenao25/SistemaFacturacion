@@ -169,15 +169,20 @@ git pull origin feature/nexora-ui
 
 ## 7. Trabajo de Omar: interfaz y ventas
 
-**La rama `feature/nexora-ui` contiene cambios visuales** para marca, navegación, Dashboard y listados de Clientes, Categorías y Productos. PR #1 pendiente de validar.
+**Rama `feature/nexora-ui` · PR [#1](https://github.com/Omargenao25/SistemaFacturacion/pull/1) en borrador y todavía sin fusionar (actualización 17/10/2026).**
+
+**Cambios visuales subidos a la rama:** identidad Nexora, navegación móvil y activa, Dashboard, listados de Clientes/Categorías/Productos, formulario Nueva Factura, Detalle/Comprobante e impresión A4, Historial con filtros, Reportes con métricas e inventario.
+
+**Evidencia disponible:** Omar mostró capturas del Dashboard, Nueva Factura, una factura nueva emitida y la vista previa de impresión. Estos flujos se ven correctamente en esas capturas, pero **los cambios posteriores de Historial y Reportes aún no han sido compilados ni probados localmente**. La captura de impresión no permite saber si todo el pie del comprobante queda en una sola página.
+
+**Pendientes inmediatos:** actualizar la rama local y compilar; probar filtros de Historial (estado, fecha, búsqueda), períodos y totales de Reportes, versión móvil y número de páginas al imprimir. No fusionar el PR sin validar.
 
 **Próximas mejoras propuestas:**
 
-- Unificar diseño de formularios Crear/Editar/Eliminar para clientes, categorías y productos.
-- Profesionalizar Nueva Factura, Historial, Reportes y el comprobante para impresión.
-- Estados vacíos, mensajes de error útiles y accesibilidad / adaptación a móviles.
-- Corregir inconsistencias visuales antes de fusionar.
-- Más adelante, revisar reglas de negocio: validación del cliente y productos, precio con/sin impuestos, descuentos, comprobante no fiscal, precisión monetaria y operaciones simultáneas sobre stock.
+- Unificar formularios Crear/Editar/Eliminar de clientes, categorías y productos.
+- Ajustar visualmente Historial/Reportes tras las pruebas de Omar; resolver errores sin tocar módulos de Russell.
+- Mantener la etiqueta `comprobante interno no fiscal` y la nota de que el margen bruto del reporte es estimado **antes de descuentos y gastos**.
+- Revisar reglas de negocio: cliente y productos válidos, precio con/sin impuestos, descuentos, precisión monetaria y ventas simultáneas sobre stock.
 
 ## 8. Relaciones del modelo de datos
 
