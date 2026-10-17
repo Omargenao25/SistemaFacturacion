@@ -10,7 +10,7 @@
           content="width=device-width, initial-scale=1.0" />
 
     <title>
-        @ViewData["Title"] - FacturaPro
+        @ViewData["Title"] - Nexora
     </title>
 
 
@@ -37,7 +37,7 @@
 
 
         <!-- SIDEBAR -->
-        <aside class="sidebar no-print">
+        <aside class="sidebar no-print" id="nexoraSidebar">
 
             <div class="sidebar-brand">
 
@@ -47,11 +47,11 @@
 
                 <div>
                     <h5 class="mb-0">
-                        FacturaPro
+                        Nexora
                     </h5>
 
                     <small>
-                        Sistema Comercial
+                        Gestión comercial
                     </small>
                 </div>
 
@@ -63,7 +63,7 @@
 
                 <a asp-controller="Home"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
 
                     <i class="bi bi-grid"></i>
 
@@ -81,7 +81,7 @@
 
                 <a asp-controller="Clientes"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clientes" ? "active" : "")">
 
                     <i class="bi bi-people"></i>
 
@@ -94,7 +94,7 @@
 
                 <a asp-controller="Categorias"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Categorias" ? "active" : "")">
 
                     <i class="bi bi-tags"></i>
 
@@ -107,7 +107,7 @@
 
                 <a asp-controller="Productos"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Productos" ? "active" : "")">
 
                     <i class="bi bi-box-seam"></i>
 
@@ -125,7 +125,7 @@
 
                 <a asp-controller="Facturas"
                    asp-action="Create"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Facturas" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
 
                     <i class="bi bi-plus-circle"></i>
 
@@ -138,7 +138,7 @@
 
                 <a asp-controller="Facturas"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Facturas" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
 
                     <i class="bi bi-receipt-cutoff"></i>
 
@@ -151,7 +151,7 @@
 
                 <a asp-controller="Reportes"
                    asp-action="Index"
-                   class="sidebar-link">
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reportes" ? "active" : "")">
 
                     <i class="bi bi-bar-chart"></i>
 
@@ -169,6 +169,7 @@
 
 
         <!-- CONTENIDO PRINCIPAL -->
+        <div class="mobile-nav-backdrop no-print" id="mobileNavBackdrop"></div>
         <div class="main-wrapper">
 
 
@@ -178,7 +179,7 @@
                 <div>
 
                     <button class="sidebar-toggle"
-                            id="sidebarToggle">
+                            id="sidebarToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nexoraSidebar">
 
                         <i class="bi bi-list"></i>
 
@@ -188,6 +189,9 @@
 
 
                 <div class="topbar-right">
+                    <a asp-controller="Facturas" asp-action="Create" class="btn btn-primary btn-sm topbar-action">
+                        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva factura
+                    </a>
 
                     <div class="system-status">
 
@@ -222,7 +226,7 @@
             <footer class="app-footer no-print">
 
                 <span>
-                    © @DateTime.Now.Year FacturaPro
+                    © @DateTime.Now.Year Nexora
                 </span>
 
                 <span>
@@ -249,26 +253,31 @@
 
     <script>
 
-        const toggle =
-            document.getElementById("sidebarToggle");
+        const toggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("nexoraSidebar");
+        const backdrop = document.getElementById("mobileNavBackdrop");
 
-        const sidebar =
-            document.querySelector(".sidebar");
-
-        if (toggle && sidebar) {
-
-            toggle.addEventListener(
-                "click",
-                function () {
-
-                    sidebar.classList.toggle(
-                        "sidebar-open"
-                    );
-
-                }
-            );
-
+        function closeSidebar() {
+            sidebar?.classList.remove("sidebar-open");
+            backdrop?.classList.remove("visible");
+            toggle?.setAttribute("aria-expanded", "false");
         }
+
+        toggle?.addEventListener("click", () => {
+            const opening = !sidebar.classList.contains("sidebar-open");
+            sidebar.classList.toggle("sidebar-open", opening);
+            backdrop?.classList.toggle("visible", opening);
+            toggle.setAttribute("aria-expanded", opening.toString());
+        });
+
+        backdrop?.addEventListener("click", closeSidebar);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") closeSidebar();
+        });
+        sidebar?.querySelectorAll("a").forEach(link => link.addEventListener("click", closeSidebar));
+        window.addEventListener("resize", () => {
+            if (window.innerWidth > 991) closeSidebar();
+        });
 
     </script>
 
