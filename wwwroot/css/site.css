@@ -763,3 +763,53 @@ body { color: var(--nx-ink); }
     .nx-receipt-state { border:1px solid #aeb7c5!important; background:#fff!important; color:#111!important; }
     .nx-receipt-void { color:#9a1725!important; background:#fff!important; border:2px solid #9a1725!important; }
 }
+
+
+/* ===== NEXORA / Historial y reportes ===== */
+.nx-history-page, .nx-reports-page { max-width:1480px; margin:0 auto 44px; }
+.nx-filters-body { padding:20px 22px 24px; }
+.nx-search-control { position:relative; }
+.nx-search-control .bi-search {
+    position:absolute; top:50%; left:14px; transform:translateY(-50%);
+    color:#97a4b7; pointer-events:none;
+}
+.nx-search-control .form-control { padding-left:38px; }
+.nx-panel-subtitle { margin:5px 0 0; color:#8794a5; font-size:.8rem; line-height:1.4; }
+.nx-count-pill {
+    display:inline-flex; align-items:center; white-space:nowrap;
+    color:#375caa; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:30px; font-size:.78rem; font-weight:750; padding:6px 12px;
+}
+.nx-history-table td, .nx-report-invoices td { vertical-align:middle; }
+.nx-history-table .btn-sm, .nx-report-invoices .btn-sm { white-space:nowrap; }
+.nx-invoice-code { color:#2852a0; font-weight:750; font-size:.87rem; white-space:nowrap; }
+.nx-history-date { color:#6c7e96; white-space:nowrap; font-size:.87rem; }
+.nx-finance-card {
+    display:flex; align-items:flex-start; gap:17px; padding:23px 25px;
+    border:1px solid #e5eaf2; border-radius:15px; background:#fff; height:100%;
+    box-shadow:0 8px 24px rgba(21,35,62,.035);
+}
+.nx-finance-icon {
+    flex:0 0 48px; width:48px; height:48px; border-radius:14px;
+    background:#edf3ff; color:#3465d8; display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem;
+}
+.nx-finance-accent { border-color:#d7eadd; background:#f9fffb; }
+.nx-finance-accent .nx-finance-icon { background:#e4f8e8; color:#258554; }
+.nx-finance-label { color:#6d7d96; font-size:.87rem; font-weight:650; }
+.nx-finance-number { font-weight:850; font-size:clamp(1.3rem,2.2vw,1.9rem); margin:9px 0 5px; letter-spacing:-.6px; overflow-wrap:anywhere; }
+.nx-finance-accent .nx-finance-number { color:#1c7b51; }
+.nx-finance-caption { font-size:.75rem; color:#8a99ac; line-height:1.45; }
+.nx-report-disclaimer { font-size:.76rem; color:#76859d; line-height:1.5; }
+.nx-report-header-icon { font-size:1.4rem; }
+.nx-rank {
+    display:inline-flex; min-width:28px; height:28px; justify-content:center;
+    align-items:center; border-radius:8px; color:#3861b3;
+    font-weight:850; font-size:.78rem; background:#eef3fd;
+}
+@media(max-width:575px) {
+    .nx-filters-body { padding:17px; }
+    .nx-finance-card { padding:18px; }
+    .nx-panel-subtitle { font-size:.75rem; }
+    .nx-history-page .nx-panel-header, .nx-reports-page .nx-panel-header { align-items:flex-start; }
+}
