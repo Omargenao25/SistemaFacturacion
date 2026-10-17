@@ -460,7 +460,7 @@ a {
 
 
 /* ============================
-   IMPRESI�N
+   IMPRESIÓN
 ============================ */
 
 @media print {
@@ -486,4 +486,330 @@ a {
     body {
         background: white !important;
     }
+}
+
+
+/* ===== Nexora: lenguaje visual y estados activos ===== */
+:root {
+    --nx-ink: #14213a;
+    --nx-accent: #3165e7;
+    --nx-muted: #64748b;
+    --nx-border: #e7ebf2;
+    --nx-surface: #ffffff;
+}
+body { color: var(--nx-ink); }
+.sidebar-link.active {
+    background: #28416b;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 #70a1ff;
+}
+.sidebar-link.active:hover { transform: none; background: #30517e; }
+.topbar-action { white-space: nowrap; }
+.mobile-nav-backdrop { display: none; }
+.page-intro { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:26px; flex-wrap:wrap; }
+.page-eyebrow { color:var(--nx-accent); font-size:.73rem; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:5px; }
+.page-title { color:var(--nx-ink); }
+.page-subtitle { max-width:680px; line-height:1.5; }
+.nx-stat-card { border:1px solid var(--nx-border); border-radius:16px; background:var(--nx-surface); box-shadow:0 8px 24px rgba(21,35,62,.04); padding:22px; height:100%; }
+.nx-stat-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--nx-muted); font-weight:600; font-size:.88rem; }
+.nx-stat-icon { display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border-radius:13px; background:#edf3ff; color:#3165e7; font-size:1.3rem; }
+.nx-stat-value { font-size:clamp(1.45rem,2vw,2rem); font-weight:800; letter-spacing:-.8px; margin:12px 0 4px; }
+.nx-stat-foot { font-size:.82rem; color:var(--nx-muted); }
+.nx-panel { border:1px solid var(--nx-border); border-radius:16px; background:#fff; box-shadow:0 8px 24px rgba(21,35,62,.035); overflow:hidden; }
+.nx-panel-header { padding:20px 22px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+.nx-panel-title { margin:0; font-size:1.05rem; font-weight:750; }
+.nx-table { margin-bottom:0; }
+.nx-table th { background:#f8fafd; color:#64748b!important; }
+.nx-table td { color:#334155; }
+.nx-action { display:inline-flex; gap:5px; align-items:center; font-weight:650; font-size:.87rem; }
+.nx-empty { padding:38px 24px; text-align:center; color:var(--nx-muted); }
+.nx-empty i { display:block; color:#97a9ca; font-size:2rem; margin-bottom:8px; }
+.nx-mono { font-variant-numeric:tabular-nums; }
+.nx-status { display:inline-block; padding:5px 10px; border-radius:30px; font-weight:700; font-size:.73rem; }
+.nx-status.good { background:#e7f8ef; color:#18734c; }
+.nx-status.warn { background:#fff5d9; color:#91620d; }
+.nx-status.danger { background:#fdebec; color:#a72b32; }
+.nx-list-action { display:inline-flex; margin:2px 7px 2px 0; font-size:.83rem; }
+@media(max-width:991px) {
+    .mobile-nav-backdrop.visible { display:block; position:fixed; inset:0; background:rgba(10,22,41,.55); z-index:950; }
+    .sidebar { z-index:1001; }
+    .topbar-action { display:none; }
+}
+@media(max-width:575px) {
+    .main-content { padding:16px; }
+    .page-intro .btn { width:100%; }
+    .topbar { padding:0 16px; }
+    .nx-panel-header { padding:16px; }
+}
+@media print { .mobile-nav-backdrop { display:none!important; } .nx-panel { box-shadow:none!important; } }
+
+
+/* ===== Nexora / Emisión de facturas ===== */
+.nx-invoice-page { width:100%; max-width:1480px; margin:0 auto 40px; }
+.nx-invoice-page .validation-summary-valid { display:none; }
+.nx-invoice-page .validation-summary-errors { border:1px solid #fecaca; }
+.nx-invoice-card {
+    background:#fff;
+    border:1px solid var(--nx-border,#e7ebf2);
+    border-radius:17px;
+    overflow:hidden;
+    box-shadow:0 12px 32px rgba(21,35,62,.045);
+}
+.nx-invoice-card-header {
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:20px 23px;
+    border-bottom:1px solid #edf0f5;
+}
+.nx-invoice-card-header h2 { margin:0; font-weight:750; letter-spacing:-.25px; font-size:1.06rem; }
+.nx-invoice-card-header p { margin:4px 0 0; font-size:.82rem; color:#728097; line-height:1.4; }
+.nx-invoice-step {
+    display:flex; flex:0 0 39px; width:39px; height:39px;
+    align-items:center; justify-content:center;
+    background:#edf3ff; color:#2c60d8; border-radius:12px;
+    font-size:.82rem; font-weight:800; letter-spacing:.4px;
+}
+.nx-invoice-card-body { padding:23px; }
+.nx-invoice-field-hint { margin-top:7px; font-size:.77rem; color:#8490a3; }
+.nx-invoice-hint-badge {
+    display:inline-flex; align-items:center; gap:7px; font-size:.78rem; font-weight:650;
+    padding:7px 12px; border-radius:30px; color:#4566a2; background:#eef4ff;
+}
+.nx-invoice-table-wrap { overflow-x:auto; }
+.nx-invoice-table { margin-bottom:0; min-width:650px; }
+.nx-invoice-table thead th {
+    background:#f8fafd; color:#718099; border-bottom:1px solid #edf0f5;
+    font-weight:750; font-size:.71rem; letter-spacing:.55px;
+    text-transform:uppercase; padding:15px 13px;
+}
+.nx-invoice-table tbody td { padding:17px 13px; border-color:#edf0f5; }
+.nx-invoice-table tbody tr:last-child td { border-bottom:0; }
+.nx-invoice-table td:first-child { min-width:270px; }
+.nx-invoice-table .nx-invoice-qty-col { width:105px; }
+.nx-invoice-table .cantidad { width:96px; }
+.nx-invoice-table .producto-select { min-width:255px; }
+.nx-invoice-table .precio, .nx-invoice-table .subtotal-fila { white-space:nowrap; color:#2f3d56; }
+.nx-invoice-table .eliminar { padding:7px 10px; border-color:#f4cbd0; }
+.nx-invoice-card-footer {
+    padding:18px 23px; border-top:1px solid #edf0f5;
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+}
+.nx-invoice-card-footer .btn { font-size:.87rem; }
+.nx-invoice-summary { position:sticky; top:92px; }
+.nx-invoice-summary-body { padding:22px 23px 24px; }
+.nx-invoice-summary-row {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:15px;
+}
+.nx-invoice-summary-row label { font-weight:550; color:#66758c; font-size:.9rem; }
+.nx-invoice-amount {
+    text-align:right; flex:1; min-width:0; width:100%;
+    background:transparent; outline:0; border:0; box-shadow:none;
+    font-variant-numeric:tabular-nums; font-size:.96rem; font-weight:750; color:#1c2a45;
+    pointer-events:none;
+}
+.nx-invoice-discount {
+    padding-top:19px; margin-top:17px; border-top:1px dashed #dbe2ec;
+}
+.nx-invoice-discount .form-control { background:#fbfcff; }
+.nx-invoice-total {
+    padding:20px; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:13px; margin:22px 0 18px;
+}
+.nx-invoice-total label {
+    display:block; color:#456291; font-size:.78rem; font-weight:800;
+    letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px;
+}
+.nx-invoice-total-value {
+    display:block; width:100%; color:#19428f; font-weight:850;
+    background:transparent; border:0; outline:0; box-shadow:none;
+    font-size:clamp(1.4rem,2.4vw,1.9rem); line-height:1.4;
+    letter-spacing:-.7px; font-variant-numeric:tabular-nums;
+    pointer-events:none;
+}
+.nx-invoice-total span { display:block; color:#6b83aa; font-size:.75rem; margin-top:6px; }
+.nx-invoice-submit { padding:13px 16px; font-weight:750; }
+.nx-invoice-summary-note {
+    text-align:center; font-size:.76rem; line-height:1.55; color:#8a96aa;
+    margin:14px 4px 0;
+}
+@media(max-width:1199px) { .nx-invoice-summary { position:static; } }
+@media(max-width:575px) {
+    .nx-invoice-card-header { padding:17px; gap:10px; }
+    .nx-invoice-card-body { padding:17px; }
+    .nx-invoice-card-footer { padding:16px 17px; }
+    .nx-invoice-summary-body { padding:18px; }
+    .nx-invoice-step { flex-basis:35px; width:35px; height:35px; }
+}
+
+
+/* ===== NEXORA / Comprobante de venta ===== */
+.nx-details-page { max-width:1240px; margin:0 auto 48px; }
+.nx-receipt-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.nx-receipt-actions form { margin:0; }
+.nx-receipt {
+    background:#fff; border:1px solid #e6ebf2; border-radius:18px;
+    overflow:hidden; box-shadow:0 14px 45px rgba(18,34,61,.06);
+    color:#172b49;
+}
+.nx-receipt-topline { height:7px; background:linear-gradient(90deg,#214ab5 0%,#487afb 60%,#8aafff 100%); }
+.nx-receipt-inner { padding:36px 43px 27px; }
+.nx-receipt-header { display:flex; justify-content:space-between; gap:26px; align-items:flex-start; }
+.nx-receipt-company { display:flex; align-items:center; gap:14px; min-width:0; }
+.nx-receipt-brand-mark {
+    flex:0 0 51px; width:51px; height:51px; border-radius:14px;
+    background:#3165e7; color:#fff; font-size:1.55rem;
+    display:flex; justify-content:center; align-items:center;
+}
+.nx-receipt-brand-name { font-size:1.63rem; font-weight:850; letter-spacing:-1px; line-height:1.2; }
+.nx-receipt-brand-subtitle { margin-top:3px; color:#74839a; font-size:.8rem; }
+.nx-receipt-identity { text-align:right; overflow-wrap:anywhere; }
+.nx-receipt-document-type { text-transform:uppercase; letter-spacing:1px; font-size:.67rem; font-weight:850; color:#647895; }
+.nx-receipt-reference { font-weight:800; font-size:1rem; margin-top:6px; font-variant-numeric:tabular-nums; }
+.nx-receipt-document-note { margin-top:6px; color:#7a899f; font-size:.75rem; }
+.nx-receipt-separator { height:1px; background:#e6ebf2; margin:27px 0; }
+.nx-receipt-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:35px; }
+.nx-receipt-info-block { min-width:0; }
+.nx-receipt-info-block h2, .nx-receipt-items h2 {
+    color:#637894; font-size:.71rem; font-weight:850;
+    letter-spacing:.85px; text-transform:uppercase; margin:0 0 16px;
+}
+.nx-receipt-person { font-size:1.16rem; font-weight:800; margin-bottom:12px; }
+.nx-receipt-info-line { display:flex; gap:12px; justify-content:space-between; margin:8px 0; line-height:1.55; font-size:.87rem; }
+.nx-receipt-info-line > span:first-child { color:#72829a; flex:0 0 auto; }
+.nx-receipt-info-line > span:last-child,
+.nx-receipt-info-line > strong { text-align:right; min-width:0; }
+.nx-receipt-info-block:first-child .nx-receipt-info-line { justify-content:flex-start; }
+.nx-receipt-break { overflow-wrap:anywhere; }
+.nx-receipt-money { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.nx-receipt-state { display:inline-block; padding:4px 10px; border-radius:30px; font-size:.76rem; font-weight:800; }
+.nx-receipt-state.is-issued { color:#1b8054; background:#e7f8ee; }
+.nx-receipt-state.is-void { color:#a92d38; background:#ffebee; }
+.nx-receipt-void {
+    border:1px solid #f4c5cb; background:#fff0f2; color:#99212f;
+    padding:14px 17px; border-radius:10px; font-weight:800;
+    margin:25px 0 0; font-size:.87rem;
+}
+.nx-receipt-items { margin-top:36px; }
+.nx-receipt-table { width:100%; margin:0; border-collapse:collapse; }
+.nx-receipt-table thead th {
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.6px;
+    color:#657890; background:#f2f5fa; border-bottom:1px solid #e5ebf3;
+    padding:15px 14px;
+}
+.nx-receipt-table td { padding:18px 14px; border-bottom:1px solid #ebeff5; color:#253650; vertical-align:middle; }
+.nx-receipt-table tbody tr:last-child td { border-bottom:0; }
+.nx-receipt-table tbody tr { break-inside:avoid; page-break-inside:avoid; }
+.nx-receipt-bottom { display:grid; grid-template-columns:1fr minmax(290px,360px); gap:36px; margin-top:32px; align-items:start; }
+.nx-receipt-note { display:flex; gap:11px; color:#7a8ba2; padding:13px 0; font-size:.78rem; line-height:1.6; }
+.nx-receipt-note > i { color:#416de0; font-size:1.05rem; }
+.nx-receipt-note strong { display:block; color:#465a78; margin-bottom:4px; }
+.nx-receipt-note p { margin:0; max-width:360px; }
+.nx-receipt-totals { background:#f7f9fc; border:1px solid #e9edf4; border-radius:13px; padding:20px; }
+.nx-receipt-total-row { display:flex; justify-content:space-between; gap:12px; margin-bottom:13px; font-size:.89rem; }
+.nx-receipt-total-row span { color:#708099; }
+.nx-receipt-total-row strong { font-weight:750; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.nx-receipt-grand-total {
+    border-top:1px dashed #cbd7e8; margin-top:17px; padding-top:16px;
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    color:#1e4caa; font-size:1.13rem; font-weight:850;
+}
+.nx-receipt-grand-total small { font-size:.73rem; }
+.nx-receipt-grand-total strong { font-size:1.6rem; letter-spacing:-.7px; font-variant-numeric:tabular-nums; }
+.nx-receipt-footer { text-align:center; border-top:1px solid #e8edf4; padding-top:22px; margin-top:34px; }
+.nx-receipt-footer strong { display:block; font-size:.91rem; }
+.nx-receipt-footer span { display:block; font-size:.76rem; color:#8b98aa; margin-top:4px; }
+@media(max-width:750px) {
+    .nx-receipt-inner { padding:25px 20px; }
+    .nx-receipt-header { flex-wrap:wrap; }
+    .nx-receipt-identity { text-align:left; }
+    .nx-receipt-info-grid { grid-template-columns:1fr; gap:21px; }
+    .nx-receipt-bottom { grid-template-columns:1fr; gap:14px; }
+    .nx-receipt-actions { width:100%; }
+    .nx-receipt-actions .btn { flex:1; }
+    .nx-receipt-actions form { display:flex!important; flex:1; }
+    .nx-receipt-actions form .btn { width:100%; }
+}
+@media(max-width:420px) {
+    .nx-receipt-inner { padding:22px 14px; }
+    .nx-receipt-brand-name { font-size:1.35rem; }
+    .nx-receipt-info-line { flex-wrap:wrap; gap:3px 9px; }
+    .nx-receipt-info-line > span:last-child,.nx-receipt-info-line > strong { text-align:left; }
+    .nx-receipt-actions { display:grid; grid-template-columns:1fr; }
+}
+@media print {
+    @page { size:A4; margin:12mm; }
+    html, body { width:auto!important; min-height:0!important; background:#fff!important; color:#151b29!important; }
+    .app-wrapper, .main-wrapper, .main-content {
+        display:block!important; min-height:0!important; margin:0!important;
+        padding:0!important; width:100%!important; background:#fff!important;
+    }
+    .nx-details-page { margin:0!important; max-width:none!important; padding:0!important; }
+    .nx-details-page .no-print, .nx-details-page .page-intro { display:none!important; }
+    .nx-receipt { box-shadow:none!important; border:0!important; border-radius:0!important; overflow:visible!important; }
+    .nx-receipt-topline { height:3px!important; background:#244ca1!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .nx-receipt-inner { padding:15px 0 0!important; }
+    .nx-receipt-header { gap:18px!important; }
+    .nx-receipt-brand-mark { background:#244ca1!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .nx-receipt-info-grid { grid-template-columns:1fr 1fr!important; gap:24px!important; }
+    .nx-receipt-bottom { grid-template-columns:1fr 46%!important; gap:20px!important; }
+    .nx-receipt-table { min-width:0!important; font-size:9pt; }
+    .nx-receipt-table td, .nx-receipt-table th { padding:9px 7px!important; }
+    .nx-receipt-items, .nx-receipt-info-grid { break-inside:avoid-page; }
+    .nx-receipt-totals, .nx-receipt-footer, .nx-receipt-void { break-inside:avoid; }
+    .nx-receipt-totals { background:#fff!important; }
+    .nx-receipt-state { border:1px solid #aeb7c5!important; background:#fff!important; color:#111!important; }
+    .nx-receipt-void { color:#9a1725!important; background:#fff!important; border:2px solid #9a1725!important; }
+}
+
+
+/* ===== NEXORA / Historial y reportes ===== */
+.nx-history-page, .nx-reports-page { max-width:1480px; margin:0 auto 44px; }
+.nx-filters-body { padding:20px 22px 24px; }
+.nx-search-control { position:relative; }
+.nx-search-control .bi-search {
+    position:absolute; top:50%; left:14px; transform:translateY(-50%);
+    color:#97a4b7; pointer-events:none;
+}
+.nx-search-control .form-control { padding-left:38px; }
+.nx-panel-subtitle { margin:5px 0 0; color:#8794a5; font-size:.8rem; line-height:1.4; }
+.nx-count-pill {
+    display:inline-flex; align-items:center; white-space:nowrap;
+    color:#375caa; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:30px; font-size:.78rem; font-weight:750; padding:6px 12px;
+}
+.nx-history-table td, .nx-report-invoices td { vertical-align:middle; }
+.nx-history-table .btn-sm, .nx-report-invoices .btn-sm { white-space:nowrap; }
+.nx-invoice-code { color:#2852a0; font-weight:750; font-size:.87rem; white-space:nowrap; }
+.nx-history-date { color:#6c7e96; white-space:nowrap; font-size:.87rem; }
+.nx-finance-card {
+    display:flex; align-items:flex-start; gap:17px; padding:23px 25px;
+    border:1px solid #e5eaf2; border-radius:15px; background:#fff; height:100%;
+    box-shadow:0 8px 24px rgba(21,35,62,.035);
+}
+.nx-finance-icon {
+    flex:0 0 48px; width:48px; height:48px; border-radius:14px;
+    background:#edf3ff; color:#3465d8; display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem;
+}
+.nx-finance-accent { border-color:#d7eadd; background:#f9fffb; }
+.nx-finance-accent .nx-finance-icon { background:#e4f8e8; color:#258554; }
+.nx-finance-label { color:#6d7d96; font-size:.87rem; font-weight:650; }
+.nx-finance-number { font-weight:850; font-size:clamp(1.3rem,2.2vw,1.9rem); margin:9px 0 5px; letter-spacing:-.6px; overflow-wrap:anywhere; }
+.nx-finance-accent .nx-finance-number { color:#1c7b51; }
+.nx-finance-caption { font-size:.75rem; color:#8a99ac; line-height:1.45; }
+.nx-report-disclaimer { font-size:.76rem; color:#76859d; line-height:1.5; }
+.nx-report-header-icon { font-size:1.4rem; }
+.nx-rank {
+    display:inline-flex; min-width:28px; height:28px; justify-content:center;
+    align-items:center; border-radius:8px; color:#3861b3;
+    font-weight:850; font-size:.78rem; background:#eef3fd;
+}
+@media(max-width:575px) {
+    .nx-filters-body { padding:17px; }
+    .nx-finance-card { padding:18px; }
+    .nx-panel-subtitle { font-size:.75rem; }
+    .nx-history-page .nx-panel-header, .nx-reports-page .nx-panel-header { align-items:flex-start; }
 }

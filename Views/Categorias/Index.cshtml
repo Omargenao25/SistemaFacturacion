@@ -1,41 +1,25 @@
-﻿@model IEnumerable<SistemaFacturacion.Models.Categoria>
-
-@{
-    ViewData["Title"] = "Index";
-}
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdCategoria">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdCategoria">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdCategoria">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+@model IEnumerable<SistemaFacturacion.Models.Categoria>
+@{ ViewData["Title"] = "Categorías"; }
+<div class="page-intro">
+    <div><div class="page-eyebrow">Nexora / Gestión</div><h1 class="page-title">Categorías</h1><p class="page-subtitle">Organiza tus productos por grupos para encontrarlos más rápido.</p></div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nueva categoría</a>
+</div>
+<section class="nx-panel">
+    <div class="nx-panel-header"><h2 class="nx-panel-title">Catálogo de categorías</h2><span class="text-muted small">@Model.Count() registros</span></div>
+    @if(!Model.Any()) {
+        <div class="nx-empty"><i class="bi bi-tags"></i>No hay categorías registradas.</div>
+    } else {
+        <div class="table-responsive"><table class="table table-hover nx-table">
+            <thead><tr><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead>
+            <tbody>
+            @foreach(var item in Model) {
+                <tr><td class="fw-semibold">@item.Nombre</td><td>@(item.Descripcion ?? "—")</td><td>
+                    <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdCategoria">Ver</a>
+                    <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdCategoria">Editar</a>
+                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdCategoria">Eliminar</a>
+                </td></tr>
+            }
+            </tbody>
+        </table></div>
+    }
+</section>
