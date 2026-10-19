@@ -25,13 +25,19 @@
             </div>
             <form asp-action="Edit" method="post" class="nx-crud-form">
                 <input type="hidden" asp-for="IdProducto" />
+                <input type="hidden" asp-for="RowVersion" />
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="mb-3 text-end">
+                    <a asp-action="Edit" asp-route-id="@Model.IdProducto" class="small">
+                        <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Recargar información actual
+                    </a>
+                </div>
                 <div class="row g-4">
                     <div class="col-md-4"><label asp-for="Codigo" class="form-label">Código / SKU <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Codigo" class="form-control" type="text" maxlength="30" placeholder="Ej. PROD-001" required /><span asp-validation-for="Codigo" class="text-danger small"></span></div>
                 <div class="col-md-8"><label asp-for="Nombre" class="form-label">Nombre del producto <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Nombre" class="form-control" type="text" maxlength="100" placeholder="Ej. Teclado mecánico" required /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
                 <div class="col-12"><label asp-for="Descripcion" class="form-label">Descripción</label><textarea asp-for="Descripcion" class="form-control" rows="3" maxlength="200" placeholder="Descripción del artículo"></textarea><span asp-validation-for="Descripcion" class="text-danger small"></span></div>
                 <div class="col-md-6"><label asp-for="IdCategoria" class="form-label">Categoría <span class="text-danger" aria-hidden="true">*</span></label><select asp-for="IdCategoria" asp-items="ViewBag.Categorias" class="form-select" required><option value="">Selecciona una categoría...</option></select><div class="nx-crud-helper">¿No aparece una categoría? <a asp-controller="Categorias" asp-action="Create">Crear categoría</a>.</div><span asp-validation-for="IdCategoria" class="text-danger small"></span></div>
-                <div class="col-md-6"><label asp-for="Stock" class="form-label">Unidades disponibles</label><input asp-for="Stock" class="form-control" type="number" min="0" step="1" /><span asp-validation-for="Stock" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Stock" class="form-label">Unidades disponibles</label><input asp-for="Stock" class="form-control" type="number" min="0" step="1" /><div class="nx-crud-helper">Si hubo ventas o cambios de inventario mientras editabas, Nexora te pedirá actualizar esta página antes de guardar.</div><span asp-validation-for="Stock" class="text-danger small"></span></div>
                 <div class="col-md-6"><label asp-for="Precio" class="form-label">Precio de venta (RD$)</label><input asp-for="Precio" class="form-control" type="number" min="0" step=".01" /><span asp-validation-for="Precio" class="text-danger small"></span></div>
                 <div class="col-md-6"><label asp-for="Costo" class="form-label">Costo unitario (RD$)</label><input asp-for="Costo" class="form-control" type="number" min="0" step=".01" /><span asp-validation-for="Costo" class="text-danger small"></span></div>
                 <div class="col-12"><div class="nx-crud-toggle form-check form-switch"><input class="form-check-input" asp-for="Estado" role="switch" /><label class="form-check-label" asp-for="Estado">Producto activo</label></div><span class="text-danger small" asp-validation-for="Estado"></span></div>
