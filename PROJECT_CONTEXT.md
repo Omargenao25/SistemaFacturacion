@@ -221,6 +221,20 @@ La rama `feature/nexora-ui` contiene ahora operaciones atómicas de inventario e
 - No se tocó Identity ni roles de Russell; la versión SQL Server `rowversion` complementa la reserva/restitución atómicas de `FacturasController`.
 - **No se ha ejecutado compilación de .NET ni pruebas contra SQL Server desde el conector GitHub.**
 
+### Garantía por producto y anulación de factura a 7 días (19/10/2026)
+
+**Añadido en `feature/nexora-ui`, pendiente de compilar/aplicar migración/probar:**
+
+- `Producto.GarantiaMeses` es un entero de **0 a 120** meses. `0` significa **sin garantía comercial adicional registrada en Nexora**, no una renuncia a garantías legales. Se puede ajustar desde Crear/Editar producto y aparece en el catálogo.
+- `DetalleFactura.GarantiaMeses` copia el valor del producto al emitir la venta. La garantía de una factura anterior no cambia al modificar el catálogo. El comprobante interno muestra plazo y fecha estimada de vencimiento como `Factura.Fecha.AddMonths(DetalleFactura.GarantiaMeses)` si el plazo es positivo. La migración inicializa registros preexistentes en `0`, sin inventar garantía retrospectiva.
+- **Nueva migración:** `20261019194000_AgregarGarantiasProductoYDetalle` (2 columnas no nulas `int DEFAULT 0` para `Productos` y `DetallesFactura`). Incluye diseñador y snapshot sincronizados. El usuario debe confirmar `Update-Database` **tras `git pull`, compilación y respaldo**. No repetir `Add-Migration`.
+- La anulación ordinaria de una factura `Emitida` se admite dentro de **7 días exactos / 168 horas desde `Fecha`**. Se comprueba al recibir el POST y de nuevo en el `ExecuteUpdateAsync` atómico antes de cambiar a `Anulada`; se conserva la protección contra doble anulación y devolución duplicada de stock.
+- Fuera de plazo, el botón de `Anular` deja de estar disponible y una solicitud directa recibe aviso sin alterar la factura ni el inventario. La fecha límite se ve en el detalle/comprobante.
+- **Distinción jurídica/funcional:** regla de anulación interna, no regula devoluciones, reparaciones, garantías legales o derechos del consumidor; estos procesos requieren un módulo y reglas separados. No afirmar que toda devolución queda prohibida luego de 7 días.
+- Para coherencia de condiciones comerciales, la reserva de stock comprueba también `RowVersion` capturado al leer el producto; un cambio simultáneo de precio/garantía/inventario provoca rechazo con `Rollback` en vez de emitir detalle obsoleto.
+- **Pruebas pendientes:** crear producto con 6, 12 y 24 meses; vender y validar comprobante/vencimiento; cambiar garantía en catálogo y reimprimir factura anterior (debe conservar la original); revisar factura emitida hace menos/más de 7 días; intentar anular por POST fuera de plazo; comprobar anulación dentro del plazo y devolución única del stock; comprobar reporte, impresión y registro histórico.
+- Mantener a Russell informado antes del merge: no se editaron autenticación o roles. El PR #1 sigue en borrador.
+
 ## 8. Relaciones del modelo de datos
 
 ```text
