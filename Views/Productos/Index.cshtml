@@ -14,13 +14,14 @@
         <div class="nx-empty"><i class="bi bi-box-seam"></i>No hay productos registrados.</div>
     } else {
         <div class="table-responsive"><table class="table table-hover nx-table">
-            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Garantía</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
             @foreach(var item in Model) {
                 <tr>
                     <td class="fw-semibold">@item.Codigo</td><td><div class="fw-semibold">@item.Nombre</div><small class="text-muted">@item.Descripcion</small></td>
                     <td class="nx-mono">RD$ @item.Precio.ToString("N2")</td><td class="nx-mono">RD$ @item.Costo.ToString("N2")</td>
                     <td><span class="nx-status @(item.Stock == 0 ? "danger" : item.Stock <= 5 ? "warn" : "good")">@item.Stock</span></td>
+                    <td class="text-nowrap">@(item.GarantiaMeses > 0 ? $"{item.GarantiaMeses} meses" : "—")</td>
                     <td><span class="nx-status @(item.Estado ? "good" : "danger")">@(item.Estado ? "Activo" : "Inactivo")</span></td>
                     <td>
                         <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdProducto">Ver</a>
