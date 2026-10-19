@@ -893,3 +893,12 @@ body { color: var(--nx-ink); }
     .nx-detail-actions > .btn, .nx-delete-form, .nx-delete-form .btn { width:100%; }
     .nx-delete-warning { margin:17px 17px 0; padding:14px; }
 }
+
+
+/* ===== NEXORA / Protección visual de eliminaciones ===== */
+.nx-delete-blocked {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.88rem; font-weight:750; color:#9a3c24;
+    background:#fff0ea; border:1px solid #f2c9b9;
+    padding:10px 15px; border-radius:9px;
+}
