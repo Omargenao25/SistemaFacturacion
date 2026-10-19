@@ -1,69 +1,54 @@
-﻿@model SistemaFacturacion.Models.Producto
-
+@model SistemaFacturacion.Models.Producto
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar producto";
 }
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Productos</div>
+            <h1 class="page-title">Editar producto</h1>
+            <p class="page-subtitle">Revisa precios, disponibilidad e información de inventario.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a productos</a>
+    </div>
 
-<h1>Edit</h1>
-
-<h4>Producto</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdProducto" />
-            <div class="form-group">
-                <label asp-for="Codigo" class="control-label"></label>
-                <input asp-for="Codigo" class="form-control" />
-                <span asp-validation-for="Codigo" class="text-danger"></span>
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-crud-heading">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 class="nx-panel-title" id="nx-crud-heading">Información del producto</h2>
+                        <p class="nx-panel-subtitle">Los campos con * son obligatorios.</p>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Precio" class="control-label"></label>
-                <input asp-for="Precio" class="form-control" />
-                <span asp-validation-for="Precio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Costo" class="control-label"></label>
-                <input asp-for="Costo" class="form-control" />
-                <span asp-validation-for="Costo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Stock" class="control-label"></label>
-                <input asp-for="Stock" class="form-control" />
-                <span asp-validation-for="Stock" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Estado" /> @Html.DisplayNameFor(model => model.Estado)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCategoria" class="control-label"></label>
-                <input asp-for="IdCategoria" class="form-control" />
-                <span asp-validation-for="IdCategoria" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+            <form asp-action="Edit" method="post" class="nx-crud-form">
+                <input type="hidden" asp-for="IdProducto" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-4">
+                    <div class="col-md-4"><label asp-for="Codigo" class="form-label">Código / SKU <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Codigo" class="form-control" type="text" maxlength="30" placeholder="Ej. PROD-001" required /><span asp-validation-for="Codigo" class="text-danger small"></span></div>
+                <div class="col-md-8"><label asp-for="Nombre" class="form-label">Nombre del producto <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Nombre" class="form-control" type="text" maxlength="100" placeholder="Ej. Teclado mecánico" required /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+                <div class="col-12"><label asp-for="Descripcion" class="form-label">Descripción</label><textarea asp-for="Descripcion" class="form-control" rows="3" maxlength="200" placeholder="Descripción del artículo"></textarea><span asp-validation-for="Descripcion" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="IdCategoria" class="form-label">Categoría <span class="text-danger" aria-hidden="true">*</span></label><select asp-for="IdCategoria" asp-items="ViewBag.Categorias" class="form-select" required><option value="">Selecciona una categoría...</option></select><div class="nx-crud-helper">¿No aparece una categoría? <a asp-controller="Categorias" asp-action="Create">Crear categoría</a>.</div><span asp-validation-for="IdCategoria" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Stock" class="form-label">Unidades disponibles</label><input asp-for="Stock" class="form-control" type="number" min="0" step="1" /><span asp-validation-for="Stock" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Precio" class="form-label">Precio de venta (RD$)</label><input asp-for="Precio" class="form-control" type="number" min="0" step=".01" /><span asp-validation-for="Precio" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Costo" class="form-label">Costo unitario (RD$)</label><input asp-for="Costo" class="form-control" type="number" min="0" step=".01" /><span asp-validation-for="Costo" class="text-danger small"></span></div>
+                <div class="col-12"><div class="nx-crud-toggle form-check form-switch"><input class="form-check-input" asp-for="Estado" role="switch" /><label class="form-check-label" asp-for="Estado">Producto activo</label></div><span class="text-danger small" asp-validation-for="Estado"></span></div>
+                </div>
+                <div class="nx-crud-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Guardar cambios</button>
+                </div>
+            </form>
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
+            <h3>Consejo de Nexora</h3>
+            <p>Verifica que el precio, costo, categoría y stock correspondan al artículo. Solo los productos activos con existencias estarán disponibles para facturar.</p>
+        </aside>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }
