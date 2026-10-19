@@ -182,7 +182,9 @@ git pull origin feature/nexora-ui
 **Próximas mejoras propuestas:**
 
 - Revisar la compilación y crear/editar registros en las tres secciones; validar el selector de categoría y los mensajes de error.
-- Modernizar las vistas de Detalles/Eliminar de clientes, categorías y productos, respetando sus operaciones existentes.
+- **Actualización 18/10/2026:** se rediseñaron las seis vistas `Details`/`Delete` de Clientes, Categorías y Productos en `feature/nexora-ui`. Los productos muestran nombre de categoría (consulta con `Include` en GET de detalle y eliminación). Se conservaron las rutas y operaciones POST de eliminación; las pantallas y la compilación **siguen pendientes de comprobar en Visual Studio**.
+- Revisar el comportamiento al eliminar registros relacionados con facturas/productos: la interfaz advierte de estos riesgos, pero **todavía no implementa controles de integridad adicionales**. Para datos comerciales reales, priorizar restricciones y bajas lógicas.
+- Ajustar las fichas de detalle y las pantallas de eliminación tras pruebas locales.
 - Ajustar visualmente Historial/Reportes tras las pruebas de Omar; resolver errores sin tocar módulos de Russell.
 - Mantener la etiqueta `comprobante interno no fiscal` y la nota de que el margen bruto del reporte es estimado **antes de descuentos y gastos**.
 - Revisar reglas de negocio: cliente y productos válidos, precio con/sin impuestos, descuentos, precisión monetaria y ventas simultáneas sobre stock.
