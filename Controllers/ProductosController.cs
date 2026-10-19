@@ -56,7 +56,7 @@ namespace SistemaFacturacion.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,Estado,IdCategoria")] Producto producto)
+        public async Task<IActionResult> Create([Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,GarantiaMeses,Estado,IdCategoria")] Producto producto)
         {
             if (!await _context.Categorias.AnyAsync(c => c.IdCategoria == producto.IdCategoria))
             {
@@ -95,7 +95,7 @@ namespace SistemaFacturacion.Controllers
         // POST: Productos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,Estado,IdCategoria,RowVersion")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,GarantiaMeses,Estado,IdCategoria,RowVersion")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
@@ -138,6 +138,7 @@ namespace SistemaFacturacion.Controllers
                 actual.Precio = producto.Precio;
                 actual.Costo = producto.Costo;
                 actual.Stock = producto.Stock;
+                actual.GarantiaMeses = producto.GarantiaMeses;
                 actual.Estado = producto.Estado;
 
                 try
