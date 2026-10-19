@@ -902,3 +902,20 @@ body { color: var(--nx-ink); }
     background:#fff0ea; border:1px solid #f2c9b9;
     padding:10px 15px; border-radius:9px;
 }
+
+
+/* NEXORA / Garantías comerciales y anulación fuera de plazo */
+.nx-receipt-warranty {
+    display:block; margin-top:5px; font-size:.72rem;
+    font-weight:550; color:#3d7557; line-height:1.45;
+}
+.nx-receipt-warranty .bi { margin-right:3px; }
+.nx-receipt-expired {
+    display:inline-flex; align-items:center; padding:9px 12px;
+    border:1px solid #e9cbb2; background:#fff8f1;
+    color:#98613c; border-radius:9px; font-size:.82rem; font-weight:750;
+}
+@media print {
+    .nx-receipt-warranty { font-size:8pt!important; color:#2b6141!important; }
+    .nx-receipt-expired { display:none!important; }
+}
