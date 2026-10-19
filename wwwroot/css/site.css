@@ -813,3 +813,41 @@ body { color: var(--nx-ink); }
     .nx-panel-subtitle { font-size:.75rem; }
     .nx-history-page .nx-panel-header, .nx-reports-page .nx-panel-header { align-items:flex-start; }
 }
+
+
+/* ===== NEXORA / Formularios de gestión ===== */
+.nx-crud-page { max-width:1390px; margin:0 auto 46px; }
+.nx-crud-shell { display:grid; grid-template-columns:minmax(0,1fr) 265px; align-items:start; gap:23px; }
+.nx-crud-shell > .nx-panel { min-width:0; }
+.nx-crud-form { padding:24px 27px 27px; }
+.nx-crud-form > .validation-summary-valid { display:none; }
+.nx-crud-form .form-label { display:block; font-size:.82rem; color:#3b4c66; margin-bottom:8px; }
+.nx-crud-form .form-control,
+.nx-crud-form .form-select { min-height:45px; background:#fbfcff; border-color:#dae2ee; }
+.nx-crud-form textarea.form-control { min-height:96px; resize:vertical; }
+.nx-crud-form .form-control:focus,
+.nx-crud-form .form-select:focus { background:#fff; }
+.nx-crud-heading { display:flex; align-items:center; gap:13px; }
+.nx-crud-heading-icon { width:43px; height:43px; display:inline-flex; align-items:center; justify-content:center; background:#eef3ff; color:#386bea; border-radius:12px; font-size:1.25rem; }
+.nx-crud-actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:29px; border-top:1px solid #edf0f6; padding-top:20px; }
+.nx-crud-actions .btn { min-width:125px; }
+.nx-crud-helper { font-size:.77rem; color:#7b8aa2; margin-top:7px; }
+.nx-crud-helper a { font-weight:650; }
+.nx-crud-toggle { border:1px solid #e6ecf5; background:#f8fafd; border-radius:10px; padding:16px 18px 16px 48px; }
+.nx-crud-toggle .form-check-input { cursor:pointer; }
+.nx-crud-toggle .form-check-label { font-weight:700; color:#3b4c66; cursor:pointer; }
+.nx-crud-sidebar { padding:23px; border:1px solid #dfebfc; background:#f4f8ff; border-radius:15px; }
+.nx-crud-sidebar-icon { display:inline-flex; align-items:center; justify-content:center; background:#e1edff; border-radius:11px; color:#2f65da; width:43px; height:43px; font-size:1.25rem; margin-bottom:16px; }
+.nx-crud-sidebar h3 { font-size:.94rem; font-weight:800; margin-bottom:9px; }
+.nx-crud-sidebar p { color:#657b9b; font-size:.83rem; line-height:1.65; margin:0; }
+@media(max-width:1100px) {
+  .nx-crud-shell { grid-template-columns:minmax(0,1fr); }
+  .nx-crud-sidebar { padding:18px 21px; }
+}
+@media(max-width:575px) {
+  .nx-crud-form { padding:17px; }
+  .nx-crud-actions { flex-direction:column-reverse; align-items:stretch; }
+  .nx-crud-actions .btn { width:100%; }
+  .nx-crud-heading-icon { width:38px; height:38px; }
+  .nx-crud-shell { gap:16px; }
+}
