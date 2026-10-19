@@ -4,6 +4,9 @@
     ViewData["Title"] = "Detalle de factura";
     var pago = ViewBag.Pago as Pago;
     var anulada = Model.Estado == "Anulada";
+    var puedeAnular = ViewBag.PuedeAnular is bool permitido && permitido;
+    var fechaLimiteAnulacion = ViewBag.FechaLimiteAnulacion is DateTime limite
+        ? limite : Model.Fecha.AddDays(7);
 }
 
 <div class="nx-details-page">
@@ -20,7 +23,7 @@
             <button type="button" class="btn btn-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1" aria-hidden="true"></i> Imprimir
             </button>
-            @if (!anulada)
+            @if (puedeAnular)
             {
                 <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-danger"
@@ -29,6 +32,12 @@
                     </button>
                 </form>
             }
+            else if (!anulada)
+            {
+                <span class="nx-receipt-expired" title="El plazo interno de anulación ha finalizado">
+                    <i class="bi bi-lock me-1" aria-hidden="true"></i> Anulación fuera de plazo
+                </span>
+            }
         </div>
     </div>
 
@@ -36,6 +45,22 @@
     {
         <div class="alert alert-success no-print" role="status">
             <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@TempData["Mensaje"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning no-print" role="alert">
+            <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>@TempData["Error"]
+        </div>
+    }
+
+    @if (!anulada && !puedeAnular)
+    {
+        <div class="alert alert-info no-print" role="status">
+            El plazo interno de 7 días para anular terminó el
+            <strong>@fechaLimiteAnulacion.ToString("dd/MM/yyyy HH:mm")</strong>.
+            Las devoluciones y garantías se gestionan por separado.
         </div>
     }
 
@@ -71,6 +96,7 @@
                 <section class="nx-receipt-info-block">
                     <h2>Datos de la operación</h2>
                     <div class="nx-receipt-info-line"><span>Fecha</span><strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    <div class="nx-receipt-info-line"><span>Plazo interno de anulación</span><span>@fechaLimiteAnulacion.ToString("dd/MM/yyyy HH:mm")</span></div>
                     <div class="nx-receipt-info-line">
                         <span>Estado</span>
                         <strong class="nx-receipt-state @(anulada ? "is-void" : "is-issued")">
@@ -109,7 +135,17 @@
                             @foreach (var detalle in Model.Detalles)
                             {
                                 <tr>
-                                    <td class="fw-semibold">@(detalle.Producto?.Nombre ?? "Producto no disponible")</td>
+                                    <td class="fw-semibold">
+                                        @(detalle.Producto?.Nombre ?? "Producto no disponible")
+                                        @if (detalle.GarantiaMeses > 0)
+                                        {
+                                            <span class="nx-receipt-warranty">
+                                                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                                Garantía comercial: @detalle.GarantiaMeses meses
+                                                · vence @Model.Fecha.AddMonths(detalle.GarantiaMeses).ToString("dd/MM/yyyy")
+                                            </span>
+                                        }
+                                    </td>
                                     <td class="text-center nx-receipt-money">@detalle.Cantidad</td>
                                     <td class="text-end nx-receipt-money">RD$ @detalle.Precio.ToString("N2")</td>
                                     <td class="text-end nx-receipt-money fw-semibold">RD$ @detalle.Subtotal.ToString("N2")</td>
