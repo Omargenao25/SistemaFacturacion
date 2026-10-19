@@ -28,6 +28,11 @@ namespace SistemaFacturacion.Models
         [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
         public int Stock { get; set; }
 
+        // 0 indica que no se registró garantía comercial adicional.
+        // El plazo se copia a cada detalle cuando se emite una factura.
+        [Range(0, 120, ErrorMessage = "La garantía debe estar entre 0 y 120 meses.")]
+        public int GarantiaMeses { get; set; }
+
         public bool Estado { get; set; } = true;
 
         // SQL Server actualiza automáticamente esta versión cada vez que
