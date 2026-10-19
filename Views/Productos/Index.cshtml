@@ -1,5 +1,9 @@
 @model IEnumerable<SistemaFacturacion.Models.Producto>
 @{ ViewData["Title"] = "Productos"; }
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>@mensaje</div>
+}
 <div class="page-intro">
     <div><div class="page-eyebrow">Nexora / Inventario</div><h1 class="page-title">Productos</h1><p class="page-subtitle">Controla precios, costos, existencias y disponibilidad de tus productos.</p></div>
     <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nuevo producto</a>
