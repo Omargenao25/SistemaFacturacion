@@ -20,6 +20,10 @@ namespace SistemaFacturacion.Models
 
         public int Cantidad { get; set; }
 
+        // Conserva el plazo ofrecido al comprar, aunque el producto cambie.
+        [Range(0, 120)]
+        public int GarantiaMeses { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal Precio { get; set; }
 
