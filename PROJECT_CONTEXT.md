@@ -208,6 +208,19 @@ La rama `feature/nexora-ui` contiene ahora operaciones atómicas de inventario e
 4. Provocar falta de stock en una factura de varios artículos: debe revertirse toda la venta, incluidos stock, factura, detalles y pago.
 5. Repetir flujo habitual de venta, detalle, impresión e historial después de compilar.
 
+### Edición segura de productos (19/10/2026)
+
+**Implementado en `feature/nexora-ui`, pendiente de compilar y probar localmente.**
+
+- `Models/Producto.cs` incorpora `[Timestamp] byte[] RowVersion`, un token SQL Server que cambia cada vez que se actualiza la fila. Se agregó también validación de stock no negativo.
+- `Views/Productos/Edit.cshtml` envía la versión original como campo oculto; si hubo otra venta, anulación o edición, el formulario debe recargarse antes de guardar.
+- `ProductosController.Edit POST` carga la fila actual y configura `OriginalValue` de `RowVersion` con el valor de la pantalla previa, de modo que EF Core detecte cambios concurrentes en `SaveChangesAsync`. Ya no usa `_context.Update(producto)`, que podía sobrescribir existencias.
+- Migración nueva **`20261019173000_AgregarVersionConcurrenciaProductos`** agrega columna SQL Server `rowversion` en Productos sin borrar datos. **Debe aplicarse con `Update-Database`** antes de usar esta versión del sitio.
+- Prueba sugerida: abrir Editar producto en pestaña A, vender 1 unidad en pestaña B y luego intentar guardar A con el stock anterior. Debe informar que cambió el producto, no guardar y conservar el stock descontado. Recargar A y editar de nuevo.
+- Prueba de dos ediciones simultáneas: abrir dos pestañas de Edición, guardar la primera y luego la segunda; esta última debe ser rechazada y no sobrescribir cambios.
+- No se tocó Identity ni roles de Russell; la versión SQL Server `rowversion` complementa la reserva/restitución atómicas de `FacturasController`.
+- **No se ha ejecutado compilación de .NET ni pruebas contra SQL Server desde el conector GitHub.**
+
 ## 8. Relaciones del modelo de datos
 
 ```text
