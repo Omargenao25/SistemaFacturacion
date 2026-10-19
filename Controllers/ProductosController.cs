@@ -44,8 +44,9 @@ namespace SistemaFacturacion.Controllers
         }
 
         // GET: Productos/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await CargarCategorias();
             return View();
         }
 
@@ -56,12 +57,19 @@ namespace SistemaFacturacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,Estado,IdCategoria")] Producto producto)
         {
+            if (!await _context.Categorias.AnyAsync(c => c.IdCategoria == producto.IdCategoria))
+            {
+                ModelState.AddModelError(nameof(Producto.IdCategoria), "Selecciona una categoría válida.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(producto);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCategorias(producto.IdCategoria);
             return View(producto);
         }
 
@@ -78,6 +86,8 @@ namespace SistemaFacturacion.Controllers
             {
                 return NotFound();
             }
+
+            await CargarCategorias(producto.IdCategoria);
             return View(producto);
         }
 
@@ -91,6 +101,11 @@ namespace SistemaFacturacion.Controllers
             if (id != producto.IdProducto)
             {
                 return NotFound();
+            }
+
+            if (!await _context.Categorias.AnyAsync(c => c.IdCategoria == producto.IdCategoria))
+            {
+                ModelState.AddModelError(nameof(Producto.IdCategoria), "Selecciona una categoría válida.");
             }
 
             if (ModelState.IsValid)
@@ -113,6 +128,8 @@ namespace SistemaFacturacion.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCategorias(producto.IdCategoria);
             return View(producto);
         }
 
@@ -147,6 +164,17 @@ namespace SistemaFacturacion.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task CargarCategorias(int? seleccionada = null)
+        {
+            var categorias = await _context.Categorias
+                .AsNoTracking()
+                .OrderBy(c => c.Nombre)
+                .Select(c => new { c.IdCategoria, c.Nombre })
+                .ToListAsync();
+
+            ViewBag.Categorias = new SelectList(categorias, "IdCategoria", "Nombre", seleccionada);
         }
 
         private bool ProductoExists(int id)
