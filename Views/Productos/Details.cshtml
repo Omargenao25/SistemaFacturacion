@@ -1,66 +1,58 @@
-﻿@model SistemaFacturacion.Models.Producto
-
+@model SistemaFacturacion.Models.Producto
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de producto";
 }
 
-<h1>Details</h1>
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Productos / Detalle</div>
+            <h1 class="page-title">Detalle de producto</h1>
+            <p class="page-subtitle">Consulta la información registrada en el sistema.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a productos
+        </a>
+    </div>
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-detail-title">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 class="nx-panel-title" id="nx-detail-title">@Model.Nombre</h2>
+                        <p class="nx-panel-subtitle">Información del registro</p>
+                    </div>
+                </div>
+                
+            </div>
 
-<div>
-    <h4>Producto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Codigo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Codigo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Costo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Costo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCategoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdCategoria)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdProducto">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+            
+
+            <dl class="nx-detail-grid">
+                <div class="nx-detail-row"><dt>Código / SKU</dt><dd>@Model.Codigo</dd></div>
+                    <div class="nx-detail-row"><dt>Nombre</dt><dd>@Model.Nombre</dd></div>
+                    <div class="nx-detail-row"><dt>Descripción</dt><dd>@(Model.Descripcion ?? "Sin descripción")</dd></div>
+                    <div class="nx-detail-row"><dt>Categoría</dt><dd>@(Model.Categoria?.Nombre ?? $"Categoría #{Model.IdCategoria}")</dd></div>
+                    <div class="nx-detail-row"><dt>Precio de venta</dt><dd>RD$ @Model.Precio.ToString("N2")</dd></div>
+                    <div class="nx-detail-row"><dt>Costo unitario</dt><dd>RD$ @Model.Costo.ToString("N2")</dd></div>
+                    <div class="nx-detail-row"><dt>Existencias</dt><dd>@Model.Stock</dd></div>
+                    <div class="nx-detail-row"><dt>Estado</dt><dd><span class="nx-status @(Model.Estado ? "good" : "danger")">@(Model.Estado ? "Activo" : "Inactivo")</span></dd></div>
+            </dl>
+
+            <div class="nx-detail-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary">Regresar</a>
+                <a asp-action="Edit" asp-route-id="@Model.IdProducto" class="btn btn-primary">
+                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Editar producto
+                </a>
+            </div>
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+            </span>
+            <h3>Información del registro</h3>
+            <p>Desde esta pantalla puedes revisar el registro y editarlo si necesitas actualizar sus datos.</p>
+        </aside>
+    </div>
 </div>
