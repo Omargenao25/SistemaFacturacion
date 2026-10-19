@@ -150,6 +150,11 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
+            // Previene borrados de registros con información histórica asociada.
+            ViewBag.Bloqueado = await _context.DetallesFactura
+                .AsNoTracking()
+                .AnyAsync(x => x.IdProducto == id);
+
             return View(producto);
         }
 
@@ -159,13 +164,38 @@ namespace SistemaFacturacion.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-            if (producto != null)
+
+            if (producto == null)
             {
-                _context.Productos.Remove(producto);
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // La comprobación se repite al confirmar, no solo al abrir la pantalla.
+            var tieneRelaciones = await _context.DetallesFactura
+                .AsNoTracking()
+                .AnyAsync(x => x.IdProducto == id);
+
+            if (tieneRelaciones)
+            {
+                TempData["Error"] = "Este producto aparece en facturas anteriores (incluso anuladas) y no puede eliminarse. Puedes desactivarlo desde Editar.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
+            try
+            {
+                _context.Productos.Remove(producto);
+                await _context.SaveChangesAsync();
+
+                TempData["Mensaje"] = "Producto eliminado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                // Las FK NO ACTION refuerzan el control ante relaciones nuevas
+                // o cambios concurrentes entre la consulta y el borrado.
+                TempData["Error"] = "No se pudo eliminar el registro. Puede tener información relacionada o existir una restricción de base de datos.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         private async Task CargarCategorias(int? seleccionada = null)
