@@ -25,9 +25,15 @@ namespace SistemaFacturacion.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Costo { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
         public int Stock { get; set; }
 
         public bool Estado { get; set; } = true;
+
+        // SQL Server actualiza automáticamente esta versión cada vez que
+        // cambia la fila (ventas, anulaciones y ediciones incluidas).
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         [Required]
         [ForeignKey(nameof(Categoria))]
