@@ -9,6 +9,9 @@ namespace SistemaFacturacion.Controllers
 {
     public class FacturasController : Controller
     {
+        // Política comercial interna: 7 días exactos desde la emisión.
+        private const int PlazoAnulacionDias = 7;
+
         private readonly ApplicationDbContext _context;
 
         public FacturasController(ApplicationDbContext context)
@@ -136,11 +139,13 @@ namespace SistemaFacturacion.Controllers
                 foreach (var item in productosSolicitados)
                 {
                     var producto = productos[item.IdProducto];
+                    var versionAlCotizar = producto.RowVersion;
 
                     var filasActualizadas = await _context.Productos
                         .Where(p =>
                             p.IdProducto == item.IdProducto &&
                             p.Estado &&
+                            p.RowVersion == versionAlCotizar &&
                             p.Stock >= item.Cantidad)
                         .ExecuteUpdateAsync(cambios => cambios
                             .SetProperty(p => p.Stock, p => p.Stock - item.Cantidad));
@@ -186,6 +191,7 @@ namespace SistemaFacturacion.Controllers
                         IdFactura = factura.IdFactura,
                         IdProducto = producto.IdProducto,
                         Cantidad = item.Cantidad,
+                        GarantiaMeses = producto.GarantiaMeses,
                         Precio = producto.Precio,
                         CostoUnitario = producto.Costo,
                         Subtotal = producto.Precio * item.Cantidad
@@ -343,6 +349,9 @@ namespace SistemaFacturacion.Controllers
                 .FirstOrDefaultAsync(p => p.IdFactura == id);
 
             ViewBag.Pago = pago;
+            ViewBag.FechaLimiteAnulacion = factura.Fecha.AddDays(PlazoAnulacionDias);
+            ViewBag.PuedeAnular = factura.Estado == "Emitida" &&
+                DateTime.Now <= factura.Fecha.AddDays(PlazoAnulacionDias);
 
             return View(factura);
         }
@@ -367,6 +376,17 @@ namespace SistemaFacturacion.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            // La restricción se comprueba en el servidor, aunque el usuario
+            // envíe el POST directamente y no desde el botón de la vista.
+            var ahora = DateTime.Now;
+            if (ahora > factura.Fecha.AddDays(PlazoAnulacionDias))
+            {
+                TempData["Error"] =
+                    "Se agotó el plazo interno de 7 días para anular esta factura. " +
+                    "Las devoluciones o garantías deben gestionarse por separado.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             await using var transaccion =
                 await _context.Database.BeginTransactionAsync();
 
@@ -374,15 +394,23 @@ namespace SistemaFacturacion.Controllers
             {
                 // Solo una solicitud puede cambiar esta factura de Emitida
                 // a Anulada. Las siguientes no devolverán el stock otra vez.
+                // Revalidación atómica: dos solicitudes no pueden anular la
+                // misma factura, ni saltarse el plazo con un POST manual.
+                var fechaLimiteInferior = DateTime.Now.AddDays(-PlazoAnulacionDias);
                 var filasActualizadas = await _context.Facturas
-                    .Where(f => f.IdFactura == id && f.Estado == "Emitida")
+                    .Where(f =>
+                        f.IdFactura == id &&
+                        f.Estado == "Emitida" &&
+                        f.Fecha >= fechaLimiteInferior)
                     .ExecuteUpdateAsync(cambios => cambios
                         .SetProperty(f => f.Estado, "Anulada"));
 
                 if (filasActualizadas != 1)
                 {
                     await transaccion.RollbackAsync();
-                    TempData["Mensaje"] = "La factura ya fue anulada o no está en estado Emitida.";
+                    TempData["Error"] =
+                        "La factura ya fue anulada o superó los 7 días permitidos. " +
+                        "No se modificó el inventario.";
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
