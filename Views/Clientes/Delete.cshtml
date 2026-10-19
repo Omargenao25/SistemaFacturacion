@@ -4,6 +4,19 @@
 }
 
 <div class="nx-crud-page">
+    @if (TempData["Error"] is string mensajeError)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>@mensajeError
+        </div>
+    }
+    @if (ViewBag.Bloqueado == true)
+    {
+        <div class="alert alert-warning" role="status">
+            <strong>Este cliente no se puede eliminar porque tiene facturas asociadas.</strong>
+            <div>Puedes editar sus datos, pero debes conservarlo para que sus facturas sigan disponibles.</div>
+        </div>
+    }
     <div class="page-intro">
         <div>
             <div class="page-eyebrow">Nexora / Clientes / Eliminar</div>
@@ -46,12 +59,21 @@
 
             <div class="nx-detail-actions">
                 <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-                <form asp-action="Delete" asp-route-id="@Model.IdCliente" method="post" class="nx-delete-form">
+                @if (ViewBag.Bloqueado == true)
+                {
+                    <span class="nx-delete-blocked">
+                        <i class="bi bi-shield-lock me-1" aria-hidden="true"></i> Eliminación no permitida
+                    </span>
+                }
+                else
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.IdCliente" method="post" class="nx-delete-form">
                     <input type="hidden" asp-for="IdCliente" />
                     <button type="submit" class="btn btn-danger" onclick="return confirm('¿Confirmas la eliminación de este registro?');">
                         <i class="bi bi-trash3 me-1" aria-hidden="true"></i> Confirmar eliminación
                     </button>
                 </form>
+                }
             </div>
         </section>
         <aside class="nx-crud-sidebar">
