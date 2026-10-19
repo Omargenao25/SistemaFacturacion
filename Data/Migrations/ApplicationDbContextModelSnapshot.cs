@@ -497,7 +497,7 @@ namespace SistemaFacturacion.Data.Migrations
                     b.HasOne("SistemaFacturacion.Models.Producto", "Producto")
                         .WithMany()
                         .HasForeignKey("IdProducto")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Factura");
@@ -510,7 +510,7 @@ namespace SistemaFacturacion.Data.Migrations
                     b.HasOne("SistemaFacturacion.Models.Cliente", "Cliente")
                         .WithMany()
                         .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Cliente");
@@ -532,7 +532,7 @@ namespace SistemaFacturacion.Data.Migrations
                     b.HasOne("SistemaFacturacion.Models.Categoria", "Categoria")
                         .WithMany()
                         .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Categoria");
