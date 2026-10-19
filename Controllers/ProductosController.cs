@@ -34,6 +34,7 @@ namespace SistemaFacturacion.Controllers
             }
 
             var producto = await _context.Productos
+                .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(m => m.IdProducto == id);
             if (producto == null)
             {
@@ -142,6 +143,7 @@ namespace SistemaFacturacion.Controllers
             }
 
             var producto = await _context.Productos
+                .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(m => m.IdProducto == id);
             if (producto == null)
             {
