@@ -1,5 +1,9 @@
 @model IEnumerable<SistemaFacturacion.Models.Cliente>
 @{ ViewData["Title"] = "Clientes"; }
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>@mensaje</div>
+}
 <div class="page-intro">
     <div><div class="page-eyebrow">Nexora / Gestión</div><h1 class="page-title">Clientes</h1><p class="page-subtitle">Consulta y administra la información de tus clientes.</p></div>
     <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Nuevo cliente</a>
