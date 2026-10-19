@@ -37,6 +37,7 @@
                     <div class="nx-detail-row"><dt>Precio de venta</dt><dd>RD$ @Model.Precio.ToString("N2")</dd></div>
                     <div class="nx-detail-row"><dt>Costo unitario</dt><dd>RD$ @Model.Costo.ToString("N2")</dd></div>
                     <div class="nx-detail-row"><dt>Existencias</dt><dd>@Model.Stock</dd></div>
+                    <div class="nx-detail-row"><dt>Garantía comercial</dt><dd>@(Model.GarantiaMeses > 0 ? $"{Model.GarantiaMeses} meses" : "No registrada")</dd></div>
                     <div class="nx-detail-row"><dt>Estado</dt><dd><span class="nx-status @(Model.Estado ? "good" : "danger")">@(Model.Estado ? "Activo" : "Inactivo")</span></dd></div>
             </dl>
 
