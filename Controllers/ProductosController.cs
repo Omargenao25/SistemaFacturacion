@@ -93,15 +93,20 @@ namespace SistemaFacturacion.Controllers
         }
 
         // POST: Productos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,Estado,IdCategoria")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,Codigo,Nombre,Descripcion,Precio,Costo,Stock,Estado,IdCategoria,RowVersion")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
                 return NotFound();
+            }
+
+            if (producto.RowVersion == null || producto.RowVersion.Length != 8)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se pudo verificar la versión del producto. Recarga la página antes de guardar.");
             }
 
             if (!await _context.Categorias.AnyAsync(c => c.IdCategoria == producto.IdCategoria))
@@ -111,23 +116,47 @@ namespace SistemaFacturacion.Controllers
 
             if (ModelState.IsValid)
             {
+                var actual = await _context.Productos.FindAsync(id);
+
+                if (actual == null)
+                {
+                    return NotFound();
+                }
+
+                // Exigimos que SQL Server conserve exactamente la versión
+                // que se cargó al abrir el formulario de edición.
+                _context.Entry(actual).Property(p => p.RowVersion).OriginalValue =
+                    producto.RowVersion;
+
+                // Actualizar únicamente las propiedades del catálogo.
+                // No usar _context.Update(producto): pisaría existencias
+                // calculadas por ventas recientes sin comprobar la versión.
+                actual.Codigo = producto.Codigo;
+                actual.Nombre = producto.Nombre;
+                actual.Descripcion = producto.Descripcion;
+                actual.IdCategoria = producto.IdCategoria;
+                actual.Precio = producto.Precio;
+                actual.Costo = producto.Costo;
+                actual.Stock = producto.Stock;
+                actual.Estado = producto.Estado;
+
                 try
                 {
-                    _context.Update(producto);
                     await _context.SaveChangesAsync();
+                    TempData["Mensaje"] = "Producto actualizado correctamente.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductoExists(producto.IdProducto))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // Una venta, anulación u otra edición cambió RowVersion.
+                    // No reintentar automáticamente ni sobrescribir el inventario.
+                    _context.Entry(actual).State = EntityState.Detached;
+                    ModelState.AddModelError(
+                        "",
+                        "Este producto cambió mientras lo editabas (puede haber una venta o ajuste " +
+                        "de inventario). No se guardaron tus cambios. Recarga la página, revisa " +
+                        "las existencias actuales y vuelve a editar.");
                 }
-                return RedirectToAction(nameof(Index));
             }
 
             await CargarCategorias(producto.IdCategoria);
