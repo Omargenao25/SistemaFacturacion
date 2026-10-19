@@ -131,6 +131,11 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
+            // Previene borrados de registros con información histórica asociada.
+            ViewBag.Bloqueado = await _context.Productos
+                .AsNoTracking()
+                .AnyAsync(x => x.IdCategoria == id);
+
             return View(categoria);
         }
 
@@ -140,13 +145,38 @@ namespace SistemaFacturacion.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
-            if (categoria != null)
+
+            if (categoria == null)
             {
-                _context.Categorias.Remove(categoria);
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // La comprobación se repite al confirmar, no solo al abrir la pantalla.
+            var tieneRelaciones = await _context.Productos
+                .AsNoTracking()
+                .AnyAsync(x => x.IdCategoria == id);
+
+            if (tieneRelaciones)
+            {
+                TempData["Error"] = "Esta categoría tiene productos asociados. Reasigna o retira los productos antes de eliminarla.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
+            try
+            {
+                _context.Categorias.Remove(categoria);
+                await _context.SaveChangesAsync();
+
+                TempData["Mensaje"] = "Categoría eliminada correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                // Las FK NO ACTION refuerzan el control ante relaciones nuevas
+                // o cambios concurrentes entre la consulta y el borrado.
+                TempData["Error"] = "No se pudo eliminar el registro. Puede tener información relacionada o existir una restricción de base de datos.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         private bool CategoriaExists(int id)
