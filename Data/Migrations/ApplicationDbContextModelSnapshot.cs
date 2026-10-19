@@ -295,6 +295,9 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
+                    b.Property<int>("GarantiaMeses")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("CostoUnitario")
                         .HasColumnType("decimal(18,2)");
 
@@ -413,6 +416,9 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.Property<bool>("Estado")
                         .HasColumnType("bit");
+
+                    b.Property<int>("GarantiaMeses")
+                        .HasColumnType("int");
 
                     b.Property<int>("IdCategoria")
                         .HasColumnType("int");
