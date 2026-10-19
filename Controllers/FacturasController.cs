@@ -56,6 +56,8 @@ namespace SistemaFacturacion.Controllers
                     IdProducto = x.Key,
                     Cantidad = x.Sum(y => y.Cantidad)
                 })
+                // Orden fijo para disminuir conflictos entre ventas concurrentes.
+                .OrderBy(x => x.IdProducto)
                 .ToList();
 
             var idsProductos = productosSolicitados
@@ -63,6 +65,7 @@ namespace SistemaFacturacion.Controllers
                 .ToList();
 
             var productos = await _context.Productos
+                .AsNoTracking()
                 .Where(p => idsProductos.Contains(p.IdProducto))
                 .ToDictionaryAsync(p => p.IdProducto);
 
@@ -127,6 +130,35 @@ namespace SistemaFacturacion.Controllers
 
             try
             {
+                // Reservar existencias de manera atómica dentro de la transacción.
+                // El WHERE se vuelve a evaluar en SQL Server al efectuar cada UPDATE:
+                // dos ventas simultáneas no pueden descontar la misma unidad.
+                foreach (var item in productosSolicitados)
+                {
+                    var producto = productos[item.IdProducto];
+
+                    var filasActualizadas = await _context.Productos
+                        .Where(p =>
+                            p.IdProducto == item.IdProducto &&
+                            p.Estado &&
+                            p.Stock >= item.Cantidad)
+                        .ExecuteUpdateAsync(cambios => cambios
+                            .SetProperty(p => p.Stock, p => p.Stock - item.Cantidad));
+
+                    if (filasActualizadas != 1)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"El inventario de {producto.Nombre} cambió mientras se procesaba la venta. " +
+                            "No se generó la factura. Verifica las existencias e inténtalo de nuevo.");
+
+                        await CargarListas();
+                        return View(modelo);
+                    }
+                }
+
                 var factura = new Factura
                 {
                     NumeroFactura =
@@ -160,9 +192,6 @@ namespace SistemaFacturacion.Controllers
                     };
 
                     _context.DetallesFactura.Add(detalle);
-
-                    // Descontar inventario
-                    producto.Stock -= item.Cantidad;
                 }
 
                 var pago = new Pago
@@ -323,8 +352,8 @@ namespace SistemaFacturacion.Controllers
         public async Task<IActionResult> Anular(int id)
         {
             var factura = await _context.Facturas
+                .AsNoTracking()
                 .Include(f => f.Detalles)
-                .ThenInclude(d => d.Producto)
                 .FirstOrDefaultAsync(f => f.IdFactura == id);
 
             if (factura == null)
@@ -335,11 +364,7 @@ namespace SistemaFacturacion.Controllers
             if (factura.Estado == "Anulada")
             {
                 TempData["Mensaje"] = "La factura ya se encuentra anulada.";
-
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id = factura.IdFactura }
-                );
+                return RedirectToAction(nameof(Details), new { id });
             }
 
             await using var transaccion =
@@ -347,29 +372,42 @@ namespace SistemaFacturacion.Controllers
 
             try
             {
-                // Devolver los productos al inventario
-                foreach (var detalle in factura.Detalles)
+                // Solo una solicitud puede cambiar esta factura de Emitida
+                // a Anulada. Las siguientes no devolverán el stock otra vez.
+                var filasActualizadas = await _context.Facturas
+                    .Where(f => f.IdFactura == id && f.Estado == "Emitida")
+                    .ExecuteUpdateAsync(cambios => cambios
+                        .SetProperty(f => f.Estado, "Anulada"));
+
+                if (filasActualizadas != 1)
                 {
-                    if (detalle.Producto != null)
-                    {
-                        detalle.Producto.Stock += detalle.Cantidad;
-                    }
+                    await transaccion.RollbackAsync();
+                    TempData["Mensaje"] = "La factura ya fue anulada o no está en estado Emitida.";
+                    return RedirectToAction(nameof(Details), new { id });
                 }
 
-                // Cambiar estado
-                factura.Estado = "Anulada";
+                // Incrementos atómicos que no sobrescriben ventas simultáneas.
+                foreach (var detalle in factura.Detalles)
+                {
+                    var productosActualizados = await _context.Productos
+                        .Where(p => p.IdProducto == detalle.IdProducto)
+                        .ExecuteUpdateAsync(cambios => cambios
+                            .SetProperty(p => p.Stock, p => p.Stock + detalle.Cantidad));
 
-                await _context.SaveChangesAsync();
+                    if (productosActualizados != 1)
+                    {
+                        throw new InvalidOperationException(
+                            "No se pudo recuperar un producto vinculado a la factura. " +
+                            "La anulación completa fue revertida.");
+                    }
+                }
 
                 await transaccion.CommitAsync();
 
                 TempData["Mensaje"] =
                     "La factura fue anulada correctamente y el inventario fue actualizado.";
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id = factura.IdFactura }
-                );
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch
             {
