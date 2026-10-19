@@ -190,6 +190,24 @@ git pull origin feature/nexora-ui
 - Mantener la etiqueta `comprobante interno no fiscal` y la nota de que el margen bruto del reporte es estimado **antes de descuentos y gastos**.
 - Revisar reglas de negocio: cliente y productos válidos, precio con/sin impuestos, descuentos, precisión monetaria y ventas simultáneas sobre stock.
 
+### Protección ante ventas y anulaciones simultáneas (18/10/2026)
+
+La rama `feature/nexora-ui` contiene ahora operaciones atómicas de inventario en `FacturasController`:
+
+- En `Create`, cada línea reserva existencias mediante `ExecuteUpdateAsync` con `Stock >= Cantidad`, `Estado` activo y transacción SQL. Si no actualiza una fila, se hace `Rollback` y se muestra un error sin registrar factura. Los productos se procesan en orden de ID para reducir interbloqueos.
+- En `Anular`, solo una solicitud puede pasar de `Emitida` a `Anulada` mediante `ExecuteUpdateAsync`; después se restituye el inventario mediante sumas atómicas en la misma transacción. Evita doble reposición por dos solicitudes concurrentes.
+- **No requiere otra migración de EF**, pero para probar con seguridad sigue pendiente confirmar que se aplicó la migración anterior `20261018220500_ProtegerEliminacionesRelacionadas` mediante `Update-Database`.
+- **Aún no probado en Visual Studio**: el cambio pasó revisión estática, falta compilación y casos de carrera reales.
+- **Riesgo pendiente:** la edición manual de stock de `ProductosController.Edit` aún puede sobrescribir cambios concurrentes si se guarda un formulario antiguo. Evaluar control de concurrencia o flujo separado de ajustes de inventario.
+- No se modificaron roles, Identity o módulos asignados a Russell.
+
+**Escenarios de prueba manual con datos ficticios:**
+1. Producto con 1 unidad; lanzar dos ventas casi simultáneas de 1 unidad: debe quedar solo una factura emitida y stock 0.
+2. Producto con 5 unidades; lanzar dos ventas de 2: deben emitirse ambas, stock 1.
+3. Anular una factura desde dos pestañas casi a la vez: debe restituirse el stock exactamente una vez.
+4. Provocar falta de stock en una factura de varios artículos: debe revertirse toda la venta, incluidos stock, factura, detalles y pago.
+5. Repetir flujo habitual de venta, detalle, impresión e historial después de compilar.
+
 ## 8. Relaciones del modelo de datos
 
 ```text
