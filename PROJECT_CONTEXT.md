@@ -177,9 +177,12 @@ git pull origin feature/nexora-ui
 
 **Pendientes inmediatos:** actualizar la rama local y compilar; probar filtros de Historial (estado, fecha, búsqueda), períodos y totales de Reportes, versión móvil y número de páginas al imprimir. No fusionar el PR sin validar.
 
+**Actualización 18/10/2026:** se rediseñaron y subieron los seis formularios `Create`/`Edit` de Clientes, Categorías y Productos. También se reemplazó el ID manual de categoría de Productos por un selector con categorías existentes; `ProductosController` incluye ahora carga del selector y validación de categoría válida, **pendiente de compilar/probar**. Este controlador podría coincidir con cambios de autorización de Russell, por lo que debe revisarse al integrar.
+
 **Próximas mejoras propuestas:**
 
-- Unificar formularios Crear/Editar/Eliminar de clientes, categorías y productos.
+- Revisar la compilación y crear/editar registros en las tres secciones; validar el selector de categoría y los mensajes de error.
+- Modernizar las vistas de Detalles/Eliminar de clientes, categorías y productos, respetando sus operaciones existentes.
 - Ajustar visualmente Historial/Reportes tras las pruebas de Omar; resolver errores sin tocar módulos de Russell.
 - Mantener la etiqueta `comprobante interno no fiscal` y la nota de que el margen bruto del reporte es estimado **antes de descuentos y gastos**.
 - Revisar reglas de negocio: cliente y productos válidos, precio con/sin impuestos, descuentos, precisión monetaria y ventas simultáneas sobre stock.
