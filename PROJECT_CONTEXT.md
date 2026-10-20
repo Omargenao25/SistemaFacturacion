@@ -235,6 +235,22 @@ La rama `feature/nexora-ui` contiene ahora operaciones atómicas de inventario e
 - **Pruebas pendientes:** crear producto con 6, 12 y 24 meses; vender y validar comprobante/vencimiento; cambiar garantía en catálogo y reimprimir factura anterior (debe conservar la original); revisar factura emitida hace menos/más de 7 días; intentar anular por POST fuera de plazo; comprobar anulación dentro del plazo y devolución única del stock; comprobar reporte, impresión y registro histórico.
 - Mantener a Russell informado antes del merge: no se editaron autenticación o roles. El PR #1 sigue en borrador.
 
+### Atención posventa (20/10/2026; rama `feature/nexora-ui`)
+
+**Implementación inicial subida a la rama, pendiente de compilar, migrar y probar localmente.**
+
+- Nuevo `CasoPosventa`: cada caso se vincula a `DetalleFactura` y registra tipo `Garantia` o `Devolucion`, cantidad, motivo, estado, fechas, última resolución y token `RowVersion`.
+- `PosventaController`: `Index` con filtros, `Create` GET/POST, `Details`, `CambiarEstado` POST. Antiforgery en POST; reglas de transición `Abierto → EnRevision → Resuelto` o `Rechazado`. Estados cerrados no se reabren en esta versión.
+- Registro de casos **sin** modificar facturas, pagos o stock y sin implementar reembolsos, entregas físicas, reparaciones o notas de crédito. `Resuelto` es cierre administrativo.
+- Se bloquea la creación para facturas **anuladas**. Para las emitidas se admiten solicitudes incluso si pasaron 7 días o expiró la garantía comercial, para no bloquear revisiones legales; ello no significa aprobación.
+- Validación de cantidades: las devoluciones abiertas/en revisión/resueltas no pueden superar la cantidad vendida; las garantías contabilizan las solicitudes abiertas o en revisión. La creación usa transacción SQL `Serializable` para reducir carreras y un índice por `IdDetalle`, `Tipo`, `Estado`.
+- Estado protegido por `RowVersion` para evitar que dos operadores sobrescriban actualizaciones concurrentes.
+- Vistas `Views/Posventa/Create.cshtml`, `Index.cshtml`, `Details.cshtml`; acceso desde el comprobante por cada línea y desde menú lateral.
+- **Migración:** `20261020234000_CrearModuloPosventa` incluye `CasosPosventa`, FK `DetalleFactura` con `NO ACTION`, índice y rowversion; modelo, DbContext, diseñador y snapshot alineados. **Aplicar con `Update-Database`** tras actualización y respaldo (no recrear con `Add-Migration`).
+- Lista de pruebas en `POSVENTA_TEST_PLAN.md` dentro de la rama. No se ha compilado ni ejecutado en el entorno de la usuaria/o.
+- **Pendiente crítico antes de producción**: integrar y exigir permisos del módulo de Russell para acceder/registrar/cambiar estado. Actualmente no se añadieron atributos de autorización a estos endpoints, al igual que módulos heredados.
+- **Otros pendientes**: motor de reembolsos, ajustes de inventario condicionados al estado físico, notas de crédito y auditoría por usuario.
+
 ## 8. Relaciones del modelo de datos
 
 ```text
