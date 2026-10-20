@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace SistemaFacturacion.Models.SaaS
@@ -10,13 +9,11 @@ namespace SistemaFacturacion.Models.SaaS
     {
         public Guid IdEmpresa { get; set; }
 
-        [ForeignKey(nameof(Empresa))]
         public Empresa? Empresa { get; set; }
 
         [Required]
         public string UserId { get; set; } = string.Empty;
 
-        [ForeignKey(nameof(Usuario))]
         public IdentityUser? Usuario { get; set; }
 
         [Required]
