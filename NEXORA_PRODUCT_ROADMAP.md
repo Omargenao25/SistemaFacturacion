@@ -2,7 +2,9 @@
 
 **Estado:** diagnóstico inicial del código en `feature/nexora-ui`, 19/10/2026.  
 **Tecnología actual:** ASP.NET Core MVC .NET 8, EF Core, SQL Server, ASP.NET Identity.  
-**Objetivo:** evolucionar de demostración universitaria a un sistema comercial **seguro, auditable, automatizable y desplegable**, primero en un piloto controlado.  
+**Objetivo:** evolucionar de demostración universitaria a **SaaS multiempresa** (empresas independientes, cada una con sus datos, usuarios y permisos), seguro, auditable, automatizable y desplegable; primero en un piloto controlado.
+
+**Decisión de producto confirmada 19/10/2026:** Nexora será **SaaS**. Consultar [Arquitectura SaaS](docs/ARQUITECTURA_SAAS.md) y [Módulo Empresas y equipos](docs/MODULO_EMPRESAS_Y_EQUIPOS.md). Estos documentos son diseño, **no funcionalidades activadas**. La migración y aislamiento son requisitos bloqueantes para registrar nuevas empresas.  
 **Importante:** esta es una hoja de ruta; **los módulos indicados como pendientes no están implementados ni probados**.
 
 ## 0. Evidencia de lo existente
@@ -30,6 +32,16 @@
 8. No hay proyecto de pruebas ni carpeta de workflows de CI observados en la raíz de esta rama. Faltan pruebas automatizadas y pipeline.
 9. El módulo de posventa tiene estados, pero no una bitácora inmutable por transición, operador, motivo y fecha.
 10. Comprobante actual es **interno no fiscal**. No se debe representar como e-CF/NCF válido sin integración y requisitos DGII.
+
+## Prioridad previa: aislamiento multiempresa + permisos
+
+Antes de admitir a cualquier segunda empresa, implementar y probar:
+- `Empresa`, `EmpresaUsuario`, resolución de empresa autenticada en el servidor y permisos por empresa.
+- `EmpresaId` obligatorio en todas las entidades comerciales, filtros globales EF, escrituras protegidas, FKs compuestas para evitar referencias entre empresas.
+- Migración segura de datos actuales a `EmpresaDemo` con respaldo, conteos e integridad; pruebas A/B.
+- Coordinación con Russell: Administrador/Cajero deben ser roles por empresa; el perfil de propietario de Nexora y el propietario de tienda son diferentes.
+- Publicar la plataforma SaaS **solo después** de verificar autorización en cada controlador, informe, comprobante, operación de stock, PDF y trabajo automático.
+- Antes del primer piloto público: plan de actualización desde .NET 8 a .NET 10 LTS. Microsoft fija el fin de soporte de .NET 8 el 10/11/2026 (https://devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support/).
 
 ## Prioridades: primero integridad, después automatización
 
@@ -128,7 +140,7 @@ Toda funcionalidad debe incluir:
 
 ## Decisiones pendientes del equipo
 
-- **Modelo de negocio inicial:** tienda única, cadena de tiendas, o SaaS para distintas empresas.
+- **Modelo de negocio inicial (DECIDIDO):** SaaS multiempresa. Base SQL Server compartida y aislamiento por `EmpresaId` para MVP, con diseño para escalar a bases aisladas si es necesario.
 - **Primer sector piloto:** tienda de electrodomésticos, PyME comercial general, o mixto.
 - **Facturación fiscal:** desarrollo propio DGII, proveedor certificado o piloto interno sin emisión fiscal.
 - **Canal de despliegue:** PC local, LAN de negocio, web en nube, o híbrido.
