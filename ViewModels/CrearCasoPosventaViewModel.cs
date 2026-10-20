@@ -21,8 +21,9 @@ namespace SistemaFacturacion.ViewModels
         public string Motivo { get; set; } = string.Empty;
 
         // Campos informativos obtenidos de la base, nunca usados para autorizar el POST.
-        public string NumeroFactura { get; set; } = string.Empty;
-        public string NombreProducto { get; set; } = string.Empty;
+        public int IdFactura { get; set; }
+        public string? NumeroFactura { get; set; }
+        public string? NombreProducto { get; set; }
         public DateTime FechaVenta { get; set; }
         public int CantidadVendida { get; set; }
         public int GarantiaMeses { get; set; }
