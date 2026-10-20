@@ -221,6 +221,7 @@ namespace SistemaFacturacion.Controllers
         private static void CargarInformacion(
             CrearCasoPosventaViewModel modelo, DetalleFactura detalle)
         {
+            modelo.IdFactura = detalle.IdFactura;
             modelo.NumeroFactura = detalle.Factura?.NumeroFactura ?? "";
             modelo.NombreProducto = detalle.Producto?.Nombre ?? "Producto sin nombre";
             modelo.FechaVenta = detalle.Factura?.Fecha ?? DateTime.MinValue;
