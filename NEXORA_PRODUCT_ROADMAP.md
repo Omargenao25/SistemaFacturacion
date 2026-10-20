@@ -43,6 +43,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Publicar la plataforma SaaS **solo después** de verificar autorización en cada controlador, informe, comprobante, operación de stock, PDF y trabajo automático.
 - Antes del primer piloto público: plan de actualización desde .NET 8 a .NET 10 LTS. Microsoft fija el fin de soporte de .NET 8 el 10/11/2026 (https://devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support/).
 
+## Inicio de implementación SaaS — Fase 1A
+
+**Primera entrega subida a `feature/nexora-ui`; pendiente de compilación y validación local:**
+
+- `Empresa` y `EmpresaUsuario` en `Models/SaaS/`.
+- Migración **aditiva** `20261021001000_CrearEmpresasYMembresias`: crea únicamente las tablas `Empresas` y `EmpresaUsuarios`, sin alterar productos, facturas ni usuarios Identity existentes.
+- Clave única de slug, FK de membresía a `Empresa` y `AspNetUsers`, PK compuesta `(IdEmpresa, UserId)`, restricciones CHECK sobre estados y roles, concurrencia `rowversion`.
+- Empresa nueva con estado `PendienteConfiguracion`; membresía `Suspendido` por defecto, para evitar privilegios accidentales.
+- **No se activaron** pantallas multiempresa, `EmpresaId` en datos comerciales, invitaciones, alta pública ni acceso tenant-aware: toda operación continúa siendo mononegocio en esta rama y **NO es apta todavía para múltiples clientes reales**.
+- Procedimiento y comprobaciones en [`docs/FASE_1A_PRUEBAS.md`](docs/FASE_1A_PRUEBAS.md). Los tests se ejecutarán desde Visual Studio y SQL Server del usuario.
+- Coordinar los roles globales de Russell con la política de membresías por empresa antes de cualquier autorización o aprovisionamiento.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
