@@ -936,3 +936,18 @@ body { color: var(--nx-ink); }
     .nx-receipt-warranty.is-unspecified { color:#606f82!important; }
     .nx-receipt-expired { display:none!important; }
 }
+
+
+/* NEXORA / Atención posventa */
+.nx-receipt-after-sale {
+    display:inline-flex; align-items:center; gap:2px; margin-top:8px;
+    padding:6px 9px; border:1px solid #c8dafa; border-radius:8px;
+    color:#2454af; background:#f1f6ff; font-size:.73rem;
+    font-weight:750; text-decoration:none; line-height:1.35;
+}
+.nx-receipt-after-sale:hover { color:#174491; background:#e7f0ff; }
+.nx-case-actions {
+    padding:24px 27px; border-top:1px solid #edf0f6;
+}
+.nx-case-actions textarea { max-width:100%; }
+@media print { .nx-receipt-after-sale, .nx-case-actions { display:none!important; } }
