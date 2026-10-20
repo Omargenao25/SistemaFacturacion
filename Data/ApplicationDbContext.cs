@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Models;
+using SistemaFacturacion.Models.SaaS;
 
 namespace SistemaFacturacion.Data
 {
@@ -18,6 +19,10 @@ namespace SistemaFacturacion.Data
         public DbSet<DetalleFactura> DetallesFactura { get; set; }
         public DbSet<Pago> Pagos { get; set; }
         public DbSet<CasoPosventa> CasosPosventa { get; set; }
+
+        // Plataforma SaaS: aún no se utiliza para separar los datos comerciales.
+        public DbSet<Empresa> Empresas { get; set; }
+        public DbSet<EmpresaUsuario> EmpresaUsuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +58,39 @@ namespace SistemaFacturacion.Data
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
                 .HasIndex(c => new { c.IdDetalle, c.Tipo, c.Estado });
+
+            // Registros globales de la plataforma. No activan acceso a datos
+            // comerciales hasta completar el aislamiento por tenant.
+            modelBuilder.Entity<Empresa>(entidad =>
+            {
+                entidad.ToTable("Empresas", tabla =>
+                    tabla.HasCheckConstraint("CK_Empresas_Estado",
+                        "[Estado] IN (N'PendienteConfiguracion', N'Activa', N'Suspendida', N'Archivada')"));
+                entidad.HasKey(e => e.IdEmpresa);
+                entidad.Property(e => e.IdEmpresa).ValueGeneratedNever();
+                entidad.HasIndex(e => e.SlugNormalizado).IsUnique();
+            });
+
+            modelBuilder.Entity<EmpresaUsuario>(entidad =>
+            {
+                entidad.ToTable("EmpresaUsuarios", tabla =>
+                {
+                    tabla.HasCheckConstraint("CK_EmpresaUsuarios_Estado",
+                        "[Estado] IN (N'Invitado', N'Activo', N'Suspendido')");
+                    tabla.HasCheckConstraint("CK_EmpresaUsuarios_Rol",
+                        "[Rol] IN (N'Propietario', N'Administrador', N'Cajero')");
+                });
+                entidad.HasKey(m => new { m.IdEmpresa, m.UserId });
+                entidad.HasOne(m => m.Empresa)
+                    .WithMany()
+                    .HasForeignKey(m => m.IdEmpresa)
+                    .OnDelete(DeleteBehavior.NoAction);
+                entidad.HasOne(m => m.Usuario)
+                    .WithMany()
+                    .HasForeignKey(m => m.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                entidad.HasIndex(m => m.UserId);
+            });
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
         }
