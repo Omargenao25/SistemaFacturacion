@@ -20,6 +20,9 @@
             <a asp-action="Index" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial
             </a>
+            <a asp-controller="Posventa" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> Posventa
+            </a>
             <button type="button" class="btn btn-primary" onclick="window.print()">
                 <i class="bi bi-printer me-1" aria-hidden="true"></i> Imprimir
             </button>
@@ -153,6 +156,15 @@
                                                 <i class="bi bi-info-circle" aria-hidden="true"></i>
                                                 Garantía comercial no registrada en esta factura
                                             </span>
+                                        }
+                                        @if (!anulada)
+                                        {
+                                            <a asp-controller="Posventa" asp-action="Create"
+                                               asp-route-detalleId="@detalle.IdDetalle"
+                                               class="nx-receipt-after-sale no-print">
+                                                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>
+                                                Solicitar devolución o garantía
+                                            </a>
                                         }
                                     </td>
                                     <td class="text-center nx-receipt-money">@detalle.Cantidad</td>
