@@ -55,6 +55,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Procedimiento y comprobaciones en [`docs/FASE_1A_PRUEBAS.md`](docs/FASE_1A_PRUEBAS.md). Los tests se ejecutarán desde Visual Studio y SQL Server del usuario.
 - Coordinar los roles globales de Russell con la política de membresías por empresa antes de cualquier autorización o aprovisionamiento.
 
+## Fase 1B-1 implementada en rama de desarrollo: etiquetado comercial, todavía NO aislamiento
+
+**Pendiente de compilación y migración local** `20261021003000_PrepararDatosComercialesPorEmpresa`.
+
+- Agrega `IdEmpresa` obligatorio con índice/FK a la empresa en `Clientes`, `Categorias`, `Productos`, `Facturas`, `DetallesFactura`, `Pagos` y `CasosPosventa`.
+- Migra registros anteriores a un **Espacio inicial de compatibilidad**, ID fijo `09d17ec1-956c-4c6e-85b3-317c7cce4e01` y slug `nexora-legado` (estado `PendienteConfiguracion`). La migración **falla** si ya existe otra empresa en la base.
+- Mantiene un **valor por defecto temporal** en SQL Server/EF para las operaciones comerciales aún mononegocio. **No aceptar ninguna segunda empresa**, ni usuarios externos, hasta retirar dicho default y proteger toda lectura, escritura, SQL masivo, informes y relaciones.
+- Mantiene la operación de facturación existente; no crea cuentas/roles y no edita el trabajo de Russell.
+- Revisión estática de 7 columnas/FK/índices y diseñador/snapshot completada; **no se ejecutó `dotnet build` ni SQL Server** en esta sesión.
+- Manual de respaldo, pruebas y SQL: [`docs/FASE_1B_1_PRUEBAS.md`](docs/FASE_1B_1_PRUEBAS.md).
+- **Fase 1B-2 pendiente:** autenticación + `ITenantContext`, filtro por empresa en **todos** los controladores/reportes e IDOR tests, validación de escritura, retirada de default temporal, claves foráneas compuestas, índice único por empresa y revisión de permisos Russell.
+- **Fase 1C bloqueada:** no activar alta de empresas, invitaciones ni plan de suscripción antes de superar 1B-2.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
