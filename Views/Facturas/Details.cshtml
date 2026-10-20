@@ -125,7 +125,7 @@
                     <table class="table nx-receipt-table">
                         <thead>
                             <tr>
-                                <th scope="col">Descripción</th>
+                                <th scope="col">Producto y garantía</th>
                                 <th scope="col" class="text-center">Cant.</th>
                                 <th scope="col" class="text-end">Precio unitario</th>
                                 <th scope="col" class="text-end">Importe</th>
@@ -139,10 +139,19 @@
                                         @(detalle.Producto?.Nombre ?? "Producto no disponible")
                                         @if (detalle.GarantiaMeses > 0)
                                         {
-                                            <span class="nx-receipt-warranty">
+                                            <span class="nx-receipt-warranty is-covered">
                                                 <i class="bi bi-shield-check" aria-hidden="true"></i>
-                                                Garantía comercial: @detalle.GarantiaMeses meses
-                                                · vence @Model.Fecha.AddMonths(detalle.GarantiaMeses).ToString("dd/MM/yyyy")
+                                                Garantía: <strong>@detalle.GarantiaMeses meses</strong>
+                                                <span class="nx-receipt-warranty-expiry">
+                                                    Vence: @Model.Fecha.AddMonths(detalle.GarantiaMeses).ToString("dd/MM/yyyy")
+                                                </span>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="nx-receipt-warranty is-unspecified">
+                                                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                                Garantía comercial no registrada en esta factura
                                             </span>
                                         }
                                     </td>
