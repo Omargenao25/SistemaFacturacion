@@ -149,6 +149,13 @@
                 </a>
 
 
+                <a asp-controller="Posventa"
+                   asp-action="Index"
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Posventa" ? "active" : "")">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span>Atención posventa</span>
+                </a>
+
                 <a asp-controller="Reportes"
                    asp-action="Index"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reportes" ? "active" : "")">
