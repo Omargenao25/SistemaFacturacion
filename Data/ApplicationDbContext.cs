@@ -17,6 +17,7 @@ namespace SistemaFacturacion.Data
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<DetalleFactura> DetallesFactura { get; set; }
         public DbSet<Pago> Pagos { get; set; }
+        public DbSet<CasoPosventa> CasosPosventa { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,6 +42,17 @@ namespace SistemaFacturacion.Data
                 .WithMany()
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Nunca eliminar en cascada los casos asociados a una venta.
+            modelBuilder.Entity<CasoPosventa>()
+                .HasOne(c => c.DetalleFactura)
+                .WithMany()
+                .HasForeignKey(c => c.IdDetalle)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // También permite comprobar cantidades de solicitudes por artículo.
+            modelBuilder.Entity<CasoPosventa>()
+                .HasIndex(c => new { c.IdDetalle, c.Tipo, c.Estado });
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
         }
