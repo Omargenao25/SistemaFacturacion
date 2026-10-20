@@ -906,16 +906,33 @@ body { color: var(--nx-ink); }
 
 /* NEXORA / Garantías comerciales y anulación fuera de plazo */
 .nx-receipt-warranty {
-    display:block; margin-top:5px; font-size:.72rem;
-    font-weight:550; color:#3d7557; line-height:1.45;
+    display:block; margin-top:7px; padding:5px 8px;
+    font-size:.72rem; font-weight:600; line-height:1.55;
+    border-radius:7px; white-space:normal;
 }
-.nx-receipt-warranty .bi { margin-right:3px; }
+.nx-receipt-warranty.is-covered {
+    color:#276441; background:#edf8f0;
+    border:1px solid #cbe6d4;
+}
+.nx-receipt-warranty.is-unspecified {
+    color:#69798f; background:#f5f7fa;
+    border:1px solid #e4e8ef;
+}
+.nx-receipt-warranty .bi { margin-right:4px; }
+.nx-receipt-warranty strong { font-weight:800; }
+.nx-receipt-warranty-expiry { display:block; padding-left:17px; font-weight:650; }
+
 .nx-receipt-expired {
     display:inline-flex; align-items:center; padding:9px 12px;
     border:1px solid #e9cbb2; background:#fff8f1;
     color:#98613c; border-radius:9px; font-size:.82rem; font-weight:750;
 }
 @media print {
-    .nx-receipt-warranty { font-size:8pt!important; color:#2b6141!important; }
+    .nx-receipt-warranty {
+        font-size:8pt!important; padding:3px 6px!important;
+        -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    .nx-receipt-warranty.is-covered { color:#2b6141!important; }
+    .nx-receipt-warranty.is-unspecified { color:#606f82!important; }
     .nx-receipt-expired { display:none!important; }
 }
