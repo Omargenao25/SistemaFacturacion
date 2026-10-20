@@ -269,7 +269,14 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdCaso");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.HasIndex("IdDetalle", "Tipo", "Estado");
 
@@ -293,7 +300,14 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdCategoria");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.ToTable("Categorias");
                 });
@@ -331,7 +345,14 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdCliente");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.ToTable("Clientes");
                 });
@@ -365,7 +386,14 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdDetalle");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.HasIndex("IdFactura");
 
@@ -509,7 +537,14 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdFactura");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.HasIndex("IdCliente");
 
@@ -538,7 +573,14 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdPago");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.HasIndex("IdFactura");
 
@@ -591,7 +633,14 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdProducto");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.HasIndex("IdCategoria");
 
@@ -646,6 +695,69 @@ namespace SistemaFacturacion.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Categoria", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Cliente", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Producto", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.DetalleFactura", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Pago", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
