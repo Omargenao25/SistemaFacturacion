@@ -374,6 +374,105 @@ namespace SistemaFacturacion.Data.Migrations
                     b.ToTable("DetallesFactura");
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.Empresa", b =>
+                {
+                    b.Property<Guid>("IdEmpresa")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Moneda")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("NombreComercial")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Rnc")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SlugNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(63)
+                        .HasColumnType("nvarchar(63)");
+
+                    b.Property<string>("ZonaHoraria")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("IdEmpresa");
+
+                    b.HasIndex("SlugNormalizado")
+                        .IsUnique();
+
+                    b.ToTable("Empresas", t =>
+                        {
+                            t.HasCheckConstraint("CK_Empresas_Estado",
+                                "[Estado] IN (N'PendienteConfiguracion', N'Activa', N'Suspendida', N'Archivada')");
+                        });
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.EmpresaUsuario", b =>
+                {
+                    b.Property<Guid>("IdEmpresa")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaAltaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaBajaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdEmpresa", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmpresaUsuarios", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmpresaUsuarios_Estado",
+                                "[Estado] IN (N'Invitado', N'Activo', N'Suspendido')");
+
+                            t.HasCheckConstraint("CK_EmpresaUsuarios_Rol",
+                                "[Rol] IN (N'Propietario', N'Administrador', N'Cajero')");
+                        });
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
                 {
                     b.Property<int>("IdFactura")
@@ -578,6 +677,25 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Navigation("Factura");
 
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.EmpresaUsuario", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
