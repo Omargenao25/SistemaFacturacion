@@ -92,7 +92,35 @@ namespace SistemaFacturacion.Data
                 entidad.HasIndex(m => m.UserId);
             });
 
+            // Fase 1B-1: todos los registros comerciales se relacionan con
+            // la empresa heredada. Estos defaults son TEMPORALES y deberán
+            // retirarse antes de admitir la segunda empresa / activar tenants.
+            ConfigurarEmpresaInicial<Cliente>(modelBuilder);
+            ConfigurarEmpresaInicial<Categoria>(modelBuilder);
+            ConfigurarEmpresaInicial<Producto>(modelBuilder);
+            ConfigurarEmpresaInicial<Factura>(modelBuilder);
+            ConfigurarEmpresaInicial<DetalleFactura>(modelBuilder);
+            ConfigurarEmpresaInicial<Pago>(modelBuilder);
+            ConfigurarEmpresaInicial<CasoPosventa>(modelBuilder);
+
             // Factura -> Detalles/Pagos conserva su configuración existente.
+        }
+
+        private static void ConfigurarEmpresaInicial<T>(ModelBuilder modelBuilder)
+            where T : class
+        {
+            modelBuilder.Entity<T>()
+                .Property<Guid>("IdEmpresa")
+                .HasDefaultValue(CompatibilidadEmpresaInicial.Id);
+
+            modelBuilder.Entity<T>()
+                .HasOne<Empresa>()
+                .WithMany()
+                .HasForeignKey("IdEmpresa")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<T>()
+                .HasIndex("IdEmpresa");
         }
 
     }
