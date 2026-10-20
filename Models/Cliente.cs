@@ -4,6 +4,11 @@ namespace SistemaFacturacion.Models
 {
     public class Cliente
     {
+        // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
+        // solicitudes y permisos se implementará después de validar la migración.
+        // Mientras exista un valor por defecto, NO activar múltiples empresas.
+        public Guid IdEmpresa { get; set; }
+
         [Key]
         public int IdCliente { get; set; }
 
