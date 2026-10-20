@@ -7,6 +7,11 @@ namespace SistemaFacturacion.Models
     // No representa automáticamente un reembolso ni un movimiento de stock.
     public class CasoPosventa
     {
+        // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
+        // solicitudes y permisos se implementará después de validar la migración.
+        // Mientras exista un valor por defecto, NO activar múltiples empresas.
+        public Guid IdEmpresa { get; set; }
+
         [Key]
         public int IdCaso { get; set; }
 
