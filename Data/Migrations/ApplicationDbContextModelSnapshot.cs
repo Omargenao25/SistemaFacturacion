@@ -224,6 +224,58 @@ namespace SistemaFacturacion.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.Property<int>("IdCaso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCaso"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdDetalle")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(800)
+                        .HasColumnType("nvarchar(800)");
+
+                    b.Property<string>("Resolucion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("IdCaso");
+
+                    b.HasIndex("IdDetalle", "Tipo", "Estado");
+
+                    b.ToTable("CasosPosventa");
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.Categoria", b =>
                 {
                     b.Property<int>("IdCategoria")
@@ -496,6 +548,17 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.DetalleFactura", "DetalleFactura")
+                        .WithMany()
+                        .HasForeignKey("IdDetalle")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("DetalleFactura");
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.DetalleFactura", b =>
