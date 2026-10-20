@@ -72,6 +72,11 @@ namespace SistemaFacturacion.Controllers
                 ModelState.AddModelError(nameof(modelo.Cantidad),
                     $"No puedes solicitar más de {detalle.Cantidad} unidades.");
 
+            if (string.IsNullOrWhiteSpace(modelo.Motivo) ||
+                modelo.Motivo.Trim().Length < 10)
+                ModelState.AddModelError(nameof(modelo.Motivo),
+                    "Explica el problema con al menos 10 caracteres útiles.");
+
             if (!ModelState.IsValid) return View(modelo);
 
             // Serializable protege el total de cantidades ante solicitudes
