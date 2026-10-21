@@ -128,6 +128,17 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/REEMBOLSOS_PENDIENTES_PRUEBAS.md`](docs/REEMBOLSOS_PENDIENTES_PRUEBAS.md).
 - **Deuda de seguridad/operación importante**: sigue existiendo el reintegro automático de stock sin prueba física de devolución. Se debe separar recepción de mercancía/anulación y preparar caja, conciliación y devoluciones parciales antes de uso comercial real.
 
+## Recepciones de mercancía por anulación — fase inicial preparada
+
+**Pendiente de `dotnet build`, migración y pruebas reales en desarrollo.**
+
+- `RecepcionAnulacion`: una obligación de recepción física por detalle de factura, `CantidadEsperada`, `CantidadRecibida = 0`, `CantidadLiberada = 0`, estado `Pendiente`, auditoría preparada; FK compuesta y unicidad por empresa + detalle.
+- `FacturasController.Anular` deja de restaurar automáticamente las existencias vendibles: crea recepciones pendientes y reembolso pendiente en la **misma transacción**. La factura sigue quedando Anulada, con protección de 7 días y no duplicación.
+- Nuevo panel de mercancía pendiente en `Details` y modal actualizado: ninguna unidad se considera recibida ni puesta en venta automáticamente.
+- Migración `20261021203000_RegistrarRecepcionesPendientesAnulacion`: tabla nueva solamente, sin backfill ni alteración del stock histórico. Las anulaciones anteriores conservan sus datos y muestran aviso de conciliación histórica.
+- **Deliberadamente no se habilita confirmar recepción ni liberar stock** hasta contar con roles de Russell, una política de inspección física y registro idempotente de movimientos. Queda bloqueado el uso comercial real.
+- Guía y consultas: [`docs/RECEPCIONES_ANULACION_PRUEBAS.md`](docs/RECEPCIONES_ANULACION_PRUEBAS.md). Respaldar, compilar, aplicar migración en Development y probar emisión-anulación con nueva expectativa: stock NO se restaura.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
