@@ -44,6 +44,16 @@ namespace SistemaFacturacion.Controllers
                 );
             }
 
+            // Solo se acepta un cliente visible para la empresa actual;
+            // evita referencias a clientes de otra empresa mediante POST.
+            if (!await _context.Clientes.AsNoTracking()
+                .AnyAsync(c => c.IdCliente == modelo.IdCliente))
+            {
+                ModelState.AddModelError(
+                    nameof(modelo.IdCliente),
+                    "Selecciona un cliente válido de la empresa.");
+            }
+
             if (!ModelState.IsValid)
             {
                 await CargarListas();
