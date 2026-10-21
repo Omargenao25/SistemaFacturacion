@@ -73,7 +73,7 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(e => e.IdCliente == id);
             if (cliente == null)
             {
                 return NotFound();
@@ -97,7 +97,19 @@ namespace SistemaFacturacion.Controllers
             {
                 try
                 {
-                    _context.Update(cliente);
+                    // Se carga el registro dentro del tenant filtrado por EF.
+                    // Nunca actualizar directamente un objeto enviado por POST.
+                    var actual = await _context.Clientes
+                        .FirstOrDefaultAsync(e => e.IdCliente == id);
+                    if (actual == null)
+                        return NotFound();
+
+                    actual.Nombre = cliente.Nombre;
+                    actual.Apellido = cliente.Apellido;
+                    actual.Telefono = cliente.Telefono;
+                    actual.Correo = cliente.Correo;
+                    actual.Direccion = cliente.Direccion;
+                    actual.IdentificacionFiscal = cliente.IdentificacionFiscal;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -144,7 +156,7 @@ namespace SistemaFacturacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(e => e.IdCliente == id);
 
             if (cliente == null)
             {
