@@ -68,7 +68,7 @@
                     <thead><tr><th>Producto</th><th>Existencia</th></tr></thead>
                     <tbody>
                     @foreach (var p in bajoStock) {
-                        <tr><td>@p.Nombre</td><td><span class="nx-status @(p.Stock == 0 ? "danger" : "warn")">@(p.Stock == 0 ? "Agotado" : $"{p.Stock} unidades")</span></td></tr>
+                        <tr><td>@p.Nombre</td><td><span class="nx-status @p.ClaseEstadoInventario">@(p.Agotado ? "Agotado" : $"Stock bajo: {p.Stock}")</span></td></tr>
                     }
                     </tbody>
                 </table></div>
