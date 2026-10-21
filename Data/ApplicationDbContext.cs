@@ -116,7 +116,7 @@ namespace SistemaFacturacion.Data
             // Factura -> Detalles/Pagos conserva su configuración existente.
         }
 
-        private static void ConfigurarEmpresaInicial<T>(ModelBuilder modelBuilder)
+        private void ConfigurarEmpresaInicial<T>(ModelBuilder modelBuilder)
             where T : class
         {
             modelBuilder.Entity<T>()
