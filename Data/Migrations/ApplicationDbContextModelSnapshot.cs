@@ -278,6 +278,8 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.HasIndex("IdEmpresa");
 
+                    b.HasIndex("IdEmpresa", "IdDetalle");
+
                     b.HasIndex("IdDetalle", "Tipo", "Estado");
 
                     b.ToTable("CasosPosventa");
@@ -306,6 +308,8 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
 
                     b.HasKey("IdCategoria");
+
+                    b.HasAlternateKey("IdEmpresa", "IdCategoria");
 
                     b.HasIndex("IdEmpresa");
 
@@ -352,6 +356,8 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.HasKey("IdCliente");
 
+                    b.HasAlternateKey("IdEmpresa", "IdCliente");
+
                     b.HasIndex("IdEmpresa");
 
                     b.ToTable("Clientes");
@@ -393,7 +399,13 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.HasKey("IdDetalle");
 
+                    b.HasAlternateKey("IdEmpresa", "IdDetalle");
+
                     b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdProducto");
+
+                    b.HasIndex("IdEmpresa", "IdFactura");
 
                     b.HasIndex("IdFactura");
 
@@ -544,7 +556,11 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.HasKey("IdFactura");
 
+                    b.HasAlternateKey("IdEmpresa", "IdFactura");
+
                     b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdCliente");
 
                     b.HasIndex("IdCliente");
 
@@ -581,6 +597,8 @@ namespace SistemaFacturacion.Data.Migrations
                     b.HasKey("IdPago");
 
                     b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdFactura");
 
                     b.HasIndex("IdFactura");
 
@@ -640,7 +658,11 @@ namespace SistemaFacturacion.Data.Migrations
 
                     b.HasKey("IdProducto");
 
+                    b.HasAlternateKey("IdEmpresa", "IdProducto");
+
                     b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdCategoria");
 
                     b.HasIndex("IdCategoria");
 
@@ -765,7 +787,8 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.DetalleFactura", "DetalleFactura")
                         .WithMany()
-                        .HasForeignKey("IdDetalle")
+                        .HasForeignKey("IdEmpresa", "IdDetalle")
+                        .HasPrincipalKey("IdEmpresa", "IdDetalle")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -776,13 +799,15 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
                         .WithMany("Detalles")
-                        .HasForeignKey("IdFactura")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SistemaFacturacion.Models.Producto", "Producto")
                         .WithMany()
-                        .HasForeignKey("IdProducto")
+                        .HasForeignKey("IdEmpresa", "IdProducto")
+                        .HasPrincipalKey("IdEmpresa", "IdProducto")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -814,7 +839,8 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Cliente", "Cliente")
                         .WithMany()
-                        .HasForeignKey("IdCliente")
+                        .HasForeignKey("IdEmpresa", "IdCliente")
+                        .HasPrincipalKey("IdEmpresa", "IdCliente")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -825,8 +851,9 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
                         .WithMany()
-                        .HasForeignKey("IdFactura")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Factura");
@@ -836,7 +863,8 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Categoria", "Categoria")
                         .WithMany()
-                        .HasForeignKey("IdCategoria")
+                        .HasForeignKey("IdEmpresa", "IdCategoria")
+                        .HasPrincipalKey("IdEmpresa", "IdCategoria")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
