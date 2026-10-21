@@ -82,7 +82,7 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
-            var producto = await _context.Productos.FindAsync(id);
+            var producto = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
             if (producto == null)
             {
                 return NotFound();
@@ -116,7 +116,7 @@ namespace SistemaFacturacion.Controllers
 
             if (ModelState.IsValid)
             {
-                var actual = await _context.Productos.FindAsync(id);
+                var actual = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
 
                 if (actual == null)
                 {
@@ -193,7 +193,7 @@ namespace SistemaFacturacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var producto = await _context.Productos.FindAsync(id);
+            var producto = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
 
             if (producto == null)
             {
