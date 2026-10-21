@@ -54,7 +54,8 @@ namespace SistemaFacturacion.Controllers
                     "Selecciona un cliente válido de la empresa.");
             }
 
-            if (!ModelState.IsValid)
+            // El model binder puede entregar Detalles nulo: no continuar.
+            if (!ModelState.IsValid || modelo.Detalles == null)
             {
                 await CargarListas();
                 return View(modelo);
