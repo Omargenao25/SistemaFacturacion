@@ -2,14 +2,24 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Models;
 using SistemaFacturacion.Models.SaaS;
+using SistemaFacturacion.Services.Tenancy;
 
 namespace SistemaFacturacion.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly IContextoEmpresa _contextoEmpresa;
+
+        // Es una propiedad del contexto, no un valor congelado en el modelo EF.
+        // Si no existe una empresa verificada, ninguna fila comercial es visible.
+        private Guid IdEmpresaActual => _contextoEmpresa.IdEmpresa;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            IContextoEmpresa contextoEmpresa)
             : base(options)
         {
+            _contextoEmpresa = contextoEmpresa;
         }
 
         public DbSet<Cliente> Clientes { get; set; }
@@ -121,6 +131,82 @@ namespace SistemaFacturacion.Data
 
             modelBuilder.Entity<T>()
                 .HasIndex("IdEmpresa");
+
+            // EF incluye este predicado en consultas, proyecciones y en
+            // ExecuteUpdate / ExecuteDelete (salvo IgnoreQueryFilters explícito).
+            modelBuilder.Entity<T>()
+                .HasQueryFilter(registro =>
+                    EF.Property<Guid>(registro, "IdEmpresa") == IdEmpresaActual);
+        }
+
+        public override int SaveChanges()
+        {
+            ValidarEscriturasDeEmpresa();
+            return base.SaveChanges();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            ValidarEscriturasDeEmpresa();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            ValidarEscriturasDeEmpresa();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default)
+        {
+            ValidarEscriturasDeEmpresa();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private void ValidarEscriturasDeEmpresa()
+        {
+            var entradas = ChangeTracker.Entries<IEntidadEmpresa>()
+                .Where(e => e.State == EntityState.Added ||
+                            e.State == EntityState.Modified ||
+                            e.State == EntityState.Deleted)
+                .ToList();
+
+            if (entradas.Count == 0)
+                return; // Identity y tablas globales tienen ciclo independiente.
+
+            var idEmpresa = IdEmpresaActual;
+            if (idEmpresa == Guid.Empty)
+                throw new UnauthorizedAccessException(
+                    "No hay una empresa validada para realizar operaciones comerciales.");
+
+            foreach (var entrada in entradas)
+            {
+                var propiedad = entrada.Property(e => e.IdEmpresa);
+
+                if (entrada.State == EntityState.Added)
+                {
+                    if (entrada.Entity.IdEmpresa != Guid.Empty &&
+                        entrada.Entity.IdEmpresa != idEmpresa)
+                        throw new UnauthorizedAccessException(
+                            "No puedes crear datos en otra empresa.");
+
+                    entrada.Entity.IdEmpresa = idEmpresa;
+                }
+                else
+                {
+                    if (entrada.Entity.IdEmpresa != idEmpresa ||
+                        propiedad.OriginalValue != idEmpresa)
+                        throw new UnauthorizedAccessException(
+                            "No puedes modificar datos de otra empresa.");
+
+                    // La pertenencia del registro no es editable.
+                    if (entrada.State == EntityState.Modified)
+                        propiedad.IsModified = false;
+                }
+            }
         }
 
     }
