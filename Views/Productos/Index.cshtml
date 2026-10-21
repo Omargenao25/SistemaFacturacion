@@ -5,7 +5,7 @@
     <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>@mensaje</div>
 }
 <div class="page-intro">
-    <div><div class="page-eyebrow">Nexora / Inventario</div><h1 class="page-title">Productos</h1><p class="page-subtitle">Controla precios, costos, existencias y disponibilidad de tus productos.</p></div>
+    <div><div class="page-eyebrow">Nexora / Inventario</div><h1 class="page-title">Productos</h1><p class="page-subtitle">El estado de inventario cambia automáticamente al vender o reponer. La desactivación manual se respeta.</p></div>
     <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nuevo producto</a>
 </div>
 <section class="nx-panel">
@@ -14,13 +14,14 @@
         <div class="nx-empty"><i class="bi bi-box-seam"></i>No hay productos registrados.</div>
     } else {
         <div class="table-responsive"><table class="table table-hover nx-table">
-            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Garantía</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Estado del inventario</th><th>Garantía</th><th>Control manual</th><th>Acciones</th></tr></thead>
             <tbody>
             @foreach(var item in Model) {
                 <tr>
                     <td class="fw-semibold">@item.Codigo</td><td><div class="fw-semibold">@item.Nombre</div><small class="text-muted">@item.Descripcion</small></td>
                     <td class="nx-mono">RD$ @item.Precio.ToString("N2")</td><td class="nx-mono">RD$ @item.Costo.ToString("N2")</td>
-                    <td><span class="nx-status @(item.Stock == 0 ? "danger" : item.Stock <= 5 ? "warn" : "good")">@item.Stock</span></td>
+                    <td class="nx-mono fw-semibold">@item.Stock</td>
+                    <td><span class="nx-status @item.ClaseEstadoInventario">@item.EstadoInventario</span></td>
                     <td class="text-nowrap">@(item.GarantiaMeses > 0 ? $"{item.GarantiaMeses} meses" : "—")</td>
                     <td><span class="nx-status @(item.Estado ? "good" : "danger")">@(item.Estado ? "Activo" : "Inactivo")</span></td>
                     <td>
