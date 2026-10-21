@@ -1200,3 +1200,70 @@ body { color: var(--nx-ink); }
 }
 @media print { .nx-refund-summary { display: none!important; } }
 
+
+/* NEXORA — Mercancía por recibir tras anular factura */
+.nx-return-tracking {
+    margin: 0 0 20px;
+    padding: 21px 23px 14px;
+    border: 1px solid #c8dafa;
+    border-radius: 15px;
+    background: #f5f9ff;
+    color: #243b60;
+}
+.nx-return-tracking-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.nx-return-tracking-header > div { flex: 1 1 350px; }
+.nx-return-tracking-kicker {
+    font-size: .7rem;
+    font-weight: 850;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    color: #346acc;
+}
+.nx-return-tracking h2 {
+    margin: 5px 0 8px;
+    color: #183d79;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+.nx-return-tracking p {
+    margin: 0 0 14px;
+    font-size: .84rem;
+    line-height: 1.65;
+}
+.nx-return-tracking-status {
+    display: inline-block;
+    padding: 7px 11px;
+    border: 1px solid #bdd2fb;
+    border-radius: 50px;
+    color: #2252a1;
+    background: #e7f0ff;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.nx-return-tracking-table { margin-bottom: 12px; }
+.nx-return-tracking-table thead th {
+    color: #40577a;
+    font-size: .74rem;
+}
+.nx-return-tracking-table td {
+    color: #273d5d;
+    font-size: .82rem;
+    vertical-align: middle;
+}
+.nx-return-tracking .nx-return-tracking-footnote {
+    padding-top: 12px;
+    border-top: 1px solid #dae7ff;
+    font-size: .78rem;
+    color: #557098;
+}
+@media (max-width: 575px) {
+    .nx-return-tracking { padding: 17px 15px; }
+    .nx-return-tracking-status { max-width: 100%; white-space: normal; }
+}
+@media print { .nx-return-tracking { display: none !important; } }
