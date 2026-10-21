@@ -5,7 +5,7 @@ namespace SistemaFacturacion.Models
 {
     // Solicitud de devolución o reclamación de garantía.
     // No representa automáticamente un reembolso ni un movimiento de stock.
-    public class CasoPosventa
+    public class CasoPosventa : IEntidadEmpresa
     {
         // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
         // solicitudes y permisos se implementará después de validar la migración.
