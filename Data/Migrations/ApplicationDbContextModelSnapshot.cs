@@ -669,6 +669,73 @@ namespace SistemaFacturacion.Data.Migrations
                     b.ToTable("Productos");
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.RecepcionAnulacion", b =>
+                {
+                    b.Property<int>("IdRecepcion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRecepcion"));
+
+                    b.Property<int>("CantidadEsperada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CantidadLiberada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CantidadRecibida")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<DateTime?>("FechaRecepcionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdDetalle")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("RecibidoPorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdRecepcion");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdDetalle")
+                        .IsUnique();
+
+                    b.ToTable("RecepcionesAnulacion", t =>
+                        {
+                            t.HasCheckConstraint("CK_RecepcionesAnulacion_Estado",
+                                "[Estado] IN (N'Pendiente', N'Parcial', N'EnInspeccion', N'Completada', N'NoRecibida')");
+
+                            t.HasCheckConstraint("CK_RecepcionesAnulacion_Cantidades",
+                                "[CantidadEsperada] > 0 AND [CantidadRecibida] >= 0 AND [CantidadLiberada] >= 0 AND [CantidadLiberada] <= [CantidadRecibida] AND [CantidadRecibida] <= [CantidadEsperada]");
+                        });
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.Reembolso", b =>
                 {
                     b.Property<int>("IdReembolso")
@@ -953,6 +1020,24 @@ namespace SistemaFacturacion.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Factura");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.RecepcionAnulacion", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SistemaFacturacion.Models.DetalleFactura", "DetalleFactura")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa", "IdDetalle")
+                        .HasPrincipalKey("IdEmpresa", "IdDetalle")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("DetalleFactura");
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
