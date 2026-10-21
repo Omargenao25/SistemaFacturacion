@@ -360,6 +360,9 @@ namespace SistemaFacturacion.Controllers
                 .FirstOrDefaultAsync(p => p.IdFactura == id);
 
             ViewBag.Pago = pago;
+            ViewBag.Reembolso = await _context.Reembolsos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.IdFactura == id);
             ViewBag.FechaLimiteAnulacion = factura.Fecha.AddDays(PlazoAnulacionDias);
             ViewBag.PuedeAnular = factura.Estado == "Emitida" &&
                 DateTime.Now <= factura.Fecha.AddDays(PlazoAnulacionDias);
