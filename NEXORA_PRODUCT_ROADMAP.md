@@ -81,6 +81,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - **PELIGRO**: en `Development` el contexto legacy se concede sin revisar la identidad del usuario: debe ser SOLO local y nunca publicado. En `Production` aún no se resuelve empresa y por diseño las consultas de negocio quedan sin registros. No añadir segundas empresas.
 - Integración con Russell es bloqueante para el siguiente paso `1B-2B`.
 
+## Mejora de inventario: agotado automático y activación manual independiente
+
+**Código integrado en `feature/nexora-ui`; pendiente de compilación y pruebas locales.**
+
+- `Producto.Estado` sigue siendo una decisión manual; **no se cambia al llegar a cero ni al reponer**.
+- Estados de inventario derivados de `Stock`: **Agotado (0)**, **Stock bajo (1–5)** y **Disponible (6+)**. Son propiedades calculadas `[NotMapped]`, por lo que **no requieren migración SQL**.
+- Disponibilidad para facturar también considera `Estado` manual; un producto manualmente inactivo permanece no vendible después de reponer.
+- Catálogo, ficha del producto, pantallas de edición/alta, Dashboard y Reportes muestran los estados con textos claros y sin fusionar control manual con stock.
+- Se mantiene intacta la lógica transaccional de `ExecuteUpdateAsync` que evita sobregiro de inventario, oculta agotados/inactivos del selector y restituye unidades tras anular.
+- Validación funcional pendiente; guía detallada en [`docs/ESTADO_INVENTARIO_AUTOMATICO_PRUEBAS.md`](docs/ESTADO_INVENTARIO_AUTOMATICO_PRUEBAS.md).
+- **No se modificó Identity** ni el módulo de Russell; sigue bloqueada la activación SaaS multiempresa hasta completar la fase 1B.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
