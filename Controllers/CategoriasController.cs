@@ -73,7 +73,7 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(e => e.IdCategoria == id);
             if (categoria == null)
             {
                 return NotFound();
@@ -97,7 +97,15 @@ namespace SistemaFacturacion.Controllers
             {
                 try
                 {
-                    _context.Update(categoria);
+                    // Se carga el registro dentro del tenant filtrado por EF.
+                    // Nunca actualizar directamente un objeto enviado por POST.
+                    var actual = await _context.Categorias
+                        .FirstOrDefaultAsync(e => e.IdCategoria == id);
+                    if (actual == null)
+                        return NotFound();
+
+                    actual.Nombre = categoria.Nombre;
+                    actual.Descripcion = categoria.Descripcion;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -144,7 +152,7 @@ namespace SistemaFacturacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(e => e.IdCategoria == id);
 
             if (categoria == null)
             {
