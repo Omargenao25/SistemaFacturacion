@@ -164,7 +164,7 @@ namespace SistemaFacturacion.Controllers
         public async Task<IActionResult> CambiarEstado(
             int id, string estado, string? resolucion, byte[]? rowVersion)
         {
-            var caso = await _context.CasosPosventa.FindAsync(id);
+            var caso = await _context.CasosPosventa.FirstOrDefaultAsync(c => c.IdCaso == id);
             if (caso == null) return NotFound();
 
             if (rowVersion == null || rowVersion.Length != 8)
