@@ -2,7 +2,7 @@
 
 namespace SistemaFacturacion.Models
 {
-    public class Cliente
+    public class Cliente : IEntidadEmpresa
     {
         // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
         // solicitudes y permisos se implementará después de validar la migración.
