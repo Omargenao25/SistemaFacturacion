@@ -268,8 +268,8 @@
 
                 <form asp-controller="Facturas" asp-action="Anular"
                       asp-route-id="@Model.IdFactura" method="post"
-                      id="nxVoidInvoiceForm" class="nx-void-modal-footer">
-                    @Html.AntiForgeryToken()
+                      id="nxVoidInvoiceForm" class="nx-void-modal-footer"
+                      asp-antiforgery="true">
                     <button type="button" class="btn nx-void-modal-cancel"
                             data-bs-dismiss="modal">
                         Mantener factura
