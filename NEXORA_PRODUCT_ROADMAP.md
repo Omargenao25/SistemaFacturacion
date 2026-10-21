@@ -68,6 +68,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - **Fase 1B-2 pendiente:** autenticación + `ITenantContext`, filtro por empresa en **todos** los controladores/reportes e IDOR tests, validación de escritura, retirada de default temporal, claves foráneas compuestas, índice único por empresa y revisión de permisos Russell.
 - **Fase 1C bloqueada:** no activar alta de empresas, invitaciones ni plan de suscripción antes de superar 1B-2.
 
+## Fase 1B-2A: filtros por empresa y validación de escrituras (en desarrollo)
+
+**Implementado en `feature/nexora-ui`, pendiente de compilación y pruebas en Visual Studio.**
+
+- Contrato `IContextoEmpresa` y adaptador **solo local en `Development`**: identifica la empresa heredada. En cualquier otro entorno devuelve `Guid.Empty` y no permite operaciones comerciales vía `SaveChanges`.
+- Contrato `IEntidadEmpresa` agregado a las siete entidades comerciales.
+- `ApplicationDbContext`: filtros globales de EF Core `HasQueryFilter` para lecturas y actualizaciones directas normales por empresa, validación de alta/cambio/borrado con `SaveChanges`/`SaveChangesAsync`, sin alterar tablas Identity.
+- Controladores: Clientes y Categorías dejan de actualizar modelos completos recibidos del formulario; se cargan por consulta filtrada. Consultas `FindAsync` relevantes sustituidas por LINQ. Facturas verifica que el cliente esté visible en el tenant.
+- No hay nueva migración SQL para este paso: solo código de filtrado y validaciones. Regresión, consultas SQL y estados a probar en [`docs/FASE_1B_2A_PRUEBAS.md`](docs/FASE_1B_2A_PRUEBAS.md).
+- **NO ES SaaS listo**: no hay contexto de tenant autenticado por membresía, todos los controladores con `[Authorize]`, FKs compuestas, retiro de default legado, tests A/B ni pruebas de SQL crudo/background jobs.
+- **PELIGRO**: en `Development` el contexto legacy se concede sin revisar la identidad del usuario: debe ser SOLO local y nunca publicado. En `Production` aún no se resuelve empresa y por diseño las consultas de negocio quedan sin registros. No añadir segundas empresas.
+- Integración con Russell es bloqueante para el siguiente paso `1B-2B`.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
