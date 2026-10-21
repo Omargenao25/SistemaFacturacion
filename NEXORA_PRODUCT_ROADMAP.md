@@ -93,6 +93,17 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Validación funcional pendiente; guía detallada en [`docs/ESTADO_INVENTARIO_AUTOMATICO_PRUEBAS.md`](docs/ESTADO_INVENTARIO_AUTOMATICO_PRUEBAS.md).
 - **No se modificó Identity** ni el módulo de Russell; sigue bloqueada la activación SaaS multiempresa hasta completar la fase 1B.
 
+## Fase SaaS 1B-2B (componente): validación segura de membresía, sin activar rutas
+
+**Preparado en `feature/nexora-ui`, pendiente de compilación y revisión con Russell.**
+
+- `IValidadorAccesoEmpresa`, `ValidadorAccesoEmpresaSql` y `MembresiaEmpresaValidada` permiten comprobar `Identity UserId` autenticado + empresa `Activa` + membresía `Activo` no finalizada + rol conocido.
+- Consulta independiente por `Microsoft.Data.SqlClient` con parámetros para evitar dependencias circulares de `ApplicationDbContext`; el slug recibido es solo candidato y se verifica en SQL.
+- **No está registrado ni conectado al pipeline MVC**: `Program.cs`, controladores e Identity de Russell sin cambios. Se mantiene `ContextoEmpresaDesarrollo` de forma provisional. **NO implica aislamiento productivo ni acceso entre empresas.**
+- La empresa `nexora-legado` es `PendienteConfiguracion`, por lo que nunca se autoriza mediante este servicio hasta activar un flujo aprobado.
+- Documento de revisión, pruebas negativas y condiciones de integración: [`docs/FASE_1B_2B_VERIFICACION_MEMBRESIAS.md`](docs/FASE_1B_2B_VERIFICACION_MEMBRESIAS.md).
+- Próxima dependencia antes de conectar: confirmar el diseño de usuario/roles de Russell; protección por ruta con `UseAuthentication`/`[Authorize]`; filtros, FKs compuestas, eliminación de defaults, pruebas A/B.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
