@@ -114,7 +114,8 @@ namespace SistemaFacturacion.Controllers
                 ModelState.AddModelError(nameof(Producto.IdCategoria), "Selecciona una categoría válida.");
             }
 
-            if (ModelState.IsValid)
+            // La versión debe ser válida y no nula antes de asignarla a EF.
+            if (ModelState.IsValid && producto.RowVersion is { Length: 8 })
             {
                 var actual = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
 
