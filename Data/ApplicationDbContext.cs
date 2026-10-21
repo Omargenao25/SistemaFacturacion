@@ -101,7 +101,8 @@ namespace SistemaFacturacion.Data
             modelBuilder.Entity<DetalleFactura>().HasIndex(d => d.IdFactura);
             modelBuilder.Entity<DetalleFactura>().HasIndex(d => d.IdProducto);
             modelBuilder.Entity<Pago>().HasIndex(p => p.IdFactura);
-            modelBuilder.Entity<CasoPosventa>().HasIndex(c => c.IdDetalle);
+            // CasosPosventa ya conserva el índice (IdDetalle, Tipo, Estado)
+            // de la fase anterior: su primera columna cubre IdDetalle.
 
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
