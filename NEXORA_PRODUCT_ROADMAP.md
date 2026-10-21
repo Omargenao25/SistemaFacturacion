@@ -104,6 +104,17 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Documento de revisión, pruebas negativas y condiciones de integración: [`docs/FASE_1B_2B_VERIFICACION_MEMBRESIAS.md`](docs/FASE_1B_2B_VERIFICACION_MEMBRESIAS.md).
 - Próxima dependencia antes de conectar: confirmar el diseño de usuario/roles de Russell; protección por ruta con `UseAuthentication`/`[Authorize]`; filtros, FKs compuestas, eliminación de defaults, pruebas A/B.
 
+## Fase SaaS 1B-2C: integridad relacional por empresa (migración pendiente de pruebas)
+
+**Preparada en `feature/nexora-ui`; no compilada ni aplicada en SQL Server por el asistente.**
+
+- `ApplicationDbContext` protege 6 referencias mediante FKs compuestas `(IdEmpresa, IdRegistro)`: Producto–Categoría, Factura–Cliente, Detalle–Factura, Detalle–Producto, Pago–Factura y Posventa–Detalle.
+- Migración `20261021175000_AislarRelacionesComerciales`: valida 6 tipos de referencias antes de alterar; si detecta cruce de empresa, **aborta**. Sustituye 6 FKs individuales por las compuestas, crea 5 claves alternas y 6 índices compuestos, todos `NoAction` y sin borrar datos.
+- `Down()` recupera el esquema anterior y las FKs previas; nueva metadata EF (`Designer.cs`) y `ApplicationDbContextModelSnapshot.cs` revisadas estáticamente.
+- **La migración no se ejecuta automáticamente**. El usuario debe respaldar y comprobar SQL antes de `Update-Database`.
+- Checklist y consultas: [`docs/FASE_1B_2C_RELACIONES_COMERCIALES.md`](docs/FASE_1B_2C_RELACIONES_COMERCIALES.md).
+- **No crea empresas ni usuarios**; mantiene default de legado y el verificador de membresías aún desconectado. No permitir segundo tenant, publicar ni fusionar PR hasta integrar Identity, roles y pruebas A/B.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
