@@ -4,6 +4,9 @@
     ViewData["Title"] = "Detalle de factura";
     var pago = ViewBag.Pago as Pago;
     var reembolso = ViewBag.Reembolso as Reembolso;
+    var recepciones = ViewBag.RecepcionesAnulacion as List<RecepcionAnulacion>
+        ?? new List<RecepcionAnulacion>();
+    var unidadesPendientes = recepciones.Sum(r => r.CantidadEsperada - r.CantidadRecibida);
     var anulada = Model.Estado == "Anulada";
     var puedeAnular = ViewBag.PuedeAnular is bool permitido && permitido;
     var fechaLimiteAnulacion = ViewBag.FechaLimiteAnulacion is DateTime limite
@@ -11,7 +14,7 @@
     var nombreCliente = Model.Cliente == null
         ? "Cliente no disponible"
         : $"{Model.Cliente.Nombre} {Model.Cliente.Apellido}";
-    var unidadesPorRestaurar = Model.Detalles.Sum(detalle => detalle.Cantidad);
+    var unidadesPorVerificar = Model.Detalles.Sum(detalle => detalle.Cantidad);
     var lineasFactura = Model.Detalles.Count;
 }
 
@@ -91,6 +94,59 @@
                 }
             </div>
             <span class="nx-refund-summary-badge">@(reembolso?.Estado == "PendienteRevision" ? "Revisar" : reembolso == null ? "Sin registro" : reembolso.Estado)</span>
+        </section>
+    }
+
+    @if (anulada)
+    {
+        <section class="nx-return-tracking no-print" aria-label="Recepción física de mercancía">
+            <div class="nx-return-tracking-header">
+                <div>
+                    <span class="nx-return-tracking-kicker">Control de mercancía</span>
+                    <h2>Recepción de productos</h2>
+                    @if (recepciones.Count > 0)
+                    {
+                        <p>La anulación <strong>no devolvió unidades al stock disponible</strong>.
+                            Hay @unidadesPendientes unidad(es) por recibir o verificar físicamente.
+                            La liberación al inventario requiere una recepción autorizada.</p>
+                    }
+                    else
+                    {
+                        <p>Esta factura se anuló antes de habilitar el control de
+                            recepciones, o requiere conciliación histórica. No se generó
+                            retroactivamente una devolución física.</p>
+                    }
+                </div>
+                <span class="nx-return-tracking-status">@(recepciones.Count > 0 ? "Pendiente de recepción" : "Sin registro histórico")</span>
+            </div>
+            @if (recepciones.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table nx-return-tracking-table">
+                        <thead>
+                            <tr><th>Producto</th><th class="text-center">Esperadas</th>
+                                <th class="text-center">Recibidas</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var recepcion in recepciones)
+                            {
+                                var linea = Model.Detalles.FirstOrDefault(d => d.IdDetalle == recepcion.IdDetalle);
+                                <tr>
+                                    <td>@(linea?.Producto?.Nombre ?? "Producto no disponible")</td>
+                                    <td class="text-center">@recepcion.CantidadEsperada</td>
+                                    <td class="text-center">@recepcion.CantidadRecibida</td>
+                                    <td><span class="nx-status warn">@recepcion.Estado</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            <p class="nx-return-tracking-footnote">
+                <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+                La recepción y liberación de existencias requieren permisos verificables.
+                Por ahora no existe una opción de confirmación habilitada.
+            </p>
         </section>
     }
 
@@ -264,8 +320,9 @@
                 <div class="modal-body nx-void-modal-body">
                     <p class="nx-void-modal-description" id="nxVoidInvoiceDescription">
                         Revisa los datos de la venta antes de continuar. Si confirmas,
-                        la factura quedará <strong>Anulada</strong> y las unidades vendidas
-                        regresarán al inventario.
+                        la factura quedará <strong>Anulada</strong>, se registrará
+                        una recepción pendiente por producto y las unidades
+                        <strong>no volverán al stock disponible</strong> hasta verificarlas.
                     </p>
 
                     <div class="nx-void-modal-summary" aria-label="Resumen de la factura">
@@ -278,8 +335,8 @@
                             <strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong>
                         </div>
                         <div class="nx-void-modal-summary-item">
-                            <span><i class="bi bi-box-arrow-in-down me-1" aria-hidden="true"></i> Unidades a restituir</span>
-                            <strong>@unidadesPorRestaurar unidad(es) <small>en @lineasFactura línea(s)</small></strong>
+                            <span><i class="bi bi-box-arrow-in-down me-1" aria-hidden="true"></i> Unidades por recibir</span>
+                            <strong>@unidadesPorVerificar unidad(es) <small>en @lineasFactura línea(s)</small></strong>
                         </div>
                         <div class="nx-void-modal-summary-item nx-void-modal-summary-total">
                             <span>Total de la factura</span>
@@ -291,11 +348,10 @@
                         <i class="bi bi-info-circle" aria-hidden="true"></i>
                         <div>
                             <strong>Antes de confirmar</strong>
-                            <p>Esta acción afecta al historial y al stock. Se creará una
-                                <strong>solicitud de reembolso pendiente</strong> a partir de los
-                                pagos registrados, pero no se devolverá dinero automáticamente
-                                ni se emitirá una nota de crédito. El plazo interno de
-                                anulación es de 7 días.</p>
+                            <p>Se creará una <strong>solicitud de reembolso pendiente</strong>
+                                y un registro de mercancía por recibir. No se devolverá dinero
+                                ni se repondrá stock automáticamente. Tampoco se emitirá una
+                                nota de crédito. El plazo interno de anulación es de 7 días.</p>
                         </div>
                     </div>
                 </div>
