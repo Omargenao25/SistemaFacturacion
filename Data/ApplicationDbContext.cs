@@ -30,6 +30,7 @@ namespace SistemaFacturacion.Data
         public DbSet<Pago> Pagos { get; set; }
         public DbSet<CasoPosventa> CasosPosventa { get; set; }
         public DbSet<Reembolso> Reembolsos { get; set; }
+        public DbSet<RecepcionAnulacion> RecepcionesAnulacion { get; set; }
 
         // Plataforma SaaS: aún no se utiliza para separar los datos comerciales.
         public DbSet<Empresa> Empresas { get; set; }
@@ -126,6 +127,28 @@ namespace SistemaFacturacion.Data
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
+            // Una obligación de recepción por línea de una factura anulada.
+            // La FK compuesta asegura la misma empresa que el detalle vendido;
+            // el índice único impide duplicados incluso por concurrencia.
+            modelBuilder.Entity<RecepcionAnulacion>(entidad =>
+            {
+                entidad.ToTable("RecepcionesAnulacion", tabla =>
+                {
+                    tabla.HasCheckConstraint("CK_RecepcionesAnulacion_Estado",
+                        "[Estado] IN (N'Pendiente', N'Parcial', N'EnInspeccion', N'Completada', N'NoRecibida')");
+                    tabla.HasCheckConstraint("CK_RecepcionesAnulacion_Cantidades",
+                        "[CantidadEsperada] > 0 AND [CantidadRecibida] >= 0 " +
+                        "AND [CantidadLiberada] >= 0 AND [CantidadLiberada] <= [CantidadRecibida] " +
+                        "AND [CantidadRecibida] <= [CantidadEsperada]");
+                });
+                entidad.HasIndex(r => new { r.IdEmpresa, r.IdDetalle }).IsUnique();
+                entidad.HasOne(r => r.DetalleFactura)
+                    .WithMany()
+                    .HasForeignKey(r => new { r.IdEmpresa, r.IdDetalle })
+                    .HasPrincipalKey(d => new { d.IdEmpresa, d.IdDetalle })
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
                 .HasIndex(c => new { c.IdDetalle, c.Tipo, c.Estado });
@@ -174,6 +197,7 @@ namespace SistemaFacturacion.Data
             ConfigurarEmpresaInicial<Pago>(modelBuilder);
             ConfigurarEmpresaInicial<CasoPosventa>(modelBuilder);
             ConfigurarEmpresaInicial<Reembolso>(modelBuilder);
+            ConfigurarEmpresaInicial<RecepcionAnulacion>(modelBuilder);
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
         }
