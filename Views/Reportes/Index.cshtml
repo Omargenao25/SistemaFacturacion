@@ -154,8 +154,8 @@
                                         <td class="fw-semibold">@producto.Nombre</td>
                                         <td>@(producto.Categoria?.Nombre ?? "Sin categoría")</td>
                                         <td class="text-center">
-                                            <span class="nx-status @(producto.Stock == 0 ? "danger" : "warn")">
-                                                @(producto.Stock == 0 ? "Agotado" : producto.Stock.ToString())
+                                            <span class="nx-status @producto.ClaseEstadoInventario">
+                                                @(producto.Agotado ? "Agotado" : $"Stock bajo: {producto.Stock}")
                                             </span>
                                         </td>
                                     </tr>
