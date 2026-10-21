@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Detalle de factura";
     var pago = ViewBag.Pago as Pago;
+    var reembolso = ViewBag.Reembolso as Reembolso;
     var anulada = Model.Estado == "Anulada";
     var puedeAnular = ViewBag.PuedeAnular is bool permitido && permitido;
     var fechaLimiteAnulacion = ViewBag.FechaLimiteAnulacion is DateTime limite
@@ -60,6 +61,37 @@
         <div class="alert alert-warning no-print" role="alert">
             <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>@TempData["Error"]
         </div>
+    }
+
+    @if (anulada)
+    {
+        <section class="nx-refund-summary no-print" aria-label="Situación del dinero del cliente">
+            <div class="nx-refund-summary-icon" aria-hidden="true">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="nx-refund-summary-content">
+                <span class="nx-refund-summary-eyebrow">Seguimiento financiero</span>
+                @if (reembolso != null)
+                {
+                    <h2>Reembolso @(reembolso.Estado == "PendienteRevision" ? "pendiente de revisión" : reembolso.Estado.ToLowerInvariant())</h2>
+                    <p>
+                        Importe solicitado: <strong>RD$ @reembolso.MontoSolicitado.ToString("N2")</strong>.
+                        Método original: <strong>@reembolso.MetodoPagoOriginal</strong>.
+                        La anulación por sí sola <strong>no confirma una devolución de dinero</strong>.
+                    </p>
+                    @if (reembolso.Estado == "PendienteRevision")
+                    {
+                        <p class="nx-refund-summary-note">El cobro registrado no coincide con una devolución simple; se requiere conciliación administrativa antes de devolver fondos.</p>
+                    }
+                }
+                else
+                {
+                    <h2>Sin solicitud de reembolso registrada</h2>
+                    <p>Esta factura se anuló antes de habilitar el seguimiento de reembolsos o requiere conciliación manual. Comprueba los pagos originales.</p>
+                }
+            </div>
+            <span class="nx-refund-summary-badge">@(reembolso?.Estado == "PendienteRevision" ? "Revisar" : reembolso == null ? "Sin registro" : reembolso.Estado)</span>
+        </section>
     }
 
     @if (!anulada && !puedeAnular)
@@ -259,9 +291,11 @@
                         <i class="bi bi-info-circle" aria-hidden="true"></i>
                         <div>
                             <strong>Antes de confirmar</strong>
-                            <p>Esta acción afecta al historial y al stock. No genera
-                                automáticamente un reembolso ni una nota de crédito.
-                                El plazo interno de anulación es de 7 días.</p>
+                            <p>Esta acción afecta al historial y al stock. Se creará una
+                                <strong>solicitud de reembolso pendiente</strong> a partir de los
+                                pagos registrados, pero no se devolverá dinero automáticamente
+                                ni se emitirá una nota de crédito. El plazo interno de
+                                anulación es de 7 días.</p>
                         </div>
                     </div>
                 </div>
