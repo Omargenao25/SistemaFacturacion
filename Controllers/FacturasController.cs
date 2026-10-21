@@ -425,6 +425,43 @@ namespace SistemaFacturacion.Controllers
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
+                // El dinero NO se mueve aquí. Capturamos los pagos originales
+                // bajo la misma transacción que la anulación y la reposición.
+                var pagosRegistrados = await _context.Pagos
+                    .AsNoTracking()
+                    .Where(p => p.IdFactura == id)
+                    .Select(p => new { p.Monto, p.MetodoPago })
+                    .ToListAsync();
+
+                if (pagosRegistrados.Any(p => p.Monto < 0))
+                {
+                    await transaccion.RollbackAsync();
+                    TempData["Error"] =
+                        "La factura contiene un pago negativo que requiere revisión. " +
+                        "No se anuló ni se modificó el inventario.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                decimal montoCobrado = pagosRegistrados.Sum(p => p.Monto);
+                var metodos = pagosRegistrados
+                    .Select(p => p.MetodoPago)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                string metodoOriginal = metodos.Count switch
+                {
+                    0 => "SinRegistro",
+                    1 => metodos[0],
+                    _ => "Mixto"
+                };
+
+                // Un cobro faltante, mixto o de importe diferente no se
+                // presume conciliado: requiere una revisión administrativa.
+                bool requiereRevision = montoCobrado <= 0 ||
+                    montoCobrado != factura.Total ||
+                    metodos.Count != 1 ||
+                    pagosRegistrados.Any(p => p.Monto <= 0);
+
                 // Incrementos atómicos que no sobrescriben ventas simultáneas.
                 foreach (var detalle in factura.Detalles)
                 {
@@ -441,10 +478,25 @@ namespace SistemaFacturacion.Controllers
                     }
                 }
 
+                // Una única solicitud por factura. El índice único
+                // (IdEmpresa, IdFactura) también bloquea duplicados en SQL.
+                _context.Reembolsos.Add(new Reembolso
+                {
+                    IdFactura = factura.IdFactura,
+                    MontoSolicitado = montoCobrado,
+                    MetodoPagoOriginal = metodoOriginal,
+                    Estado = requiereRevision ? "PendienteRevision" : "Pendiente",
+                    FechaSolicitudUtc = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
                 await transaccion.CommitAsync();
 
-                TempData["Mensaje"] =
-                    "La factura fue anulada correctamente y el inventario fue actualizado.";
+                TempData["Mensaje"] = requiereRevision
+                    ? "Factura anulada e inventario restaurado. Se creó una solicitud " +
+                      "financiera pendiente de revisión; no se devolvió dinero automáticamente."
+                    : "Factura anulada e inventario restaurado. Se creó un reembolso " +
+                      "pendiente de confirmación; no se devolvió dinero automáticamente.";
 
                 return RedirectToAction(nameof(Details), new { id });
             }
