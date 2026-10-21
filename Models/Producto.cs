@@ -38,7 +38,33 @@ namespace SistemaFacturacion.Models
         [Range(0, 120, ErrorMessage = "La garantía debe estar entre 0 y 120 meses.")]
         public int GarantiaMeses { get; set; }
 
+        // Estado es exclusivamente el control MANUAL del administrador:
+        // una venta, devolución o reposición no debe modificarlo.
         public bool Estado { get; set; } = true;
+
+        // Los siguientes valores se calculan en memoria desde el stock actual.
+        // No se almacenan ni requieren migraciones de Entity Framework.
+        [NotMapped]
+        public bool Agotado => Stock <= 0;
+
+        [NotMapped]
+        public bool DisponibleParaVenta => Estado && !Agotado;
+
+        [NotMapped]
+        public string EstadoInventario =>
+            Agotado ? "Agotado" : Stock <= 5 ? "Stock bajo" : "Disponible";
+
+        [NotMapped]
+        public string ClaseEstadoInventario =>
+            Agotado ? "danger" : Stock <= 5 ? "warn" : "good";
+
+        [NotMapped]
+        public string DisponibilidadVenta =>
+            !Estado ? "Inactivo" : EstadoInventario;
+
+        [NotMapped]
+        public string ClaseDisponibilidadVenta =>
+            !Estado ? "danger" : ClaseEstadoInventario;
 
         // SQL Server actualiza automáticamente esta versión cada vez que
         // cambia la fila (ventas, anulaciones y ediciones incluidas).
