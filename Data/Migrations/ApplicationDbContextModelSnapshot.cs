@@ -669,6 +669,72 @@ namespace SistemaFacturacion.Data.Migrations
                     b.ToTable("Productos");
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.Reembolso", b =>
+                {
+                    b.Property<int>("IdReembolso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdReembolso"));
+
+                    b.Property<string>("ConfirmadoPorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<DateTime?>("FechaConfirmacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitudUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdFactura")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
+                    b.Property<string>("MetodoPagoOriginal")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("MontoSolicitado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ReferenciaDevolucion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdReembolso");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdFactura")
+                        .IsUnique();
+
+                    b.ToTable("Reembolsos", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reembolsos_Estado",
+                                "[Estado] IN (N'Pendiente', N'PendienteRevision', N'Aprobado', N'Procesando', N'Reembolsado', N'Rechazado', N'Fallido')");
+
+                            t.HasCheckConstraint("CK_Reembolsos_MontoSolicitado",
+                                "[MontoSolicitado] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -869,6 +935,24 @@ namespace SistemaFacturacion.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Reembolso", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Factura");
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
