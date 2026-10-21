@@ -29,6 +29,7 @@ namespace SistemaFacturacion.Data
         public DbSet<DetalleFactura> DetallesFactura { get; set; }
         public DbSet<Pago> Pagos { get; set; }
         public DbSet<CasoPosventa> CasosPosventa { get; set; }
+        public DbSet<Reembolso> Reembolsos { get; set; }
 
         // Plataforma SaaS: aún no se utiliza para separar los datos comerciales.
         public DbSet<Empresa> Empresas { get; set; }
@@ -104,6 +105,27 @@ namespace SistemaFacturacion.Data
             // CasosPosventa ya conserva el índice (IdDetalle, Tipo, Estado)
             // de la fase anterior: su primera columna cubre IdDetalle.
 
+            // Registro financiero obligatorio y único para cada anulación.
+            // Ningún borrado en cascada puede ocultar un reembolso pendiente.
+            modelBuilder.Entity<Reembolso>(entidad =>
+            {
+                entidad.ToTable("Reembolsos", tabla =>
+                {
+                    tabla.HasCheckConstraint(
+                        "CK_Reembolsos_Estado",
+                        "[Estado] IN (N'Pendiente', N'PendienteRevision', N'Aprobado', N'Procesando', N'Reembolsado', N'Rechazado', N'Fallido')");
+                    tabla.HasCheckConstraint(
+                        "CK_Reembolsos_MontoSolicitado",
+                        "[MontoSolicitado] >= 0");
+                });
+                entidad.HasIndex(r => new { r.IdEmpresa, r.IdFactura }).IsUnique();
+                entidad.HasOne(r => r.Factura)
+                    .WithMany()
+                    .HasForeignKey(r => new { r.IdEmpresa, r.IdFactura })
+                    .HasPrincipalKey(f => new { f.IdEmpresa, f.IdFactura })
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
                 .HasIndex(c => new { c.IdDetalle, c.Tipo, c.Estado });
@@ -151,6 +173,7 @@ namespace SistemaFacturacion.Data
             ConfigurarEmpresaInicial<DetalleFactura>(modelBuilder);
             ConfigurarEmpresaInicial<Pago>(modelBuilder);
             ConfigurarEmpresaInicial<CasoPosventa>(modelBuilder);
+            ConfigurarEmpresaInicial<Reembolso>(modelBuilder);
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
         }
