@@ -363,6 +363,13 @@ namespace SistemaFacturacion.Controllers
             ViewBag.Reembolso = await _context.Reembolsos
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.IdFactura == id);
+            // Obligatoriedades físicas, sin asumir que se devolvió mercancía.
+            var idsDetalles = factura.Detalles.Select(d => d.IdDetalle).ToList();
+            ViewBag.RecepcionesAnulacion = await _context.RecepcionesAnulacion
+                .AsNoTracking()
+                .Where(r => idsDetalles.Contains(r.IdDetalle))
+                .OrderBy(r => r.IdDetalle)
+                .ToListAsync();
             ViewBag.FechaLimiteAnulacion = factura.Fecha.AddDays(PlazoAnulacionDias);
             ViewBag.PuedeAnular = factura.Estado == "Emitida" &&
                 DateTime.Now <= factura.Fecha.AddDays(PlazoAnulacionDias);
@@ -407,7 +414,7 @@ namespace SistemaFacturacion.Controllers
             try
             {
                 // Solo una solicitud puede cambiar esta factura de Emitida
-                // a Anulada. Las siguientes no devolverán el stock otra vez.
+                // a Anulada. Las siguientes no crean recepciones ni reembolsos duplicados.
                 // Revalidación atómica: dos solicitudes no pueden anular la
                 // misma factura, ni saltarse el plazo con un POST manual.
                 var fechaLimiteInferior = DateTime.Now.AddDays(-PlazoAnulacionDias);
@@ -429,7 +436,7 @@ namespace SistemaFacturacion.Controllers
                 }
 
                 // El dinero NO se mueve aquí. Capturamos los pagos originales
-                // bajo la misma transacción que la anulación y la reposición.
+                // bajo la misma transacción que la anulación y las recepciones pendientes.
                 var pagosRegistrados = await _context.Pagos
                     .AsNoTracking()
                     .Where(p => p.IdFactura == id)
@@ -465,20 +472,29 @@ namespace SistemaFacturacion.Controllers
                     metodos.Count != 1 ||
                     pagosRegistrados.Any(p => p.Monto <= 0);
 
-                // Incrementos atómicos que no sobrescriben ventas simultáneas.
+                // No se suma stock aquí: hasta que una recepción física sea
+                // inspeccionada y autorizada, las unidades NO son vendibles.
+                // Cada línea genera una obligación pendiente, sin simular una
+                // devolución ya realizada. Se crea en la misma transacción.
+                if (factura.Detalles.Count == 0 ||
+                    factura.Detalles.Any(d => d.Cantidad <= 0))
+                {
+                    throw new InvalidOperationException(
+                        "La factura contiene detalles inválidos para la recepción. " +
+                        "Se revirtió la anulación completa.");
+                }
+
                 foreach (var detalle in factura.Detalles)
                 {
-                    var productosActualizados = await _context.Productos
-                        .Where(p => p.IdProducto == detalle.IdProducto)
-                        .ExecuteUpdateAsync(cambios => cambios
-                            .SetProperty(p => p.Stock, p => p.Stock + detalle.Cantidad));
-
-                    if (productosActualizados != 1)
+                    _context.RecepcionesAnulacion.Add(new RecepcionAnulacion
                     {
-                        throw new InvalidOperationException(
-                            "No se pudo recuperar un producto vinculado a la factura. " +
-                            "La anulación completa fue revertida.");
-                    }
+                        IdDetalle = detalle.IdDetalle,
+                        CantidadEsperada = detalle.Cantidad,
+                        CantidadRecibida = 0,
+                        CantidadLiberada = 0,
+                        Estado = "Pendiente",
+                        FechaCreacionUtc = DateTime.UtcNow
+                    });
                 }
 
                 // Una única solicitud por factura. El índice único
@@ -496,10 +512,10 @@ namespace SistemaFacturacion.Controllers
                 await transaccion.CommitAsync();
 
                 TempData["Mensaje"] = requiereRevision
-                    ? "Factura anulada e inventario restaurado. Se creó una solicitud " +
-                      "financiera pendiente de revisión; no se devolvió dinero automáticamente."
-                    : "Factura anulada e inventario restaurado. Se creó un reembolso " +
-                      "pendiente de confirmación; no se devolvió dinero automáticamente.";
+                    ? "Factura anulada. Mercancía pendiente de recepción: el stock no aumentó. " +
+                      "La solicitud financiera requiere revisión; no se devolvió dinero."
+                    : "Factura anulada. Mercancía pendiente de recepción: el stock no aumentó. " +
+                      "Se creó un reembolso pendiente, sin devolver dinero automáticamente.";
 
                 return RedirectToAction(nameof(Details), new { id });
             }
