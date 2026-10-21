@@ -115,6 +115,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Checklist y consultas: [`docs/FASE_1B_2C_RELACIONES_COMERCIALES.md`](docs/FASE_1B_2C_RELACIONES_COMERCIALES.md).
 - **No crea empresas ni usuarios**; mantiene default de legado y el verificador de membresías aún desconectado. No permitir segundo tenant, publicar ni fusionar PR hasta integrar Identity, roles y pruebas A/B.
 
+## Módulo financiero inicial: solicitudes de reembolso al anular (código preparado)
+
+**En `feature/nexora-ui`; pendiente de compilación, migración y pruebas SQL locales.**
+
+- Nueva entidad `Reembolso` por factura y empresa. FK compuesta e índice único impiden crear dos solicitudes para la misma factura o relacionarlas con otra empresa.
+- La anulación transaccional que ya restauraba stock también crea `Reembolso` en estado **Pendiente** cuando pagos y factura coinciden. Discrepancias/sin pagos/métodos mixtos → **PendienteRevision**.
+- El importe surge de la suma de `Pago.Monto` existente y se conserva el método original: no es igual necesariamente al total de venta.
+- No hay devolución monetaria automática, notas de crédito ni endpoint de aprobación; la confirmación requiere Identity + permisos de administrador por empresa que Russell está desarrollando.
+- `Details` de factura anulada muestra importe, estado y método, sin atribuir reembolso a anulaciones históricas que carezcan del nuevo registro.
+- Migración `20261021193000_CrearReembolsosPendientes`; verificar compilación, respaldo, `Update-Database` y regresión antes de aceptar el hito.
+- Guía: [`docs/REEMBOLSOS_PENDIENTES_PRUEBAS.md`](docs/REEMBOLSOS_PENDIENTES_PRUEBAS.md).
+- **Deuda de seguridad/operación importante**: sigue existiendo el reintegro automático de stock sin prueba física de devolución. Se debe separar recepción de mercancía/anulación y preparar caja, conciliación y devoluciones parciales antes de uso comercial real.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
