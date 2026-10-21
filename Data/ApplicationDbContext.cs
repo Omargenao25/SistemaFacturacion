@@ -38,32 +38,70 @@ namespace SistemaFacturacion.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Protege el historial comercial: los registros relacionados
-            // nunca se borran automáticamente por cascada.
+            // Aislamiento a nivel SQL: toda referencia comercial incluye
+            // IdEmpresa tanto en la fila hija como en la fila principal.
+            // SQL Server rechaza asociaciones entre empresas diferentes.
+            modelBuilder.Entity<Categoria>()
+                .HasAlternateKey(c => new { c.IdEmpresa, c.IdCategoria });
+            modelBuilder.Entity<Cliente>()
+                .HasAlternateKey(c => new { c.IdEmpresa, c.IdCliente });
+            modelBuilder.Entity<Producto>()
+                .HasAlternateKey(p => new { p.IdEmpresa, p.IdProducto });
             modelBuilder.Entity<Factura>()
-                .HasOne(f => f.Cliente)
-                .WithMany()
-                .HasForeignKey(f => f.IdCliente)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasAlternateKey(f => new { f.IdEmpresa, f.IdFactura });
+            modelBuilder.Entity<DetalleFactura>()
+                .HasAlternateKey(d => new { d.IdEmpresa, d.IdDetalle });
 
             modelBuilder.Entity<Producto>()
                 .HasOne(p => p.Categoria)
                 .WithMany()
-                .HasForeignKey(p => p.IdCategoria)
+                .HasForeignKey(p => new { p.IdEmpresa, p.IdCategoria })
+                .HasPrincipalKey(c => new { c.IdEmpresa, c.IdCategoria })
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Factura>()
+                .HasOne(f => f.Cliente)
+                .WithMany()
+                .HasForeignKey(f => new { f.IdEmpresa, f.IdCliente })
+                .HasPrincipalKey(c => new { c.IdEmpresa, c.IdCliente })
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DetalleFactura>()
+                .HasOne(d => d.Factura)
+                .WithMany(f => f.Detalles)
+                .HasForeignKey(d => new { d.IdEmpresa, d.IdFactura })
+                .HasPrincipalKey(f => new { f.IdEmpresa, f.IdFactura })
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<DetalleFactura>()
                 .HasOne(d => d.Producto)
                 .WithMany()
-                .HasForeignKey(d => d.IdProducto)
+                .HasForeignKey(d => new { d.IdEmpresa, d.IdProducto })
+                .HasPrincipalKey(p => new { p.IdEmpresa, p.IdProducto })
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Nunca eliminar en cascada los casos asociados a una venta.
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Factura)
+                .WithMany()
+                .HasForeignKey(p => new { p.IdEmpresa, p.IdFactura })
+                .HasPrincipalKey(f => new { f.IdEmpresa, f.IdFactura })
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<CasoPosventa>()
                 .HasOne(c => c.DetalleFactura)
                 .WithMany()
-                .HasForeignKey(c => c.IdDetalle)
+                .HasForeignKey(c => new { c.IdEmpresa, c.IdDetalle })
+                .HasPrincipalKey(d => new { d.IdEmpresa, d.IdDetalle })
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Conservar los índices de una columna de migraciones anteriores:
+            // además se crean índices compuestos para las nuevas relaciones.
+            modelBuilder.Entity<Producto>().HasIndex(p => p.IdCategoria);
+            modelBuilder.Entity<Factura>().HasIndex(f => f.IdCliente);
+            modelBuilder.Entity<DetalleFactura>().HasIndex(d => d.IdFactura);
+            modelBuilder.Entity<DetalleFactura>().HasIndex(d => d.IdProducto);
+            modelBuilder.Entity<Pago>().HasIndex(p => p.IdFactura);
+            modelBuilder.Entity<CasoPosventa>().HasIndex(c => c.IdDetalle);
 
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
