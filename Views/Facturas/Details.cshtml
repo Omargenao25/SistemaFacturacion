@@ -7,6 +7,11 @@
     var puedeAnular = ViewBag.PuedeAnular is bool permitido && permitido;
     var fechaLimiteAnulacion = ViewBag.FechaLimiteAnulacion is DateTime limite
         ? limite : Model.Fecha.AddDays(7);
+    var nombreCliente = Model.Cliente == null
+        ? "Cliente no disponible"
+        : $"{Model.Cliente.Nombre} {Model.Cliente.Apellido}";
+    var unidadesPorRestaurar = Model.Detalles.Sum(detalle => detalle.Cantidad);
+    var lineasFactura = Model.Detalles.Count;
 }
 
 <div class="nx-details-page">
@@ -28,12 +33,11 @@
             </button>
             @if (puedeAnular)
             {
-                <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-outline-danger"
-                            onclick="return confirm('¿Está seguro de que desea anular esta factura? El inventario será restaurado.');">
-                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Anular factura
-                    </button>
-                </form>
+                <button type="button" class="btn btn-outline-danger nx-void-trigger"
+                        data-bs-toggle="modal" data-bs-target="#nxVoidInvoiceModal"
+                        aria-haspopup="dialog">
+                    <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Anular factura
+                </button>
             }
             else if (!anulada)
             {
@@ -203,3 +207,102 @@
         </div>
     </article>
 </div>
+
+
+@if (puedeAnular)
+{
+    <div class="modal fade nx-void-modal no-print" id="nxVoidInvoiceModal"
+         tabindex="-1" aria-labelledby="nxVoidInvoiceTitle"
+         aria-describedby="nxVoidInvoiceDescription">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="nx-void-modal-header">
+                    <div class="nx-void-modal-icon" aria-hidden="true">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="nx-void-modal-heading">
+                        <span class="nx-void-modal-eyebrow">Operación sensible</span>
+                        <h2 class="modal-title" id="nxVoidInvoiceTitle">Confirmar anulación</h2>
+                        <p>Factura <strong>@Model.NumeroFactura</strong></p>
+                    </div>
+                    <button type="button" class="btn-close nx-void-modal-close"
+                            data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body nx-void-modal-body">
+                    <p class="nx-void-modal-description" id="nxVoidInvoiceDescription">
+                        Revisa los datos de la venta antes de continuar. Si confirmas,
+                        la factura quedará <strong>Anulada</strong> y las unidades vendidas
+                        regresarán al inventario.
+                    </p>
+
+                    <div class="nx-void-modal-summary" aria-label="Resumen de la factura">
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-person me-1" aria-hidden="true"></i> Cliente</span>
+                            <strong>@nombreCliente</strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-calendar3 me-1" aria-hidden="true"></i> Fecha de venta</span>
+                            <strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-box-arrow-in-down me-1" aria-hidden="true"></i> Unidades a restituir</span>
+                            <strong>@unidadesPorRestaurar unidad(es) <small>en @lineasFactura línea(s)</small></strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item nx-void-modal-summary-total">
+                            <span>Total de la factura</span>
+                            <strong>RD$ @Model.Total.ToString("N2")</strong>
+                        </div>
+                    </div>
+
+                    <div class="nx-void-modal-warning" role="note">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        <div>
+                            <strong>Antes de confirmar</strong>
+                            <p>Esta acción afecta al historial y al stock. No genera
+                                automáticamente un reembolso ni una nota de crédito.
+                                El plazo interno de anulación es de 7 días.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-controller="Facturas" asp-action="Anular"
+                      asp-route-id="@Model.IdFactura" method="post"
+                      id="nxVoidInvoiceForm" class="nx-void-modal-footer">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn nx-void-modal-cancel"
+                            data-bs-dismiss="modal">
+                        Mantener factura
+                    </button>
+                    <button type="submit" class="btn btn-danger nx-void-modal-confirm"
+                            id="nxVoidInvoiceConfirm">
+                        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>
+                        Sí, anular factura
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("nxVoidInvoiceForm");
+            const confirmButton = document.getElementById("nxVoidInvoiceConfirm");
+            if (!form || !confirmButton) return;
+
+            let submitting = false;
+            form.addEventListener("submit", (event) => {
+                if (submitting) {
+                    event.preventDefault();
+                    return;
+                }
+                submitting = true;
+                confirmButton.disabled = true;
+                confirmButton.setAttribute("aria-disabled", "true");
+                confirmButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Anulando...';
+            });
+        })();
+    </script>
+}
