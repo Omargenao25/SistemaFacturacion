@@ -44,7 +44,11 @@ namespace SistemaFacturacion.ViewModels
             EstadoReembolso != "Rechazado";
 
         public bool NecesitaConciliacion =>
-            !TieneReembolso || LineasFactura == 0 || RegistrosRecepcion != LineasFactura;
+            !TieneReembolso ||
+            EstadoReembolso == "PendienteRevision" ||
+            EstadoReembolso == "Fallido" ||
+            LineasFactura == 0 ||
+            RegistrosRecepcion != LineasFactura;
 
         public string ClaseReembolso =>
             EstadoReembolso == "Reembolsado" ? "good" :
