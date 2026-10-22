@@ -139,6 +139,16 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - **Deliberadamente no se habilita confirmar recepción ni liberar stock** hasta contar con roles de Russell, una política de inspección física y registro idempotente de movimientos. Queda bloqueado el uso comercial real.
 - Guía y consultas: [`docs/RECEPCIONES_ANULACION_PRUEBAS.md`](docs/RECEPCIONES_ANULACION_PRUEBAS.md). Respaldar, compilar, aplicar migración en Development y probar emisión-anulación con nueva expectativa: stock NO se restaura.
 
+## Inspección y clasificación de mercancía — lectura y simulación (preparada)
+
+- Nueva bandeja `GET /Recepciones` y ficha `GET /Recepciones/Details/{id}`, enlazadas desde menú lateral y detalle de factura anulada.
+- Clasificación **simulada** en apta para venta / cuarentena / reparación / descarte. Reglas puras verifican cantidades no negativas, sumas y límites; resultados calculados por servidor a través de `GET` sin efectos de persistencia.
+- `RecepcionesController` **solo tiene acciones GET**; no se modifica stock, recepción, factura, pago o reembolso. No se añade endpoint de confirmar/guardar hasta contar con los permisos de Russell.
+- Nuevos archivos `Services/Inventario/ReglasInspeccionMercancia.cs`, `ViewModels/InspeccionRecepcionViewModel.cs`, `Controllers/RecepcionesController.cs`, `Views/Recepciones/Index.cshtml` y `Views/Recepciones/Details.cshtml`. Estilos responsive en `site.css`.
+- **No requiere migración SQL nueva.** Compilación y pruebas de navegación/simulación en la máquina del usuario pendientes de confirmar.
+- Guía: [`docs/INSPECCION_MERCANCIA_FASE_PREPARACION.md`](docs/INSPECCION_MERCANCIA_FASE_PREPARACION.md).
+- No operar en público con el contexto de desarrollo heredado; no confirmar inspecciones, liberar stock ni devolver dinero antes de Identity, autorización tenant y auditoría.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
