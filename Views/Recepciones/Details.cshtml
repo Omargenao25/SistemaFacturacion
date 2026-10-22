@@ -81,7 +81,16 @@
             <span class="nx-inspection-simulation-badge">Solo simulación</span>
         </div>
         <div class="nx-inspection-form-wrap">
-            <form asp-action="Details" asp-route-id="@recepcion.IdRecepcion" method="get">
+            @if (pendiente == 0)
+            {
+                <div class="alert alert-info mb-0" role="status">
+                    Esta recepción no tiene unidades pendientes de registrar. La simulación está deshabilitada
+                    y cualquier cambio real seguirá requiriendo autorización y auditoría.
+                </div>
+            }
+            else
+            {
+                <form asp-action="Details" asp-route-id="@recepcion.IdRecepcion" method="get">
                 <input type="hidden" name="simular" value="true" />
                 <div class="row g-3">
                     <div class="col-lg-4 col-md-6">
@@ -134,7 +143,8 @@
                     <a asp-action="Details" asp-route-id="@recepcion.IdRecepcion"
                        class="btn btn-outline-secondary">Limpiar simulación</a>
                 </div>
-            </form>
+                </form>
+            }
 
             @if (Model.Simulacion != null)
             {
