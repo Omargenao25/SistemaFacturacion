@@ -163,6 +163,13 @@
                     <span>Recepciones</span>
                 </a>
 
+                <a asp-controller="ControlAnulaciones"
+                   asp-action="Index"
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ControlAnulaciones" ? "active" : "")">
+                    <i class="bi bi-clipboard-data" aria-hidden="true"></i>
+                    <span>Control de anulaciones</span>
+                </a>
+
                 <a asp-controller="Reportes"
                    asp-action="Index"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reportes" ? "active" : "")">
