@@ -1267,3 +1267,251 @@ body { color: var(--nx-ink); }
     .nx-return-tracking-status { max-width: 100%; white-space: normal; }
 }
 @media print { .nx-return-tracking { display: none !important; } }
+
+/* NEXORA / Recepciones e inspección (simulación de solo lectura) */
+.nx-inspection-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 17px 20px;
+    margin-bottom: 19px;
+    border: 1px solid #bed4f5;
+    border-radius: 13px;
+    background: #f0f6ff;
+    color: #27538c;
+}
+.nx-inspection-notice > i {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    background: #dceaff;
+}
+.nx-inspection-notice strong { font-size: .89rem; }
+.nx-inspection-notice p { margin: 5px 0 0; font-size: .83rem; line-height: 1.6; }
+.nx-inspection-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+.nx-inspection-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #e4eaf3;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(20, 38, 70, .035);
+}
+.nx-inspection-metric span {
+    color: #667b98;
+    font-size: .77rem;
+    font-weight: 650;
+}
+.nx-inspection-metric strong {
+    color: #1a376a;
+    font-size: 1.7rem;
+    font-weight: 830;
+    font-variant-numeric: tabular-nums;
+    margin: 6px 0;
+}
+.nx-inspection-metric small { color: #7b8ca6; font-size: .73rem; }
+.nx-inspection-table td { vertical-align: middle; }
+.nx-inspection-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr);
+    gap: 17px;
+    margin-bottom: 22px;
+}
+.nx-inspection-hero {
+    border-radius: 17px;
+    padding: 25px;
+    background: linear-gradient(135deg, #16396e 0%, #2563d7 100%);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(22, 72, 153, .16);
+}
+.nx-inspection-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+.nx-inspection-kicker {
+    color: #d5e5ff;
+    text-transform: uppercase;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    font-weight: 750;
+}
+.nx-inspection-hero .nx-status.warn {
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    border-color: rgba(255,255,255,.28);
+}
+.nx-inspection-hero h2 {
+    margin: 14px 0 5px;
+    font-size: 1.45rem;
+    line-height: 1.25;
+    font-weight: 840;
+}
+.nx-inspection-hero-subtitle {
+    color: #dce9ff;
+    font-size: .84rem;
+    overflow-wrap: anywhere;
+}
+.nx-inspection-hero-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+}
+.nx-inspection-hero-numbers > div {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,.11);
+    border: 1px solid rgba(255,255,255,.17);
+    border-radius: 11px;
+    padding: 12px 14px;
+}
+.nx-inspection-hero-numbers span { color: #dbeafe; font-size: .72rem; }
+.nx-inspection-hero-numbers strong {
+    margin-top: 4px;
+    font-size: 1.45rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.nx-inspection-origin {
+    border-radius: 17px;
+    border: 1px solid #e3e9f4;
+    padding: 24px;
+    background: #fff;
+}
+.nx-inspection-origin h3 {
+    margin: 0 0 16px;
+    font-size: .97rem;
+    font-weight: 800;
+    color: #1f355b;
+}
+.nx-inspection-origin dl { margin: 0; }
+.nx-inspection-origin dl > div {
+    padding: 10px 0;
+    border-bottom: 1px solid #edf1f7;
+}
+.nx-inspection-origin dl > div:last-child { border-bottom: none; }
+.nx-inspection-origin dt { color: #7888a0; font-size: .72rem; margin-bottom: 3px; }
+.nx-inspection-origin dd {
+    font-weight: 700;
+    font-size: .84rem;
+    color: #284166;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.nx-inspection-workspace { overflow: hidden; }
+.nx-inspection-form-wrap { padding: 24px; }
+.nx-inspection-small-heading {
+    font-size: .89rem;
+    font-weight: 800;
+    color: #263d62;
+    margin: 5px 0 7px;
+}
+.nx-inspection-simulation-badge {
+    display: inline-block;
+    white-space: nowrap;
+    border: 1px solid #bed4ff;
+    border-radius: 40px;
+    color: #2b5eb2;
+    background: #eef5ff;
+    font-size: .74rem;
+    font-weight: 750;
+    padding: 7px 11px;
+}
+.nx-inspection-option {
+    display: flex;
+    flex-direction: column;
+    min-height: 110px;
+    gap: 8px;
+    border: 1px solid #e0e9f4;
+    border-radius: 11px;
+    padding: 13px 12px;
+    margin-bottom: 8px;
+    background: #f9fbff;
+}
+.nx-inspection-option span { font-size: .82rem; font-weight: 800; }
+.nx-inspection-option small { font-size: .74rem; line-height: 1.45; color: #74859c; }
+.nx-inspection-option.is-good span { color: #23734c; }
+.nx-inspection-option.is-warn span { color: #9b6818; }
+.nx-inspection-option.is-service span { color: #3262ab; }
+.nx-inspection-option.is-danger span { color: #b63747; }
+.nx-inspection-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+.nx-inspection-actions .btn { border-radius: 10px; font-weight: 700; }
+.nx-inspection-result {
+    border: 1px solid #bcdcc9;
+    background: #f3fbf5;
+    border-radius: 12px;
+    padding: 19px;
+    color: #266145;
+}
+.nx-inspection-result-heading { font-weight: 800; margin-bottom: 14px; }
+.nx-inspection-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 13px;
+}
+.nx-inspection-result-grid > div {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cce5d5;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+}
+.nx-inspection-result-grid span { color: #527763; font-size: .71rem; }
+.nx-inspection-result-grid strong {
+    color: #1c6141;
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
+}
+.nx-inspection-result-grid small { color: #6e927c; font-size: .7rem; }
+.nx-inspection-result p { font-size: .82rem; }
+.nx-inspection-footer-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin: 15px 0 0;
+    color: #64748b;
+    font-size: .8rem;
+    line-height: 1.6;
+}
+.nx-inspection-inline-link {
+    display: block;
+    color: #2563b3;
+    font-size: .73rem;
+    font-weight: 750;
+    margin-top: 6px;
+    text-decoration: none;
+}
+.nx-inspection-inline-link:hover { color: #15458a; text-decoration: underline; }
+@media (max-width: 900px) {
+    .nx-inspection-overview { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+    .nx-inspection-metrics, .nx-inspection-result-grid { grid-template-columns: 1fr; }
+    .nx-inspection-form-wrap, .nx-inspection-hero, .nx-inspection-origin { padding: 18px; }
+    .nx-inspection-actions .btn { flex: 1 1 100%; }
+    .nx-inspection-hero h2 { font-size: 1.26rem; }
+    .nx-inspection-notice { padding: 14px; }
+}
+@media print {
+    .nx-inspection-page { display: none !important; }
+}
