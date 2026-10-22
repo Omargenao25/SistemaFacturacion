@@ -135,7 +135,14 @@
                                     <td>@(linea?.Producto?.Nombre ?? "Producto no disponible")</td>
                                     <td class="text-center">@recepcion.CantidadEsperada</td>
                                     <td class="text-center">@recepcion.CantidadRecibida</td>
-                                    <td><span class="nx-status warn">@recepcion.Estado</span></td>
+                                    <td>
+                                        <span class="nx-status warn">@recepcion.Estado</span>
+                                        <a asp-controller="Recepciones" asp-action="Details"
+                                           asp-route-id="@recepcion.IdRecepcion"
+                                           class="nx-inspection-inline-link no-print">
+                                            Simular inspección <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
