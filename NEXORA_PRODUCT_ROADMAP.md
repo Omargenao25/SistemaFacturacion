@@ -149,6 +149,15 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/INSPECCION_MERCANCIA_FASE_PREPARACION.md`](docs/INSPECCION_MERCANCIA_FASE_PREPARACION.md).
 - No operar en público con el contexto de desarrollo heredado; no confirmar inspecciones, liberar stock ni devolver dinero antes de Identity, autorización tenant y auditoría.
 
+## Centro de control de anulaciones (lectura operativa preparada)
+
+- Nueva ruta `GET /ControlAnulaciones`: panel por factura **Anulada**, con saldo de solicitud financiera, estado de recepción física, datos faltantes y acceso al detalle comercial.
+- Búsqueda por factura/cliente y paginación SQL de 25 facturas. Indicadores expresamente **limitados a la página visible**, sin multiplicar reembolsos por número de productos.
+- Detecta anulaciones antiguas sin solicitud/recepción y líneas de recepción incompletas como pendientes de conciliación, sin fabricar comprobantes ni movimientos históricos.
+- Archivos `Controllers/ControlAnulacionesController.cs`, `ViewModels/ControlAnulacionesViewModel.cs`, `Views/ControlAnulaciones/Index.cshtml`, menú y CSS.
+- **Solo GET, sin migración ni escrituras**. La autorización global y por empresa de Russell sigue pendiente. Guía: [`docs/CENTRO_CONTROL_ANULACIONES_PRUEBAS.md`](docs/CENTRO_CONTROL_ANULACIONES_PRUEBAS.md).
+- Implementación y revisión estática en GitHub: pendiente `Ctrl+Shift+B` y comprobación visual/funcional local. No desplegar públicamente ni fusionar PR.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
