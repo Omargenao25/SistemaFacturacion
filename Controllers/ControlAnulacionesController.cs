@@ -133,7 +133,7 @@ namespace SistemaFacturacion.Controllers
                         registros.Count == item.LineasFactura)
                     {
                         item.UnidadesPendientes = registros.Sum(r =>
-                            Math.Max(0, r.CantidadEsperada - r.CantidadRecibida));
+                            Math.Max(0L, (long)r.CantidadEsperada - r.CantidadRecibida));
 
                         item.EstadoMercancia = registros.All(r => r.Estado == "Completada")
                             ? "Completada"
