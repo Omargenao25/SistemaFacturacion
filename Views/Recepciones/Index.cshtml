@@ -1,0 +1,116 @@
+@model IReadOnlyList<SistemaFacturacion.Models.RecepcionAnulacion>
+@{
+    ViewData["Title"] = "Recepción de mercancía";
+    var estado = ViewBag.Estado as string ?? "";
+    var pendientes = Model.Sum(r => Math.Max(0, r.CantidadEsperada - r.CantidadRecibida));
+    var sinRecepcion = Model.Count(r => r.Estado == "Pendiente");
+}
+<div class="nx-crud-page nx-inspection-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Operaciones / Inventario</div>
+            <h1 class="page-title">Recepción e inspección</h1>
+            <p class="page-subtitle">Mercancía asociada a facturas anuladas, todavía sin incorporar al inventario disponible.</p>
+        </div>
+        <a asp-controller="Facturas" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial de facturas
+        </a>
+    </div>
+
+    <div class="nx-inspection-notice" role="note">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <div>
+            <strong>Control de recepción en preparación</strong>
+            <p>La bandeja permite consultar y simular inspecciones. Por seguridad no se puede
+               confirmar mercancía recibida, aprobar su estado ni liberar existencias hasta integrar permisos verificados.</p>
+        </div>
+    </div>
+
+    <div class="nx-inspection-metrics">
+        <div class="nx-inspection-metric">
+            <span>Registros en este filtro</span><strong>@Model.Count</strong>
+            <small>Una recepción por línea facturada</small>
+        </div>
+        <div class="nx-inspection-metric">
+            <span>Unidades sin recibir</span><strong>@pendientes</strong>
+            <small>No están disponibles para vender</small>
+        </div>
+        <div class="nx-inspection-metric">
+            <span>Recepciones pendientes</span><strong>@sinRecepcion</strong>
+            <small>Sin confirmación física</small>
+        </div>
+    </div>
+
+    <section class="nx-panel" aria-labelledby="nx-inspection-list-title">
+        <div class="nx-panel-header">
+            <div>
+                <h2 class="nx-panel-title" id="nx-inspection-list-title">Control de devoluciones físicas</h2>
+                <p class="nx-panel-subtitle">Abre una recepción para revisar sus cantidades y ensayar una clasificación sin guardar.</p>
+            </div>
+        </div>
+        <div class="p-3 border-bottom">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <div class="col-md-6 col-lg-4">
+                    <label class="form-label" for="nxFiltroRecepcion">Estado de la recepción</label>
+                    <select class="form-select" name="estado" id="nxFiltroRecepcion">
+                        <option value="" selected="@(estado == "")">Todos</option>
+                        <option value="Pendiente" selected="@(estado == "Pendiente")">Pendiente</option>
+                        <option value="Parcial" selected="@(estado == "Parcial")">Parcial</option>
+                        <option value="EnInspeccion" selected="@(estado == "EnInspeccion")">En inspección</option>
+                        <option value="Completada" selected="@(estado == "Completada")">Completada</option>
+                        <option value="NoRecibida" selected="@(estado == "NoRecibida")">No recibida</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Filtrar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-1">Limpiar</a>
+                </div>
+            </form>
+        </div>
+        @if (Model.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-box-seam" aria-hidden="true"></i>
+                <strong>Sin recepciones en este filtro</strong>
+                <p class="mb-0">Las nuevas facturas anuladas generarán registros de mercancía pendiente.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover nx-table nx-inspection-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Recepción</th>
+                            <th scope="col">Factura</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col" class="text-center">Esperadas</th>
+                            <th scope="col" class="text-center">Recibidas</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col" class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var registro in Model)
+                        {
+                            <tr>
+                                <td><span class="nx-invoice-code">REC-@registro.IdRecepcion.ToString("D5")</span></td>
+                                <td>@(registro.DetalleFactura?.Factura?.NumeroFactura ?? "—")</td>
+                                <td class="fw-semibold">@(registro.DetalleFactura?.Producto?.Nombre ?? "Producto no disponible")</td>
+                                <td class="text-center nx-mono">@registro.CantidadEsperada</td>
+                                <td class="text-center nx-mono">@registro.CantidadRecibida</td>
+                                <td><span class="nx-status @(registro.Estado == "Completada" ? "good" : "warn")">@registro.Estado</span></td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@registro.IdRecepcion"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i> Revisar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
