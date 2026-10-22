@@ -14,7 +14,7 @@ namespace SistemaFacturacion.ViewModels
         // Los indicadores se refieren EXCLUSIVAMENTE a la página cargada.
         public int FacturasConSolicitudAbierta { get; set; }
         public decimal MontoSolicitudesAbiertas { get; set; }
-        public int UnidadesPorRecibirRegistradas { get; set; }
+        public long UnidadesPorRecibirRegistradas { get; set; }
         public int FacturasConDatosPorConciliar { get; set; }
 
         public List<ControlAnulacionItem> Facturas { get; set; } = new();
@@ -34,7 +34,7 @@ namespace SistemaFacturacion.ViewModels
         public string? MetodoPagoOriginal { get; set; }
 
         public string EstadoMercancia { get; set; } = "Sin registro";
-        public int? UnidadesPendientes { get; set; }
+        public long? UnidadesPendientes { get; set; }
         public int RegistrosRecepcion { get; set; }
         public int LineasFactura { get; set; }
 
@@ -44,7 +44,7 @@ namespace SistemaFacturacion.ViewModels
             EstadoReembolso != "Rechazado";
 
         public bool NecesitaConciliacion =>
-            !TieneReembolso || RegistrosRecepcion != LineasFactura;
+            !TieneReembolso || LineasFactura == 0 || RegistrosRecepcion != LineasFactura;
 
         public string ClaseReembolso =>
             EstadoReembolso == "Reembolsado" ? "good" :
