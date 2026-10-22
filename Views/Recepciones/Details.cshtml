@@ -1,0 +1,189 @@
+@model SistemaFacturacion.ViewModels.InspeccionRecepcionViewModel
+@{
+    ViewData["Title"] = "Inspección de mercancía";
+    var recepcion = Model.Recepcion;
+    var detalle = recepcion.DetalleFactura;
+    var factura = detalle?.Factura;
+    var producto = detalle?.Producto;
+    var pendiente = Math.Max(0, recepcion.CantidadEsperada - recepcion.CantidadRecibida);
+    var cliente = factura?.Cliente == null
+        ? "Cliente no disponible"
+        : $"{factura.Cliente.Nombre} {factura.Cliente.Apellido}";
+}
+<div class="nx-crud-page nx-inspection-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Recepciones / REC-@recepcion.IdRecepcion.ToString("D5")</div>
+            <h1 class="page-title">Inspección de mercancía</h1>
+            <p class="page-subtitle">Consulta los datos reales y simula una clasificación sin registrar operaciones.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a recepciones
+        </a>
+    </div>
+
+    <div class="nx-inspection-notice" role="note">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <div>
+            <strong>Modo simulación — ninguna acción se guarda</strong>
+            <p>Este módulo todavía no permite recibir productos, cambiar su estado ni devolver unidades al stock.
+               La recepción real requerirá autenticación, autorización, evidencia y auditoría.</p>
+        </div>
+    </div>
+
+    <div class="nx-inspection-overview">
+        <div class="nx-inspection-hero">
+            <div class="nx-inspection-hero-top">
+                <span class="nx-inspection-kicker">Mercancía pendiente</span>
+                <span class="nx-status warn">@recepcion.Estado</span>
+            </div>
+            <h2>@(producto?.Nombre ?? "Producto no disponible")</h2>
+            <p class="nx-inspection-hero-subtitle">@(producto?.Codigo ?? "Sin código") · REC-@recepcion.IdRecepcion.ToString("D5")</p>
+            <div class="nx-inspection-hero-numbers">
+                <div><span>Esperadas</span><strong>@recepcion.CantidadEsperada</strong></div>
+                <div><span>Ya recibidas</span><strong>@recepcion.CantidadRecibida</strong></div>
+                <div><span>Por recibir</span><strong>@pendiente</strong></div>
+                <div><span>Liberadas al stock</span><strong>@recepcion.CantidadLiberada</strong></div>
+            </div>
+        </div>
+        <div class="nx-inspection-origin">
+            <h3>Referencia comercial</h3>
+            <dl>
+                <div><dt>Factura</dt><dd>
+                    @if (factura != null)
+                    {
+                        <a asp-controller="Facturas" asp-action="Details" asp-route-id="@factura.IdFactura">
+                            @factura.NumeroFactura
+                        </a>
+                    }
+                    else
+                    {
+                        <span>No disponible</span>
+                    }
+                </dd></div>
+                <div><dt>Cliente</dt><dd>@cliente</dd></div>
+                <div><dt>Fecha de registro</dt><dd>@recepcion.FechaCreacionUtc.ToString("dd/MM/yyyy HH:mm") UTC</dd></div>
+                <div><dt>Estado de factura</dt><dd>@(factura?.Estado ?? "No disponible")</dd></div>
+                <div><dt>Registro</dt><dd>Por detalle de venta, sin movimiento automático de mercancía</dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <section class="nx-panel nx-inspection-workspace" aria-labelledby="nx-inspection-simulator">
+        <div class="nx-panel-header">
+            <div>
+                <h2 id="nx-inspection-simulator" class="nx-panel-title">
+                    <i class="bi bi-clipboard2-check me-2 text-primary" aria-hidden="true"></i>
+                    Simulador de inspección
+                </h2>
+                <p class="nx-panel-subtitle">Las cantidades se validan con reglas del servidor, pero el resultado no se guarda.</p>
+            </div>
+            <span class="nx-inspection-simulation-badge">Solo simulación</span>
+        </div>
+        <div class="nx-inspection-form-wrap">
+            <form asp-action="Details" asp-route-id="@recepcion.IdRecepcion" method="get">
+                <input type="hidden" name="simular" value="true" />
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label" for="cantidadNueva">Unidades que se reciben (simulación)</label>
+                        <input class="form-control" type="number" id="cantidadNueva" name="cantidadNueva"
+                               min="1" max="@pendiente" value="@Model.CantidadNueva" required />
+                        <div class="form-text">Máximo pendiente actualmente: @pendiente.</div>
+                    </div>
+                    <div class="col-12">
+                        <h3 class="nx-inspection-small-heading">Distribución por estado físico</h3>
+                        <p class="text-muted small">La suma de las cuatro categorías debe coincidir con las unidades simuladas como recibidas.</p>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <label class="nx-inspection-option is-good" for="cantidadApta">
+                            <span><i class="bi bi-check-circle me-1" aria-hidden="true"></i> Apto para venta</span>
+                            <small>Podría incorporarse al stock tras autorización.</small>
+                        </label>
+                        <input class="form-control" type="number" id="cantidadApta" name="cantidadApta"
+                               min="0" value="@Model.CantidadApta" required />
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <label class="nx-inspection-option is-warn" for="cantidadCuarentena">
+                            <span><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i> Cuarentena</span>
+                            <small>Sin venta hasta que termine la revisión.</small>
+                        </label>
+                        <input class="form-control" type="number" id="cantidadCuarentena" name="cantidadCuarentena"
+                               min="0" value="@Model.CantidadCuarentena" required />
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <label class="nx-inspection-option is-service" for="cantidadReparacion">
+                            <span><i class="bi bi-wrench-adjustable me-1" aria-hidden="true"></i> Reparación</span>
+                            <small>Necesita intervención antes de su evaluación.</small>
+                        </label>
+                        <input class="form-control" type="number" id="cantidadReparacion" name="cantidadReparacion"
+                               min="0" value="@Model.CantidadReparacion" required />
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <label class="nx-inspection-option is-danger" for="cantidadDescartada">
+                            <span><i class="bi bi-x-octagon me-1" aria-hidden="true"></i> Descarte</span>
+                            <small>No apto para comercialización.</small>
+                        </label>
+                        <input class="form-control" type="number" id="cantidadDescartada" name="cantidadDescartada"
+                               min="0" value="@Model.CantidadDescartada" required />
+                    </div>
+                </div>
+                <div class="nx-inspection-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator me-1" aria-hidden="true"></i> Simular clasificación
+                    </button>
+                    <a asp-action="Details" asp-route-id="@recepcion.IdRecepcion"
+                       class="btn btn-outline-secondary">Limpiar simulación</a>
+                </div>
+            </form>
+
+            @if (Model.Simulacion != null)
+            {
+                @if (!Model.Simulacion.EsValida)
+                {
+                    <div class="alert alert-warning mt-4 mb-0" role="alert">
+                        <strong><i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i> Cantidades inválidas</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach (var error in Model.Simulacion.Errores)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="nx-inspection-result mt-4" role="status">
+                        <div class="nx-inspection-result-heading">
+                            <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+                            Simulación válida — sin cambios reales
+                        </div>
+                        <div class="nx-inspection-result-grid">
+                            <div>
+                                <span>Aptas propuestas</span>
+                                <strong>@Model.Simulacion.CantidadPropuestaApta</strong>
+                                <small>No agregadas al inventario</small>
+                            </div>
+                            <div>
+                                <span>Retenidas propuestas</span>
+                                <strong>@Model.Simulacion.CantidadPropuestaRetenida</strong>
+                                <small>Cuarentena, reparación o descarte</small>
+                            </div>
+                            <div>
+                                <span>Seguirían pendientes</span>
+                                <strong>@Model.Simulacion.CantidadPendienteTrasSimulacion</strong>
+                                <small>Cantidad no recibida físicamente</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">No se ha guardado ninguna inspección. El inventario y el dinero permanecen intactos.</p>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <div class="nx-inspection-footer-note">
+        <i class="bi bi-info-circle me-2" aria-hidden="true"></i>
+        <span><strong>Siguiente etapa:</strong> crear recepciones reales con autorización por empresa, registro de responsable,
+            fecha, evidencia del estado físico y liberación parcial de existencias sin duplicados.</span>
+    </div>
+</div>
