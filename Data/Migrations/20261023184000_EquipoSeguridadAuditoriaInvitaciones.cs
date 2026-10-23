@@ -72,9 +72,11 @@ CREATE INDEX IX_AuditoriaMembresias_EmpresaFecha
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-DROP TABLE IF EXISTS dbo.AuditoriaMembresias;
-DROP TABLE IF EXISTS dbo.InvitacionesEmpresa;");
+            // Evitar borrar accidentalmente registros de seguridad (historial
+            // de roles, invitaciones y revocaciones). El rollback requiere un
+            // procedimiento de conservación de evidencias revisado aparte.
+            throw new NotSupportedException(
+                "La migración de auditoría no puede revertirse automáticamente sin pérdida de registros.");
         }
     }
 }
