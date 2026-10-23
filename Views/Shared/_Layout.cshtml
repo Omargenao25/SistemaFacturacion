@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using SistemaFacturacion.Security
+@inject SistemaFacturacion.Services.Tenancy.ContextoEmpresaVerificado EquipoEmpresaActual
+
+<!DOCTYPE html>
 
 <html lang="es">
 
@@ -182,6 +185,20 @@
 
                 </a>
 
+
+                @if (EquipoEmpresaActual.TieneEmpresa &&
+                     PermisosNexora.TienePermiso(
+                         EquipoEmpresaActual.RolEmpresa, PermisosNexora.AdministrarUsuarios))
+                {
+                    <div class="menu-title">ADMINISTRACIÓN</div>
+                    <a asp-controller="Equipo"
+                       asp-action="Index"
+                       asp-route-empresaSlug="@(ViewContext.RouteData.Values["empresaSlug"])"
+                       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Equipo" ? "active" : "")">
+                        <i class="bi bi-person-gear" aria-hidden="true"></i>
+                        <span>Mi equipo</span>
+                    </a>
+                }
 
             </nav>
 
