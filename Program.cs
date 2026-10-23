@@ -83,6 +83,12 @@ var rutaMvc = app.MapControllerRoute(
 if (!app.Environment.IsDevelopment())
     rutaMvc.RequireAuthorization();
 
+// Las rutas con atributos (como el diagnóstico empresarial) también quedan
+// registradas explícitamente y exigen autenticación fuera de Development.
+var rutasAtributo = app.MapControllers();
+if (!app.Environment.IsDevelopment())
+    rutasAtributo.RequireAuthorization();
+
 app.MapRazorPages();
 
 app.Run();
