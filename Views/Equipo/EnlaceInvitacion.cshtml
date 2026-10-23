@@ -1,0 +1,36 @@
+@model string
+@{
+    ViewData["Title"] = "Invitación generada";
+}
+<div class="nx-crud-page nx-team-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Mi equipo / Invitaciones</div>
+            <h1 class="page-title">Enlace de invitación generado</h1>
+            <p class="page-subtitle">Este enlace es secreto y solo se mostrará una vez.</p>
+        </div>
+    </div>
+    <div class="nx-team-banner" role="note">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <div>
+            <strong>No enviamos correos automáticamente</strong>
+            <p>Comparte el enlace personalmente con el destinatario mediante un canal privado.
+               Caduca en 48 horas, funciona una sola vez y exige que quien lo acepte
+               tenga una cuenta de Nexora con el mismo correo confirmado.</p>
+        </div>
+    </div>
+    <section class="nx-panel p-4">
+        <label for="nxInvitationLink" class="form-label">Enlace de un solo uso</label>
+        <input type="text" id="nxInvitationLink" class="form-control" value="@Model"
+               readonly autocomplete="off" spellcheck="false" />
+        <div class="mt-3 d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary"
+                    onclick="navigator.clipboard.writeText(document.getElementById('nxInvitationLink').value).then(() => { this.textContent = 'Copiado'; }).catch(() => { document.getElementById('nxInvitationLink').select(); })">
+                Copiar enlace
+            </button>
+            <a asp-action="Index" asp-route-empresaSlug="@ViewContext.RouteData.Values["empresaSlug"]"
+               class="btn btn-outline-secondary">Volver a Mi equipo</a>
+        </div>
+        <p class="text-muted small mt-3 mb-0">No compartas este enlace públicamente ni lo incluyas en capturas.</p>
+    </section>
+</div>
