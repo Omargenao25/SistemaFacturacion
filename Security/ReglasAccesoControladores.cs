@@ -66,6 +66,12 @@ namespace SistemaFacturacion.Security
                 // Ningún método POST está autorizado en esta fase.
                 ("Equipo", "Index", "GET") =>
                     PermisosNexora.AdministrarUsuarios,
+                ("Equipo", "CambiarRol", "POST") =>
+                    PermisosNexora.AdministrarRoles,
+                ("Equipo", "CambiarEstado", "POST") =>
+                    PermisosNexora.AdministrarUsuarios,
+                ("Equipo", "CrearInvitacion", "POST") =>
+                    PermisosNexora.AdministrarUsuarios,
 
                 // La política del controlador es una segunda capa. El filtro
                 // nunca permite un método de escritura sobre el diagnóstico.
