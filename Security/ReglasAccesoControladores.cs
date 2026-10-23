@@ -61,6 +61,12 @@ namespace SistemaFacturacion.Security
                 ("Reportes", "Index", "GET") =>
                     PermisosNexora.ConsultarReportes,
 
+                // Empleados contiene correos/roles; solo el propietario con
+                // membresía verificada puede consultar este endpoint.
+                // Ningún método POST está autorizado en esta fase.
+                ("Equipo", "Index", "GET") =>
+                    PermisosNexora.AdministrarUsuarios,
+
                 // La política del controlador es una segunda capa. El filtro
                 // nunca permite un método de escritura sobre el diagnóstico.
                 ("SeguridadEmpresa", "Estado", "GET") =>
