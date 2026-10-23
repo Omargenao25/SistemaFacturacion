@@ -232,6 +232,51 @@
         }
     </section>
 
+    <section class="nx-panel mb-4" aria-labelledby="nxTeamAudit">
+        <div class="nx-panel-header">
+            <div>
+                <h2 id="nxTeamAudit" class="nx-panel-title">Actividad de seguridad</h2>
+                <p class="nx-panel-subtitle">Últimas 20 operaciones auditadas en esta empresa.</p>
+            </div>
+        </div>
+        @if (Model.AuditoriaReciente.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <strong>Todavía no hay cambios administrativos registrados</strong>
+                <p class="mb-0">Las nuevas invitaciones y modificaciones aparecerán aquí.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table nx-table nx-team-audit-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Cuándo (UTC)</th>
+                            <th scope="col">Responsable</th>
+                            <th scope="col">Operación</th>
+                            <th scope="col">Empleado / invitación</th>
+                            <th scope="col">Antes y después</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.AuditoriaReciente)
+                        {
+                            <tr>
+                                <td>@ev.FechaUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@ev.Actor</td>
+                                <td><span class="nx-team-role">@ev.Accion</span></td>
+                                <td>@ev.Afectado</td>
+                                <td class="nx-team-audit-description">@ev.Descripcion</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
     <section class="nx-panel" aria-labelledby="nxTeamPolicies">
         <div class="nx-panel-header">
             <div>
