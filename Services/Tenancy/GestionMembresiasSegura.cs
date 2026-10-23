@@ -289,6 +289,10 @@ SELECT i.IdInvitacion, i.IdEmpresa, i.EmailNormalizado, i.Rol,
 FROM dbo.InvitacionesEmpresa i WITH (UPDLOCK, HOLDLOCK)
 INNER JOIN dbo.Empresas e WITH (HOLDLOCK)
  ON e.IdEmpresa = i.IdEmpresa AND e.Estado = N'Activa'
+INNER JOIN dbo.EmpresaUsuarios creador WITH (HOLDLOCK)
+ ON creador.IdEmpresa = i.IdEmpresa AND creador.UserId = i.CreadoPorUserId
+ AND creador.Rol = N'Propietario' AND creador.Estado = N'Activo'
+ AND creador.FechaBajaUtc IS NULL
 WHERE i.TokenHash = @Hash;";
                     await using var cmd = Comando(conexion, tx, sql);
                     Param(cmd, "@Hash", SqlDbType.VarBinary, hash, 32);
@@ -332,24 +336,32 @@ WHERE IdEmpresa = @Empresa AND UserId = @Usuario;";
                         throw new InvalidOperationException(
                             "Tu cuenta ya está asociada a esta empresa.");
                 }
+                // Cada instrucción se valida por separado dentro de la MISMA
+                // transacción; si el token ya no es válido, se revierte el alta.
                 {
                     const string sql = @"
 INSERT INTO dbo.EmpresaUsuarios
  (IdEmpresa, UserId, Rol, Estado, FechaAltaUtc, FechaBajaUtc)
-VALUES (@Empresa, @Usuario, @Rol, N'Activo', SYSUTCDATETIME(), NULL);
-
+VALUES (@Empresa, @Usuario, @Rol, N'Activo', SYSUTCDATETIME(), NULL);";
+                    await using var cmd = Comando(conexion, tx, sql);
+                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, empresaId);
+                    Param(cmd, "@Usuario", SqlDbType.NVarChar, usuario, 450);
+                    Param(cmd, "@Rol", SqlDbType.NVarChar, rol, 30);
+                    if (await cmd.ExecuteNonQueryAsync(ct) != 1)
+                        throw new InvalidOperationException("No se pudo vincular al empleado.");
+                }
+                {
+                    const string sql = @"
 UPDATE dbo.InvitacionesEmpresa
 SET Estado = N'Aceptada', ConsumidoUtc = SYSUTCDATETIME(),
     ConsumidoPorUserId = @Usuario
 WHERE IdInvitacion = @Id AND Estado = N'Pendiente'
   AND VenceUtc > SYSUTCDATETIME();";
                     await using var cmd = Comando(conexion, tx, sql);
-                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, empresaId);
                     Param(cmd, "@Usuario", SqlDbType.NVarChar, usuario, 450);
-                    Param(cmd, "@Rol", SqlDbType.NVarChar, rol, 30);
                     Param(cmd, "@Id", SqlDbType.UniqueIdentifier, id);
-                    if (await cmd.ExecuteNonQueryAsync(ct) != 2)
-                        throw new InvalidOperationException("No pudo completarse la invitación.");
+                    if (await cmd.ExecuteNonQueryAsync(ct) != 1)
+                        throw new InvalidOperationException("La invitación ya fue utilizada o caducó.");
                 }
 
                 await AuditarAsync(conexion, tx, usuario, usuario, id,
