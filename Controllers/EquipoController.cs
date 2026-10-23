@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
@@ -9,7 +11,7 @@ using SistemaFacturacion.ViewModels;
 namespace SistemaFacturacion.Controllers
 {
     /// <summary>
-    /// Directorio empresarial de solo lectura para propietarios autenticados.
+    /// Directorio y administración auditada de membresías para propietarios.
     /// EmpresaUsuarios es una tabla GLOBAL: siempre limitar su consulta al
     /// IdEmpresa verificado por el servidor, antes de contar y proyectar.
     /// </summary>
@@ -19,13 +21,19 @@ namespace SistemaFacturacion.Controllers
         private const int TamanoPagina = 20;
         private readonly ApplicationDbContext _context;
         private readonly ContextoEmpresaVerificado _empresa;
+        private readonly GestionMembresiasSegura _gestion;
+        private readonly ILogger<EquipoController> _log;
 
         public EquipoController(
             ApplicationDbContext context,
-            ContextoEmpresaVerificado empresa)
+            ContextoEmpresaVerificado empresa,
+            GestionMembresiasSegura gestion,
+            ILogger<EquipoController> log)
         {
             _context = context;
             _empresa = empresa;
+            _gestion = gestion;
+            _log = log;
         }
 
         [HttpGet]
@@ -109,6 +117,8 @@ namespace SistemaFacturacion.Controllers
                 .Take(TamanoPagina)
                 .Select(m => new MiembroEmpresaItem
                 {
+                    UserId = m.UserId,
+                    RowVersion = m.RowVersion,
                     NombreUsuario = m.Usuario == null
                         ? "Usuario no disponible"
                         : (m.Usuario.UserName ?? "Usuario no disponible"),
@@ -138,7 +148,147 @@ namespace SistemaFacturacion.Controllers
                 });
             }
 
+            var actorActual = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            modelo.AuditoriaReciente = await _gestion.UltimosEventosAsync(
+                actorActual, cancellationToken);
             return View(modelo);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = PermisosNexora.AdministrarRoles)]
+        public async Task<IActionResult> CambiarRol(
+            string usuarioId, string version, string nuevoRol,
+            CancellationToken cancellationToken)
+        {
+            if (!_empresa.TieneEmpresa)
+                return Forbid();
+            try
+            {
+                var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var bytes = Convert.FromBase64String(version ?? "");
+                await _gestion.CambiarAsync(actor, usuarioId, bytes,
+                    "Rol", nuevoRol, cancellationToken);
+                TempData["EquipoMensaje"] = "Rol actualizado y registrado en la auditoría.";
+            }
+            catch (FormatException)
+            {
+                TempData["EquipoError"] = "Actualiza la página antes de modificar un empleado.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["EquipoError"] = ex.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (SqlException ex)
+            {
+                _log.LogError(ex, "Fallo al cambiar rol de empleado");
+                TempData["EquipoError"] = "No se pudo guardar el cambio. Consulta los registros.";
+            }
+            return RedirectToAction(nameof(Index), new
+            {
+                empresaSlug = RouteData.Values["empresaSlug"]
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarEstado(
+            string usuarioId, string version, string accion,
+            CancellationToken cancellationToken)
+        {
+            if (!_empresa.TieneEmpresa)
+                return Forbid();
+            try
+            {
+                var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var bytes = Convert.FromBase64String(version ?? "");
+                await _gestion.CambiarAsync(actor, usuarioId, bytes,
+                    accion, null, cancellationToken);
+                TempData["EquipoMensaje"] = "Membresía actualizada y auditada.";
+            }
+            catch (FormatException)
+            {
+                TempData["EquipoError"] = "Actualiza la página antes de modificar un empleado.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["EquipoError"] = ex.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (SqlException ex)
+            {
+                _log.LogError(ex, "Fallo al modificar membresía");
+                TempData["EquipoError"] = "No se pudo guardar el cambio. Consulta los registros.";
+            }
+            return RedirectToAction(nameof(Index), new
+            {
+                empresaSlug = RouteData.Values["empresaSlug"]
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearInvitacion(
+            string correo, string rol, CancellationToken cancellationToken)
+        {
+            if (!_empresa.TieneEmpresa)
+                return Forbid();
+            try
+            {
+                var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var token = await _gestion.CrearInvitacionAsync(
+                    actor, correo, rol, cancellationToken);
+                // Entrega manual del enlace. Nunca persistir el token ni enviarlo
+                // a TempData/cookies. No existe proveedor de correo configurado.
+                Response.Headers["Cache-Control"] = "no-store";
+                Response.Headers["Referrer-Policy"] = "no-referrer";
+                // Construir URL usando únicamente una base pública configurada,
+                // nunca el Host enviado en la petición HTTP.
+                var ruta = Url.Action("Aceptar", "Invitaciones", new { token });
+                if (string.IsNullOrEmpty(ruta))
+                    throw new InvalidOperationException(
+                        "Invitación registrada, pero no se pudo construir su ruta.");
+                var baseConfigurada = HttpContext.RequestServices
+                    .GetRequiredService<IConfiguration>()["Seguridad:BaseUrlPublica"];
+                var enlace = ruta;
+                if (!string.IsNullOrWhiteSpace(baseConfigurada))
+                {
+                    if (!Uri.TryCreate(baseConfigurada, UriKind.Absolute, out var urlBase) ||
+                        (urlBase.Scheme != Uri.UriSchemeHttps &&
+                         !(HttpContext.RequestServices
+                             .GetRequiredService<IHostEnvironment>().IsDevelopment() &&
+                           urlBase.Scheme == Uri.UriSchemeHttp &&
+                           urlBase.IsLoopback)))
+                        throw new InvalidOperationException(
+                            "Configura Seguridad:BaseUrlPublica con una URL HTTPS válida.");
+                    enlace = new Uri(urlBase, ruta).AbsoluteUri;
+                }
+                return View("EnlaceInvitacion", model: enlace);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["EquipoError"] = ex.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (SqlException ex)
+            {
+                _log.LogError(ex, "Fallo al registrar invitación");
+                TempData["EquipoError"] = "No se pudo registrar la invitación.";
+            }
+            return RedirectToAction(nameof(Index), new
+            {
+                empresaSlug = RouteData.Values["empresaSlug"]
+            });
         }
 
         private static string NombreLegible(string permiso) => permiso switch

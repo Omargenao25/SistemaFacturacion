@@ -1,0 +1,16 @@
+@model string
+@{
+    ViewData["Title"] = "Aceptar invitación";
+}
+<div class="container py-5" style="max-width:640px">
+    <h1 class="h3">Invitación a Nexora</h1>
+    <p>Para unirte a la empresa, debes iniciar sesión con el mismo correo al que
+       se dirigió la invitación y tenerlo confirmado en Identity.</p>
+    <p class="text-muted">El enlace solo funciona una vez y caduca después de 48 horas.</p>
+    <form asp-controller="Invitaciones" asp-action="Aceptar" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="token" value="@Model" />
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        <button class="btn btn-primary" type="submit">Aceptar invitación</button>
+    </form>
+</div>

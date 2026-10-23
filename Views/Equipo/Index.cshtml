@@ -12,18 +12,60 @@
             <h1 class="page-title">Mi equipo</h1>
             <p class="page-subtitle">Membresías y permisos de @Model.Empresa. Solo visibles para el propietario verificado.</p>
         </div>
-        <span class="nx-team-readonly"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i> Solo lectura</span>
+        <span class="nx-team-readonly"><i class="bi bi-shield-check me-1" aria-hidden="true"></i> Gestión auditada</span>
     </div>
 
     <div class="nx-team-banner" role="note">
         <i class="bi bi-shield-check" aria-hidden="true"></i>
         <div>
-            <strong>Seguridad empresarial en preparación</strong>
-            <p>Puedes consultar los empleados y sus permisos actuales, pero no invitar usuarios,
-               suspenderlos ni cambiar roles todavía. Esas acciones necesitarán auditoría, pruebas
-               de concurrencia y protección del último propietario activo.</p>
+            <strong>Acciones restringidas al propietario de esta empresa</strong>
+            <p>Los cambios de rol y estado se registran en auditoría SQL dentro de una transacción.
+               Las cuentas Propietario están protegidas. Los enlaces de invitación se generan
+               una sola vez y se comparten manualmente; Nexora aún no envía emails.</p>
         </div>
     </div>
+
+    @if (TempData["EquipoMensaje"] is string mensaje)
+    {
+        <div class="alert alert-success" role="status">@mensaje</div>
+    }
+    @if (TempData["EquipoError"] is string error)
+    {
+        <div class="alert alert-warning" role="alert">@error</div>
+    }
+
+    <section class="nx-panel mb-4" aria-labelledby="nxEquipoInvitar">
+        <div class="nx-panel-header">
+            <div>
+                <h2 class="nx-panel-title" id="nxEquipoInvitar">Invitar un empleado</h2>
+                <p class="nx-panel-subtitle">Genera un enlace temporal de un solo uso. La cuenta invitada debe confirmar su correo.</p>
+            </div>
+        </div>
+        <form asp-action="CrearInvitacion" asp-route-empresaSlug="@slugEmpresa" method="post"
+              class="p-3 row g-3 align-items-end">
+            @Html.AntiForgeryToken()
+            <div class="col-md-6">
+                <label for="nxInvitarCorreo" class="form-label">Correo del empleado</label>
+                <input id="nxInvitarCorreo" type="email" name="correo" class="form-control"
+                       autocomplete="email" maxlength="254" required />
+            </div>
+            <div class="col-md-3">
+                <label for="nxInvitarRol" class="form-label">Rol inicial</label>
+                <select id="nxInvitarRol" name="rol" class="form-select">
+                    <option value="Cajero">Cajero</option>
+                    <option value="Administrador">Administrador</option>
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-link-45deg me-1" aria-hidden="true"></i> Generar enlace
+                </button>
+            </div>
+            <div class="col-12">
+                <small class="text-muted">Caduca a las 48 horas; no se envía automáticamente. No permite invitar propietarios.</small>
+            </div>
+        </form>
+    </section>
 
     <div class="nx-team-stats">
         <div><span>Activos</span><strong>@Model.Activos</strong><small>Membresías vigentes</small></div>
@@ -90,6 +132,7 @@
                             <th scope="col">Rol</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Fecha de vinculación</th>
+                            <th scope="col">Acciones protegidas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,6 +158,49 @@
                                     <span class="nx-status @miembro.ClaseEstado">@miembro.EstadoVisible</span>
                                 </td>
                                 <td><span class="nx-team-date">@miembro.FechaAltaUtc.ToString("dd/MM/yyyy HH:mm") UTC</span></td>
+                                <td>
+                                    @if (miembro.Rol != "Propietario" && miembro.FechaBajaUtc == null &&
+                                         miembro.RowVersion is { Length: 8 })
+                                    {
+                                        <div class="nx-team-actions">
+                                            @if (miembro.Estado == "Activo")
+                                            {
+                                                <form asp-action="CambiarRol" asp-route-empresaSlug="@slugEmpresa"
+                                                      method="post" class="d-flex gap-2 align-items-center">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="usuarioId" value="@miembro.UserId" />
+                                                    <input type="hidden" name="version" value="@Convert.ToBase64String(miembro.RowVersion)" />
+                                                    <label class="visually-hidden" for="nxRol-@miembro.UserId">Cambiar rol</label>
+                                                    <select class="form-select form-select-sm" name="nuevoRol"
+                                                            id="nxRol-@miembro.UserId" aria-label="Nuevo rol">
+                                                        <option value="Cajero" selected="@(miembro.Rol == "Cajero")">Cajero</option>
+                                                        <option value="Administrador" selected="@(miembro.Rol == "Administrador")">Administrador</option>
+                                                    </select>
+                                                    <button class="btn btn-outline-primary btn-sm" type="submit"
+                                                            title="Guardar rol empresarial">Guardar</button>
+                                                </form>
+                                            }
+                                            @if (miembro.Estado == "Activo" || miembro.Estado == "Suspendido")
+                                            {
+                                                <form asp-action="CambiarEstado" asp-route-empresaSlug="@slugEmpresa"
+                                                      method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="usuarioId" value="@miembro.UserId" />
+                                                    <input type="hidden" name="version" value="@Convert.ToBase64String(miembro.RowVersion)" />
+                                                    <input type="hidden" name="accion"
+                                                           value="@(miembro.Estado == "Activo" ? "Suspender" : "Reactivar")" />
+                                                    <button class="btn btn-outline-secondary btn-sm" type="submit">
+                                                        @(miembro.Estado == "Activo" ? "Suspender" : "Reactivar")
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Protegido / sin cambios</span>
+                                    }
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -146,13 +232,58 @@
         }
     </section>
 
+    <section class="nx-panel mb-4" aria-labelledby="nxTeamAudit">
+        <div class="nx-panel-header">
+            <div>
+                <h2 id="nxTeamAudit" class="nx-panel-title">Actividad de seguridad</h2>
+                <p class="nx-panel-subtitle">Últimas 20 operaciones auditadas en esta empresa.</p>
+            </div>
+        </div>
+        @if (Model.AuditoriaReciente.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <strong>Todavía no hay cambios administrativos registrados</strong>
+                <p class="mb-0">Las nuevas invitaciones y modificaciones aparecerán aquí.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table nx-table nx-team-audit-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Cuándo (UTC)</th>
+                            <th scope="col">Responsable</th>
+                            <th scope="col">Operación</th>
+                            <th scope="col">Empleado / invitación</th>
+                            <th scope="col">Antes y después</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.AuditoriaReciente)
+                        {
+                            <tr>
+                                <td>@ev.FechaUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@ev.Actor</td>
+                                <td><span class="nx-team-role">@ev.Accion</span></td>
+                                <td>@ev.Afectado</td>
+                                <td class="nx-team-audit-description">@ev.Descripcion</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
     <section class="nx-panel" aria-labelledby="nxTeamPolicies">
         <div class="nx-panel-header">
             <div>
                 <h2 class="nx-panel-title" id="nxTeamPolicies">Matriz de permisos</h2>
                 <p class="nx-panel-subtitle">Reglas actualmente definidas en el código para cada rol empresarial.</p>
             </div>
-            <span class="nx-team-readonly">Sin edición de roles</span>
+            <span class="nx-team-readonly">Permisos definidos por rol</span>
         </div>
         <div class="table-responsive">
             <table class="table nx-table nx-team-policy-table">
@@ -200,7 +331,7 @@
             Los permisos de confirmación de reembolsos, recepción física y liberación de
             inventario están <strong>reservados para futuras operaciones</strong>.
             Verlos en la matriz no significa que esos módulos puedan ejecutar esas acciones.
-            Esta página no permite cambiar roles, invitar ni suspender personas.
+            Solo el propietario puede modificar membresías no propietarias; los permisos reservados no activan movimientos de dinero o inventario.
         </div>
     </section>
 </div>

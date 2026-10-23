@@ -1668,3 +1668,26 @@ body { color: var(--nx-ink); }
     .nx-team-readonly {white-space: normal;}
 }
 @media print { .nx-team-page {display: none !important;} }
+
+/* Nexora — controles de membresía e historial auditable */
+.nx-team-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 220px;
+}
+.nx-team-actions form {margin:0;}
+.nx-team-actions select.form-select {min-width: 115px; max-width: 180px;}
+.nx-team-actions button {white-space: nowrap; font-weight: 700;}
+.nx-team-audit-table th {
+    white-space: nowrap;
+    font-size: .76rem;
+    color: #667b97;
+}
+.nx-team-audit-table td {vertical-align:middle; font-size:.79rem;}
+.nx-team-audit-description {white-space:normal; min-width:185px; color:#62758c;}
+.nx-team-page input[readonly] {background:#f7f9fd; user-select:all;}
+@media (max-width:680px) {
+    .nx-team-actions {min-width:190px;}
+    .nx-team-audit-table {min-width:680px;}
+}

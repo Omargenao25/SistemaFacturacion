@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using SistemaFacturacion.Security;
+using System.Net.Mail;
 using SistemaFacturacion.Services.Tenancy;
 
 var fallos = 0;
@@ -243,15 +244,86 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
         await new PermisoEmpresaHandler(contexto).HandleAsync(autorizacion);
         Verificar(!autorizacion.HasSucceeded);
     }),
-    ("El módulo de equipo no habilita edición ni altas", () =>
+    ("Los cambios de equipo solo usan POST con permiso explícito", () =>
     {
-        foreach (var accion in new[] { "Index", "Create", "Edit", "Invite", "CambiarRol", "Suspender" })
-        {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "CambiarRol", "POST") == PermisosNexora.AdministrarRoles);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "CambiarEstado", "POST") == PermisosNexora.AdministrarUsuarios);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "CrearInvitacion", "POST") == PermisosNexora.AdministrarUsuarios);
+        return Task.CompletedTask;
+    }),
+    ("Las escrituras de equipo por GET se deniegan", () =>
+    {
+        foreach (var accion in new[] { "CambiarRol", "CambiarEstado", "CrearInvitacion" })
+            Verificar(ReglasAccesoControladores.ObtenerPermiso(
+                "Equipo", accion, "GET") == null);
+        return Task.CompletedTask;
+    }),
+    ("Las escrituras no reconocidas continúan denegadas", () =>
+    {
+        foreach (var accion in new[] { "Create", "Edit", "Delete", "InvitarPropietario",
+                                       "Escalar", "Transferir", "EliminarPropietario" })
             Verificar(ReglasAccesoControladores.ObtenerPermiso(
                 "Equipo", accion, "POST") == null);
+        return Task.CompletedTask;
+    }),
+    ("Un cajero no administra roles", () =>
+    {
+        Verificar(!PermisosNexora.TienePermiso("Cajero", PermisosNexora.AdministrarRoles));
+        Verificar(!PermisosNexora.TienePermiso("Cajero", PermisosNexora.AdministrarUsuarios));
+        return Task.CompletedTask;
+    }),
+    ("Solo propietario administra membresías", () =>
+    {
+        Verificar(PermisosNexora.TienePermiso("Propietario", PermisosNexora.AdministrarUsuarios));
+        Verificar(PermisosNexora.TienePermiso("Propietario", PermisosNexora.AdministrarRoles));
+        Verificar(!PermisosNexora.TienePermiso("Administrador", PermisosNexora.AdministrarUsuarios));
+        return Task.CompletedTask;
+    }),
+    ("El rol Propietario no se puede delegar por invitación", () =>
+    {
+        Verificar(!GestionMembresiasSegura.RolDelegable("Propietario"));
+        Verificar(GestionMembresiasSegura.RolDelegable("Cajero"));
+        Verificar(GestionMembresiasSegura.RolDelegable("Administrador"));
+        return Task.CompletedTask;
+    }),
+    ("Roles arbitrarios de invitación se rechazan", () =>
+    {
+        Verificar(!GestionMembresiasSegura.RolDelegable("Superusuario"));
+        Verificar(!GestionMembresiasSegura.RolDelegable(null));
+        return Task.CompletedTask;
+    }),
+    ("Correo de invitación se normaliza", () =>
+    {
+        Verificar(GestionMembresiasSegura.NormalizarCorreo(" test@example.com ") ==
+                 "TEST@EXAMPLE.COM");
+        return Task.CompletedTask;
+    }),
+    ("Correo inválido no permite invitaciones", () =>
+    {
+        try
+        {
+            GestionMembresiasSegura.NormalizarCorreo("no-es-correo");
+            throw new Exception("Aceptó un correo inválido.");
         }
+        catch (InvalidOperationException)
+        {
+            return Task.CompletedTask;
+        }
+    }),
+    ("No hay endpoint de invitación que eluda el filtro por POST comercial", () =>
+    {
         Verificar(ReglasAccesoControladores.ObtenerPermiso(
-            "Equipo", "Create", "GET") == null);
+            "Invitaciones", "Crear", "POST") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Invitaciones", "CambiarRol", "POST") == null);
+        return Task.CompletedTask;
+    }),
+    ("El propietario no obtiene permisos nuevos por un rol desconocido", () =>
+    {
+        Verificar(!PermisosNexora.TienePermiso("Propietario", "Nexora.AdministrarTodosLosSistemas"));
         return Task.CompletedTask;
     })
 };

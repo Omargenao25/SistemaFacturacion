@@ -14,6 +14,7 @@ var activarTenancyValidada = builder.Configuration.GetValue<bool>(
     "Seguridad:ActivarTenancyValidada");
 
 builder.Services.AddScoped<ContextoEmpresaVerificado>();
+builder.Services.AddScoped<GestionMembresiasSegura>();
 builder.Services.AddScoped<IValidadorAccesoEmpresa, ValidadorAccesoEmpresaSql>();
 
 if (activarTenancyValidada)
