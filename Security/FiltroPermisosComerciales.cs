@@ -23,6 +23,19 @@ namespace SistemaFacturacion.Security
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
+            // La persona invitada todavía NO pertenece a la empresa.
+            // ÚNICA excepción al filtro tenant: aceptar invitación por Identity,
+            // GET/POST exactos. Las acciones llevan [Authorize] en su controller;
+            // los POST tienen antiforgery y el servicio comprueba token + email.
+            if (descriptor?.ControllerName == "Invitaciones" &&
+                descriptor.ActionName == "Aceptar" &&
+                context.HttpContext.Request.Method is "GET" or "POST")
+            {
+                if (context.HttpContext.User.Identity?.IsAuthenticated != true)
+                    context.Result = new ChallengeResult();
+                return;
+            }
+
             var permiso = ReglasAccesoControladores.ObtenerPermiso(
                 descriptor?.ControllerName,
                 descriptor?.ActionName,
