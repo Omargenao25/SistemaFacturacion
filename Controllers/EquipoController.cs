@@ -148,6 +148,9 @@ namespace SistemaFacturacion.Controllers
                 });
             }
 
+            var actorActual = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            modelo.AuditoriaReciente = await _gestion.UltimosEventosAsync(
+                actorActual, cancellationToken);
             return View(modelo);
         }
 
@@ -246,11 +249,27 @@ namespace SistemaFacturacion.Controllers
                 // a TempData/cookies. No existe proveedor de correo configurado.
                 Response.Headers["Cache-Control"] = "no-store";
                 Response.Headers["Referrer-Policy"] = "no-referrer";
-                var enlace = Url.Action("Aceptar", "Invitaciones",
-                    new { token }, Request.Scheme);
-                if (string.IsNullOrEmpty(enlace))
+                // Construir URL usando únicamente una base pública configurada,
+                // nunca el Host enviado en la petición HTTP.
+                var ruta = Url.Action("Aceptar", "Invitaciones", new { token });
+                if (string.IsNullOrEmpty(ruta))
                     throw new InvalidOperationException(
-                        "Invitación registrada, pero no se pudo construir el enlace.");
+                        "Invitación registrada, pero no se pudo construir su ruta.");
+                var baseConfigurada = HttpContext.RequestServices
+                    .GetRequiredService<IConfiguration>()["Seguridad:BaseUrlPublica"];
+                var enlace = ruta;
+                if (!string.IsNullOrWhiteSpace(baseConfigurada))
+                {
+                    if (!Uri.TryCreate(baseConfigurada, UriKind.Absolute, out var urlBase) ||
+                        (urlBase.Scheme != Uri.UriSchemeHttps &&
+                         !(HttpContext.RequestServices
+                             .GetRequiredService<IHostEnvironment>().IsDevelopment() &&
+                           urlBase.Scheme == Uri.UriSchemeHttp &&
+                           urlBase.IsLoopback)))
+                        throw new InvalidOperationException(
+                            "Configura Seguridad:BaseUrlPublica con una URL HTTPS válida.");
+                    enlace = new Uri(urlBase, ruta).AbsoluteUri;
+                }
                 return View("EnlaceInvitacion", model: enlace);
             }
             catch (InvalidOperationException ex)
