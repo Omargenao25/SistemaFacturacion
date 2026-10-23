@@ -2,6 +2,7 @@ using System.Data;
 using System.Net.Mail;
 using System.Security.Cryptography;
 using Microsoft.Data.SqlClient;
+using SistemaFacturacion.ViewModels;
 
 namespace SistemaFacturacion.Services.Tenancy
 {
@@ -355,6 +356,48 @@ WHERE IdInvitacion = @Id AND Estado = N'Pendiente'
                     "InvitacionAceptada", null, rol, "Pendiente", "Activo", ct,
                     empresaId);
                 await tx.CommitAsync(ct);
+            }
+        }
+
+        public async Task<List<AuditoriaEquipoItem>> UltimosEventosAsync(
+            string actor, CancellationToken ct)
+        {
+            var (conexion, tx) = await AbrirAsync(ct);
+            await using (conexion)
+            await using (tx)
+            {
+                await ExigirPropietarioAsync(conexion, tx, actor, ct);
+                const string sql = @"
+SELECT TOP (20) a.Accion, a.RolAnterior, a.RolNuevo,
+       a.EstadoAnterior, a.EstadoNuevo, a.FechaUtc,
+       COALESCE(u.UserName, N'Cuenta anterior') AS Actor,
+       COALESCE(t.UserName, N'Invitación / cuenta anterior') AS Afectado
+FROM dbo.AuditoriaMembresias a
+LEFT JOIN dbo.AspNetUsers u ON u.Id = a.ActorUserId
+LEFT JOIN dbo.AspNetUsers t ON t.Id = a.AfectadoUserId
+WHERE a.IdEmpresa = @Empresa
+ORDER BY a.IdAuditoria DESC;";
+                await using var cmd = Comando(conexion, tx, sql);
+                Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, _empresa.IdEmpresa);
+                var eventos = new List<AuditoriaEquipoItem>();
+                await using (var rd = await cmd.ExecuteReaderAsync(ct))
+                {
+                    while (await rd.ReadAsync(ct))
+                    {
+                        string Leer(int indice) => rd.IsDBNull(indice) ? "—" : rd.GetString(indice);
+                        var accion = rd.GetString(0);
+                        eventos.Add(new AuditoriaEquipoItem
+                        {
+                            Accion = accion,
+                            Descripcion = $"{Leer(1)} / {Leer(3)} → {Leer(2)} / {Leer(4)}",
+                            FechaUtc = rd.GetDateTime(5),
+                            Actor = rd.GetString(6),
+                            Afectado = rd.GetString(7)
+                        });
+                    }
+                }
+                await tx.CommitAsync(ct);
+                return eventos;
             }
         }
 
