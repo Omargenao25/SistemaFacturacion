@@ -1,0 +1,206 @@
+@model SistemaFacturacion.ViewModels.EquipoEmpresaViewModel
+@{
+    ViewData["Title"] = "Mi equipo";
+    var desde = Model.TotalMiembros == 0 ? 0 : (Model.Pagina - 1) * 20 + 1;
+    var hasta = Math.Min(Model.Pagina * 20, Model.TotalMiembros);
+    var slugEmpresa = ViewContext.RouteData.Values["empresaSlug"]?.ToString();
+}
+<div class="nx-crud-page nx-team-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Administración / Acceso empresarial</div>
+            <h1 class="page-title">Mi equipo</h1>
+            <p class="page-subtitle">Membresías y permisos de @Model.Empresa. Solo visibles para el propietario verificado.</p>
+        </div>
+        <span class="nx-team-readonly"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i> Solo lectura</span>
+    </div>
+
+    <div class="nx-team-banner" role="note">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+        <div>
+            <strong>Seguridad empresarial en preparación</strong>
+            <p>Puedes consultar los empleados y sus permisos actuales, pero no invitar usuarios,
+               suspenderlos ni cambiar roles todavía. Esas acciones necesitarán auditoría, pruebas
+               de concurrencia y protección del último propietario activo.</p>
+        </div>
+    </div>
+
+    <div class="nx-team-stats">
+        <div><span>Activos</span><strong>@Model.Activos</strong><small>Membresías vigentes</small></div>
+        <div><span>Propietarios activos</span><strong>@Model.PropietariosActivos</strong><small>Administración principal</small></div>
+        <div><span>Invitados</span><strong>@Model.Invitados</strong><small>Pendientes de habilitación</small></div>
+        <div><span>Suspendidos</span><strong>@Model.Suspendidos</strong><small>Sin acceso empresarial</small></div>
+    </div>
+
+    <section class="nx-panel mb-4" aria-labelledby="nxTeamMiembros">
+        <div class="nx-panel-header">
+            <div>
+                <h2 class="nx-panel-title" id="nxTeamMiembros">Personas vinculadas a la empresa</h2>
+                <p class="nx-panel-subtitle">Se muestran únicamente las membresías pertenecientes a tu empresa verificada.</p>
+            </div>
+            <span class="text-muted small">@Model.TotalMiembros resultado(s) con estos filtros</span>
+        </div>
+
+        <div class="nx-team-filters">
+            <form asp-action="Index" asp-route-empresaSlug="@slugEmpresa" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="nxEquipoRol">Rol empresarial</label>
+                    <select class="form-select" name="rol" id="nxEquipoRol">
+                        <option value="" selected="@(Model.FiltroRol == "")">Todos los roles</option>
+                        <option value="Propietario" selected="@(Model.FiltroRol == "Propietario")">Propietario</option>
+                        <option value="Administrador" selected="@(Model.FiltroRol == "Administrador")">Administrador</option>
+                        <option value="Cajero" selected="@(Model.FiltroRol == "Cajero")">Cajero</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="nxEquipoEstado">Estado de membresía</label>
+                    <select class="form-select" name="estado" id="nxEquipoEstado">
+                        <option value="" selected="@(Model.FiltroEstado == "")">Todos los estados</option>
+                        <option value="Activo" selected="@(Model.FiltroEstado == "Activo")">Activo</option>
+                        <option value="Invitado" selected="@(Model.FiltroEstado == "Invitado")">Invitado</option>
+                        <option value="Suspendido" selected="@(Model.FiltroEstado == "Suspendido")">Suspendido</option>
+                        <option value="Baja" selected="@(Model.FiltroEstado == "Baja")">Dada de baja</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1" aria-hidden="true"></i> Aplicar
+                    </button>
+                    <a asp-action="Index" asp-route-empresaSlug="@slugEmpresa"
+                       class="btn btn-outline-secondary ms-1">Limpiar</a>
+                </div>
+            </form>
+        </div>
+
+        @if (Model.Miembros.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-people" aria-hidden="true"></i>
+                <strong>Sin membresías para estos filtros</strong>
+                <p class="mb-0">La pantalla no crea empleados automáticamente ni concede acceso por sí sola.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover nx-table nx-team-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Fecha de vinculación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var miembro in Model.Miembros)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="nx-team-username">@miembro.NombreUsuario</strong>
+                                    @if (!string.IsNullOrWhiteSpace(miembro.Correo))
+                                    {
+                                        <span class="nx-team-secondary">
+                                            @miembro.Correo
+                                            @if (miembro.CorreoConfirmado)
+                                            {
+                                                <i class="bi bi-patch-check text-success ms-1"
+                                                   title="Correo confirmado" aria-label="Correo confirmado"></i>
+                                            }
+                                        </span>
+                                    }
+                                </td>
+                                <td><span class="nx-team-role">@miembro.Rol</span></td>
+                                <td>
+                                    <span class="nx-status @miembro.ClaseEstado">@miembro.EstadoVisible</span>
+                                </td>
+                                <td><span class="nx-team-date">@miembro.FechaAltaUtc.ToString("dd/MM/yyyy HH:mm") UTC</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav class="nx-team-pager" aria-label="Paginación del equipo">
+                <span>Mostrando @desde–@hasta de @Model.TotalMiembros · Página @Model.Pagina de @Model.TotalPaginas</span>
+                <div>
+                    @if (Model.Pagina > 1)
+                    {
+                        <a asp-action="Index" asp-route-empresaSlug="@slugEmpresa"
+                           asp-route-rol="@Model.FiltroRol" asp-route-estado="@Model.FiltroEstado"
+                           asp-route-pagina="@(Model.Pagina - 1)"
+                           class="btn btn-outline-secondary btn-sm">Anterior</a>
+                    }
+                    @if (Model.Pagina < Model.TotalPaginas)
+                    {
+                        <a asp-action="Index" asp-route-empresaSlug="@slugEmpresa"
+                           asp-route-rol="@Model.FiltroRol" asp-route-estado="@Model.FiltroEstado"
+                           asp-route-pagina="@(Model.Pagina + 1)"
+                           class="btn btn-outline-secondary btn-sm">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+
+    <section class="nx-panel" aria-labelledby="nxTeamPolicies">
+        <div class="nx-panel-header">
+            <div>
+                <h2 class="nx-panel-title" id="nxTeamPolicies">Matriz de permisos</h2>
+                <p class="nx-panel-subtitle">Reglas actualmente definidas en el código para cada rol empresarial.</p>
+            </div>
+            <span class="nx-team-readonly">Sin edición de roles</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table nx-table nx-team-policy-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Operación</th>
+                        <th scope="col" class="text-center">Propietario</th>
+                        <th scope="col" class="text-center">Administrador</th>
+                        <th scope="col" class="text-center">Cajero</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var permiso in Model.Matriz)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@permiso.Nombre</strong>
+                                <small class="nx-team-secondary">@permiso.Permiso</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="nx-team-policy @(permiso.Propietario ? "yes" : "no")"
+                                      aria-label="@(permiso.Propietario ? "Permitido" : "No permitido")">
+                                    <i class="bi @(permiso.Propietario ? "bi-check-lg" : "bi-dash-lg")" aria-hidden="true"></i>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="nx-team-policy @(permiso.Administrador ? "yes" : "no")"
+                                      aria-label="@(permiso.Administrador ? "Permitido" : "No permitido")">
+                                    <i class="bi @(permiso.Administrador ? "bi-check-lg" : "bi-dash-lg")" aria-hidden="true"></i>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="nx-team-policy @(permiso.Cajero ? "yes" : "no")"
+                                      aria-label="@(permiso.Cajero ? "Permitido" : "No permitido")">
+                                    <i class="bi @(permiso.Cajero ? "bi-check-lg" : "bi-dash-lg")" aria-hidden="true"></i>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="nx-team-policy-note">
+            <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+            Los permisos de confirmación de reembolsos, recepción física y liberación de
+            inventario están <strong>reservados para futuras operaciones</strong>.
+            Verlos en la matriz no significa que esos módulos puedan ejecutar esas acciones.
+            Esta página no permite cambiar roles, invitar ni suspender personas.
+        </div>
+    </section>
+</div>
