@@ -18,6 +18,7 @@ namespace SistemaFacturacion.ViewModels
         public int Suspendidos { get; set; }
         public List<MiembroEmpresaItem> Miembros { get; set; } = new();
         public List<PermisoRolItem> Matriz { get; set; } = new();
+        public List<AuditoriaEquipoItem> AuditoriaReciente { get; set; } = new();
     }
 
     public sealed class MiembroEmpresaItem
@@ -39,6 +40,15 @@ namespace SistemaFacturacion.ViewModels
         public string EstadoVisible => FechaBajaUtc != null
             ? "Dada de baja"
             : Estado;
+    }
+
+    public sealed class AuditoriaEquipoItem
+    {
+        public string Actor { get; set; } = "";
+        public string Afectado { get; set; } = "";
+        public string Accion { get; set; } = "";
+        public string Descripcion { get; set; } = "";
+        public DateTime FechaUtc { get; set; }
     }
 
     public sealed class PermisoRolItem
