@@ -7,6 +7,11 @@
     <UserSecretsId>aspnet-SistemaFacturacion-a492ae57-e5a6-44a8-8eaf-0b62fb18de8f</UserSecretsId>
   </PropertyGroup>
 
+  <!-- Excluir el runner autónomo del sitio Web (tiene su propio Program.cs). -->
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7" />
