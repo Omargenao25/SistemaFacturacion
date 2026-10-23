@@ -197,6 +197,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Sin migraciones SQL. Guía: [`docs/SEGURIDAD_FASE_3_EQUIPO_SOLO_LECTURA.md`](docs/SEGURIDAD_FASE_3_EQUIPO_SOLO_LECTURA.md).
 - No activar `Seguridad:ActivarTenancyValidada` en tu base normal, no habilitar tenants nuevos ni fusionar los PR en `master`.
 
+## Seguridad empresarial — fase 4: membresías auditadas e invitaciones (laboratorio)
+
+**Rama:** `feature/nexora-security-phase4-members`, basada en fase 3. **Requiere compilación, migración y pruebas de integración SQL; no apta para producción.**
+
+- `GestionMembresiasSegura`: transacciones SERIALIZABLE parametrizadas sobre tablas globales, revalidación del propietario, RowVersion, protección de cuentas Propietario, cambios de rol `Cajero/Administrador`, suspensión/reactivación y auditoría atómica.
+- Invitaciones para `Cajero/Administrador` con token aleatorio 32 bytes, hash SHA-256, un uso y expiración 48 horas. Entrega **manual** del link. Aceptación con Identity y EmailConfirmed coincidente, empresa Activa, invitante vigente y sin membresía duplicada. No existe todavía envío automático de correos.
+- `EquipoController` y Razor: POST con antiforgery para rol, estado e invitación; bitácora reciente de 20 movimientos por tenant. `InvitacionesController` acepta desde fuera del contexto comercial mediante excepción muy restringida y atributo [Authorize].
+- Migración `EquipoSeguridadAuditoriaInvitaciones`: tablas `InvitacionesEmpresa` y `AuditoriaMembresias` sin cambiar las entidades comerciales ni snapshot EF. **Respaldar y aplicar solo en base de laboratorio después de compilar**. Rollback destructivo de auditoría bloqueado.
+- Runner `tests/Nexora.Security.Checks`: **38 verificaciones programadas**, pendientes de ejecución en Visual Studio. Sin confirmaciones financieras ni devoluciones reales.
+- Guía: [`docs/SEGURIDAD_FASE_4_GESTION_EMPLEADOS.md`](docs/SEGURIDAD_FASE_4_GESTION_EMPLEADOS.md).
+- Todavía falta revocación de invitaciones, proveedor de correo + confirmación Identity, propagación completa de rutas SaaS, SQL integration A/B, y hardening antes de producción. No activar tenants en base usual ni fusionar a master.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
