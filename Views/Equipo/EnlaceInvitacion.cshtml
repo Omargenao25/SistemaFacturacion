@@ -28,7 +28,7 @@
                     onclick="navigator.clipboard.writeText(document.getElementById('nxInvitationLink').value).then(() => { this.textContent = 'Copiado'; }).catch(() => { document.getElementById('nxInvitationLink').select(); })">
                 Copiar enlace
             </button>
-            <a asp-action="Index" asp-route-empresaSlug="@ViewContext.RouteData.Values["empresaSlug"]"
+            <a asp-action="Index" asp-route-empresaSlug="@(ViewContext.RouteData.Values["empresaSlug"])"
                class="btn btn-outline-secondary">Volver a Mi equipo</a>
         </div>
         @if (!Uri.TryCreate(Model, UriKind.Absolute, out _))
