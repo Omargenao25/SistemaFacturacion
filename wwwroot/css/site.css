@@ -1585,3 +1585,86 @@ body { color: var(--nx-ink); }
     .nx-reconciliation-page-note {font-size:.75rem;}
 }
 @media print { .nx-reconciliation-page {display:none!important;} }
+
+/* Nexora SaaS — directorio empresarial de solo lectura */
+.nx-team-readonly {
+    display: inline-flex; align-items: center; gap: 4px;
+    border: 1px solid #bfcef0; background: #ecf2ff; color: #275398;
+    border-radius: 999px; padding: 8px 11px; font-size: .75rem;
+    font-weight: 750; white-space: nowrap;
+}
+.nx-team-banner {
+    display: flex; align-items: flex-start; gap: 13px; padding: 18px 20px;
+    border: 1px solid #c9dafa; border-radius: 14px; background: #f2f7ff;
+    color: #2d578f; margin-bottom: 20px;
+}
+.nx-team-banner > i {
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 42px; width: 42px; height: 42px; border-radius: 10px;
+    font-size: 1.2rem; background: #dae9ff;
+}
+.nx-team-banner strong {font-size: .88rem; font-weight: 800;}
+.nx-team-banner p {font-size: .81rem; line-height: 1.55; margin: 5px 0 0;}
+.nx-team-stats {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 13px; margin-bottom: 20px;
+}
+.nx-team-stats > div {
+    display: flex; flex-direction: column; min-width: 0;
+    border: 1px solid #e2eaf5; border-radius: 13px;
+    padding: 18px; background: #fff;
+    box-shadow: 0 5px 18px rgba(29, 51, 94, .035);
+}
+.nx-team-stats span {font-size: .76rem; color: #657994; font-weight: 700;}
+.nx-team-stats strong {
+    color: #1b396b; margin: 6px 0;
+    font-size: 1.65rem; font-weight: 850; font-variant-numeric: tabular-nums;
+}
+.nx-team-stats small {font-size: .71rem; color: #8290a8;}
+.nx-team-filters {padding: 17px 20px; border-bottom: 1px solid #e8edf5;}
+.nx-team-table td {font-size: .82rem; vertical-align: middle;}
+.nx-team-table th {font-size: .76rem; white-space: nowrap; color: #667c98;}
+.nx-team-username {display: block; color: #243c61; font-weight: 750;}
+.nx-team-secondary {
+    display: block; margin-top: 3px; font-size: .73rem; line-height: 1.45;
+    color: #70829b; font-weight: 500; overflow-wrap: anywhere;
+}
+.nx-team-role {
+    display: inline-block; font-size: .77rem; font-weight: 750;
+    padding: 6px 10px; border: 1px solid #d8e3f6; border-radius: 8px;
+    color: #335d9a; background: #eef5ff;
+}
+.nx-team-date {font-size: .75rem; color: #657994; font-variant-numeric: tabular-nums;}
+.nx-team-pager {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 13px; padding: 17px 20px;
+    border-top: 1px solid #e7eef7; font-size: .78rem; color: #6d7f9b;
+}
+.nx-team-pager > div {display: flex; gap: 10px;}
+.nx-team-policy-table th {
+    font-size: .76rem; color: #697d9a; white-space: nowrap;
+}
+.nx-team-policy-table td {vertical-align: middle; font-size: .79rem;}
+.nx-team-policy-table td:first-child {min-width: 220px;}
+.nx-team-policy-table td small {font-family: Consolas, monospace; font-size: .67rem;}
+.nx-team-policy {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px; font-weight: 800;
+}
+.nx-team-policy.yes {background: #e8f9ef; color: #24794a;}
+.nx-team-policy.no {background: #f0f2f5; color: #9aa7bb;}
+.nx-team-policy-note {
+    padding: 15px 20px; border-top: 1px solid #e4eaf5;
+    color: #677c98; background: #f8faff;
+    font-size: .77rem; line-height: 1.6;
+}
+@media (max-width: 1090px) {
+    .nx-team-stats {grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+@media (max-width: 570px) {
+    .nx-team-stats {grid-template-columns: 1fr;}
+    .nx-team-banner {padding: 15px;}
+    .nx-team-filters {padding: 15px;}
+    .nx-team-readonly {white-space: normal;}
+}
+@media print { .nx-team-page {display: none !important;} }

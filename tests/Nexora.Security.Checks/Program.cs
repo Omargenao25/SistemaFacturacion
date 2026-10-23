@@ -205,6 +205,54 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
         Verificar(permiso == PermisosNexora.ConsultarReportes);
         Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
         return Task.CompletedTask;
+    }),
+    ("El directorio exige el permiso de administración de usuarios", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "Index", "GET");
+        Verificar(permiso == PermisosNexora.AdministrarUsuarios);
+        return Task.CompletedTask;
+    }),
+    ("El propietario puede consultar su directorio", async () =>
+    {
+        var contexto = await CrearContextoValidado("Propietario");
+        var requisito = new PermisoEmpresaRequirement(PermisosNexora.AdministrarUsuarios);
+        var autorizacion = new AuthorizationHandlerContext(
+            new[] { requisito }, HttpAutenticado().User, resource: null);
+        await new PermisoEmpresaHandler(contexto).HandleAsync(autorizacion);
+        Verificar(autorizacion.HasSucceeded);
+    }),
+    ("Administrador y cajero no pueden consultar empleados", async () =>
+    {
+        foreach (var rol in new[] { "Administrador", "Cajero" })
+        {
+            var contexto = await CrearContextoValidado(rol);
+            var requisito = new PermisoEmpresaRequirement(PermisosNexora.AdministrarUsuarios);
+            var autorizacion = new AuthorizationHandlerContext(
+                new[] { requisito }, HttpAutenticado().User, resource: null);
+            await new PermisoEmpresaHandler(contexto).HandleAsync(autorizacion);
+            Verificar(!autorizacion.HasSucceeded);
+        }
+    }),
+    ("Sin empresa validada ningún rol accede al equipo", async () =>
+    {
+        var contexto = new ContextoEmpresaVerificado();
+        var requisito = new PermisoEmpresaRequirement(PermisosNexora.AdministrarUsuarios);
+        var autorizacion = new AuthorizationHandlerContext(
+            new[] { requisito }, HttpAutenticado().User, resource: null);
+        await new PermisoEmpresaHandler(contexto).HandleAsync(autorizacion);
+        Verificar(!autorizacion.HasSucceeded);
+    }),
+    ("El módulo de equipo no habilita edición ni altas", () =>
+    {
+        foreach (var accion in new[] { "Index", "Create", "Edit", "Invite", "CambiarRol", "Suspender" })
+        {
+            Verificar(ReglasAccesoControladores.ObtenerPermiso(
+                "Equipo", accion, "POST") == null);
+        }
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "Create", "GET") == null);
+        return Task.CompletedTask;
     })
 };
 

@@ -184,6 +184,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Documento: [`docs/SEGURIDAD_FASE_2_AUTORIZACION_COMERCIAL.md`](docs/SEGURIDAD_FASE_2_AUTORIZACION_COMERCIAL.md).
 - Pendiente: navegación con slug, selector de empresa, Identity/roles y usuarios, pruebas negativas A/B con SQL real, auditoría y revisión de permisos por entidad. Mantener ramas y PR en borrador, sin activar SaaS público.
 
+## Seguridad empresarial — fase 3: directorio Mi equipo (solo lectura)
+
+**Rama:** `feature/nexora-security-phase3-team` encima de fase 2. Pendiente de compilación y pruebas SQL/HTTP en laboratorio. **No apta para producción.**
+
+- `Controllers/EquipoController.cs`: nuevo GET protegido por `[Authorize(Policy = AdministrarUsuarios)]`, comprobaciones redundantes de empresa Activa y permiso Propietario, y filtro **explícito** `EmpresaUsuarios.IdEmpresa == ContextoEmpresaVerificado.IdEmpresa`. La tabla de membresías es global; nunca se consulta para todo el sistema.
+- `ViewModels/EquipoEmpresaViewModel.cs` y `Views/Equipo/Index.cshtml`: directorio de empleados, estado de membresía, rol y correo confirmado, filtros y paginación de 20. Indicadores por empresa y matriz derivada del código `PermisosNexora`.
+- `Security/ReglasAccesoControladores.cs`: `Equipo.Index.GET` requiere `AdministrarUsuarios`; se deniegan por defecto los POST y acciones desconocidas.
+- `Views/Shared/_Layout.cshtml`: menú **Mi equipo** visible únicamente cuando el usuario tiene membresía verificada y rol que concede este permiso; no aparece en Development legado (flag apagada).
+- Runner `tests/Nexora.Security.Checks`: **28 casos definidos**, nuevos casos sobre autorización de propietario, denegación a administrador/cajero y ausencia de edición.
+- No habilita invitaciones, cambios de roles, altas, bajas ni escrituras de Identity/EmpresaUsuario. Requiere auditoría, CSRF, RowVersion y protección del último propietario para esas funciones posteriores.
+- Sin migraciones SQL. Guía: [`docs/SEGURIDAD_FASE_3_EQUIPO_SOLO_LECTURA.md`](docs/SEGURIDAD_FASE_3_EQUIPO_SOLO_LECTURA.md).
+- No activar `Seguridad:ActivarTenancyValidada` en tu base normal, no habilitar tenants nuevos ni fusionar los PR en `master`.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
