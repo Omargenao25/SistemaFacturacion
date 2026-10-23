@@ -171,6 +171,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/SEGURIDAD_FASE_1_IDENTIDAD_MEMBRESIAS.md`](docs/SEGURIDAD_FASE_1_IDENTIDAD_MEMBRESIAS.md).
 - Próximo bloqueante: autenticación + autorización por operación en cada controlador real, pruebas cruzadas A/B, auditoría, y alta/invitación de usuarios antes de producción.
 
+## Seguridad empresarial — fase 2 preparada (enforcement opt-in)
+
+**Rama nueva:** `feature/nexora-security-phase2`, basada en `feature/nexora-security-phase1`. **Pendiente de compilar y probar con Identity/SQL reales; no activada por defecto.**
+
+- `Security/ReglasAccesoControladores.cs`: matriz cerrada de `(controlador, acción MVC, método HTTP) -> policy`, denegación por defecto. Se cubren Facturas, Clientes, Productos, Categorías, Posventa, Recepciones, Control de Anulaciones, Reportes y Home. Las rutas nuevas no obtienen privilegios automáticamente.
+- `Security/FiltroPermisosComerciales.cs`: `IAsyncAuthorizationFilter` que evalúa el permiso en el servidor a través de `IAuthorizationService` y el `ContextoEmpresaVerificado` scoped (de la fase 1).
+- `Program.cs`: instala filtro y ruta `e/{empresaSlug}/{controller}/{action}/{id?}` **solo si** `Seguridad:ActivarTenancyValidada=true`; en Development usual permanece OFF sin cambios comerciales. Si ON, las rutas legacy sin slug carecen de contexto empresarial y son denegadas.
+- `Security/PermisosNexora.cs`: añade `AdministrarClientes`, `ConsultarRecepciones`, `RegistrarPosventa`, `ResolverPosventa`. Cajero puede consultar/registrar posventa y crear facturas, pero no anular, liberar stock ni confirmar devoluciones.
+- Runner `tests/Nexora.Security.Checks`: 23 verificaciones programadas (sin dependencias nuevas); falta correr en Visual Studio.
+- **Sin migración, sin nuevos POST que muevan dinero o mercancía**, sin modificar controladores comerciales ni datos previos.
+- Documento: [`docs/SEGURIDAD_FASE_2_AUTORIZACION_COMERCIAL.md`](docs/SEGURIDAD_FASE_2_AUTORIZACION_COMERCIAL.md).
+- Pendiente: navegación con slug, selector de empresa, Identity/roles y usuarios, pruebas negativas A/B con SQL real, auditoría y revisión de permisos por entidad. Mantener ramas y PR en borrador, sin activar SaaS público.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales

@@ -11,7 +11,11 @@ namespace SistemaFacturacion.Security
         public const string CrearFacturas = "Nexora.Facturas.Crear";
         public const string AnularFacturas = "Nexora.Facturas.Anular";
         public const string AdministrarInventario = "Nexora.Inventario.Administrar";
+        public const string AdministrarClientes = "Nexora.Clientes.Administrar";
+        public const string ConsultarRecepciones = "Nexora.Recepciones.Consultar";
         public const string ConsultarPosventa = "Nexora.Posventa.Consultar";
+        public const string RegistrarPosventa = "Nexora.Posventa.Registrar";
+        public const string ResolverPosventa = "Nexora.Posventa.Resolver";
         public const string ConsultarReembolsos = "Nexora.Reembolsos.Consultar";
         public const string ConsultarReportes = "Nexora.Reportes.Consultar";
         public const string AdministrarUsuarios = "Nexora.Usuarios.Administrar";
@@ -24,7 +28,9 @@ namespace SistemaFacturacion.Security
         public static readonly IReadOnlyList<string> Todos = new[]
         {
             ConsultarOperaciones, CrearFacturas, AnularFacturas,
-            AdministrarInventario, ConsultarPosventa, ConsultarReembolsos,
+            AdministrarInventario, AdministrarClientes, ConsultarRecepciones,
+            ConsultarPosventa, RegistrarPosventa, ResolverPosventa,
+            ConsultarReembolsos,
             ConsultarReportes, AdministrarUsuarios, AdministrarRoles,
             AdministrarEmpresa, ConfirmarRecepciones, LiberarInventario,
             ConfirmarReembolsos
@@ -37,12 +43,14 @@ namespace SistemaFacturacion.Security
                 ["Administrador"] = new HashSet<string>(StringComparer.Ordinal)
                 {
                     ConsultarOperaciones, CrearFacturas, AnularFacturas,
-                    AdministrarInventario, ConsultarPosventa,
+                    AdministrarInventario, AdministrarClientes, ConsultarRecepciones,
+                    ConsultarPosventa, RegistrarPosventa, ResolverPosventa,
                     ConsultarReembolsos, ConsultarReportes
                 },
                 ["Cajero"] = new HashSet<string>(StringComparer.Ordinal)
                 {
-                    ConsultarOperaciones, CrearFacturas, ConsultarPosventa
+                    ConsultarOperaciones, CrearFacturas, ConsultarPosventa,
+                    RegistrarPosventa
                 }
             };
 

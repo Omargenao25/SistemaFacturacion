@@ -109,6 +109,102 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
         {
             Verificar(!contexto.TieneEmpresa);
         }
+    }),
+    ("Cajero puede consultar, pero no anular facturas", () =>
+    {
+        var lectura = ReglasAccesoControladores.ObtenerPermiso("Facturas", "Details", "GET");
+        var anular = ReglasAccesoControladores.ObtenerPermiso("Facturas", "Anular", "POST");
+        Verificar(lectura == PermisosNexora.ConsultarOperaciones);
+        Verificar(anular == PermisosNexora.AnularFacturas);
+        Verificar(PermisosNexora.TienePermiso("Cajero", lectura!));
+        Verificar(!PermisosNexora.TienePermiso("Cajero", anular!));
+        return Task.CompletedTask;
+    }),
+    ("No se puede anular mediante GET", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Facturas", "Anular", "GET") == null);
+        return Task.CompletedTask;
+    }),
+    ("Métodos HTTP no previstos se deniegan", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Facturas", "Create", "PUT") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Productos", "Edit", "PATCH") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Recepciones", "Details", "DELETE") == null);
+        return Task.CompletedTask;
+    }),
+    ("Acciones nuevas y controladores desconocidos se deniegan", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Facturas", "Reembolsar", "POST") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "CualquierController", "Index", "GET") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(null, "Index", "GET") == null);
+        return Task.CompletedTask;
+    }),
+    ("Editar stock exige administrar inventario", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Productos", "Edit", "POST");
+        Verificar(permiso == PermisosNexora.AdministrarInventario);
+        Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
+        Verificar(PermisosNexora.TienePermiso("Administrador", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Modificar clientes no se permite al cajero", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Clientes", "Edit", "POST");
+        Verificar(permiso == PermisosNexora.AdministrarClientes);
+        Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Eliminar usa permiso aun con ActionName Delete", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Categorias", "Delete", "POST") == PermisosNexora.AdministrarInventario);
+        return Task.CompletedTask;
+    }),
+    ("Posventa: registrar no permite cerrar casos", () =>
+    {
+        var registrar = ReglasAccesoControladores.ObtenerPermiso(
+            "Posventa", "Create", "POST");
+        var cerrar = ReglasAccesoControladores.ObtenerPermiso(
+            "Posventa", "CambiarEstado", "POST");
+        Verificar(registrar == PermisosNexora.RegistrarPosventa);
+        Verificar(cerrar == PermisosNexora.ResolverPosventa);
+        Verificar(PermisosNexora.TienePermiso("Cajero", registrar!));
+        Verificar(!PermisosNexora.TienePermiso("Cajero", cerrar!));
+        return Task.CompletedTask;
+    }),
+    ("Recepciones siguen solo lectura", () =>
+    {
+        var consultar = ReglasAccesoControladores.ObtenerPermiso(
+            "Recepciones", "Details", "GET");
+        Verificar(consultar == PermisosNexora.ConsultarRecepciones);
+        Verificar(!PermisosNexora.TienePermiso("Cajero", consultar!));
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Recepciones", "Confirmar", "POST") == null);
+        return Task.CompletedTask;
+    }),
+    ("Centro de anulaciones requiere consulta financiera", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "ControlAnulaciones", "Index", "GET");
+        Verificar(permiso == PermisosNexora.ConsultarReembolsos);
+        Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Reportes requieren un permiso dedicado", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Reportes", "Index", "GET");
+        Verificar(permiso == PermisosNexora.ConsultarReportes);
+        Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
+        return Task.CompletedTask;
     })
 };
 
