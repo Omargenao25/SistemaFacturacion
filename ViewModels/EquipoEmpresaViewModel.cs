@@ -22,6 +22,10 @@ namespace SistemaFacturacion.ViewModels
 
     public sealed class MiembroEmpresaItem
     {
+        // Identificador y RowVersion usados exclusivamente en forms POST con CSRF.
+        // No son credenciales: el servidor revalida empresa, actor y target.
+        public string UserId { get; set; } = string.Empty;
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public string NombreUsuario { get; set; } = "Usuario no disponible";
         public string Correo { get; set; } = "";
         public bool CorreoConfirmado { get; set; }
