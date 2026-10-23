@@ -45,7 +45,15 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
+// En el laboratorio SaaS se protegen todas las acciones MVC por permiso.
+ // Con el flag apagado no se agregan filtros: desarrollo conserva el flujo
+ // mononegocio ya probado.
+builder.Services.AddScoped<FiltroPermisosComerciales>();
+builder.Services.AddControllersWithViews(opciones =>
+{
+    if (activarTenancyValidada)
+        opciones.Filters.AddService<FiltroPermisosComerciales>();
+});
 
 var app = builder.Build();
 
@@ -72,6 +80,16 @@ app.UseAuthentication();
 if (activarTenancyValidada)
     app.UseMiddleware<VerificacionMembresiaMiddleware>();
 app.UseAuthorization();
+
+// El contexto validado SOLO se puede crear si hay slug en ruta,
+// identidad autenticada y membresía aprobada por SQL Server.
+// Este enlace no está activo en el modo de desarrollo heredado.
+if (activarTenancyValidada)
+{
+    app.MapControllerRoute(
+        name: "empresa",
+        pattern: "e/{empresaSlug}/{controller=Home}/{action=Index}/{id?}");
+}
 
 // En producción no se permite entrar anónimamente a controladores MVC.
 // En Development se mantiene la compatibilidad para probar la fase inicial.
