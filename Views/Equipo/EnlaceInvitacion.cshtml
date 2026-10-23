@@ -31,6 +31,18 @@
             <a asp-action="Index" asp-route-empresaSlug="@ViewContext.RouteData.Values["empresaSlug"]"
                class="btn btn-outline-secondary">Volver a Mi equipo</a>
         </div>
-        <p class="text-muted small mt-3 mb-0">No compartas este enlace públicamente ni lo incluyas en capturas.</p>
+        @if (!Uri.TryCreate(Model, UriKind.Absolute, out _))
+        {
+            <p class="text-warning small mt-3">
+                Este es un enlace relativo de desarrollo. Configura
+                <code>Seguridad:BaseUrlPublica</code> con tu dominio HTTPS
+                antes de compartir una dirección completa con otra persona.
+            </p>
+        }
+        <p class="text-muted small mt-3 mb-0">
+            No compartas este enlace públicamente ni lo incluyas en capturas.
+            Si el destinatario aún no puede confirmar su correo en Identity,
+            necesitará completar primero esa configuración.
+        </p>
     </section>
 </div>
