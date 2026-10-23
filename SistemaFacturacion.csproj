@@ -5,7 +5,19 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-SistemaFacturacion-a492ae57-e5a6-44a8-8eaf-0b62fb18de8f</UserSecretsId>
+    <!-- The Web SDK globs Content and None as well as Compile.
+         Exclude the ENTIRE nested test project before default item discovery;
+         otherwise test bin/obj can be recursively copied into Web output. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);tests/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <!-- Defensa adicional si otros targets agregan elementos desde tests/. -->
+  <ItemGroup>
+    <Compile Remove="tests/**/*" />
+    <Content Remove="tests/**/*" />
+    <None Remove="tests/**/*" />
+    <EmbeddedResource Remove="tests/**/*" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.7" />

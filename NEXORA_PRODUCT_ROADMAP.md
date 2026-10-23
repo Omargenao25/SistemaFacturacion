@@ -158,6 +158,19 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - **Solo GET, sin migración ni escrituras**. La autorización global y por empresa de Russell sigue pendiente. Guía: [`docs/CENTRO_CONTROL_ANULACIONES_PRUEBAS.md`](docs/CENTRO_CONTROL_ANULACIONES_PRUEBAS.md).
 - Implementación y revisión estática en GitHub: pendiente `Ctrl+Shift+B` y comprobación visual/funcional local. No desplegar públicamente ni fusionar PR.
 
+## Seguridad empresarial — fase 1 preparada para revisión
+
+**Rama independiente:** `feature/nexora-security-phase1` (no mezclada aún con `feature/nexora-ui`). Esta fase **no activa SaaS real** ni garantiza protección granular sobre todos los controladores comerciales.
+
+- `Program.cs`: `UseAuthentication()` explícito, registro de políticas de seguridad y middleware de validación **solo con opt-in** `Seguridad:ActivarTenancyValidada`. En Production se requiere autenticación en rutas MVC convencionales y por atributos.
+- `ContextoEmpresaVerificado` scoped, `VerificacionMembresiaMiddleware`: `Guid.Empty` inicial; membresía y rol establecidos solo tras verificación SQL del usuario Identity y slug de ruta. Se conserva modo Development legado por defecto para no romper pruebas existentes.
+- `PermisosNexora`, `PermisoEmpresaRequirement` y `PermisoEmpresaHandler`: matriz de permisos por rol empresarial, independiente de los roles globales de Identity.
+- Prueba protegida `GET /e/{empresaSlug}/seguridad/estado`: solo devuelve el tenant/rol verificado y no escribe datos.
+- Runner `tests/Nexora.Security.Checks` sin dependencias NuGet de prueba adicionales (12 verificaciones de roles, auth, contexto, errores).
+- **Sin nuevas migraciones, sin POST sensibles, sin habilitar reembolsos o recepción de stock.** Compilación y tests locales pendientes.
+- Guía: [`docs/SEGURIDAD_FASE_1_IDENTIDAD_MEMBRESIAS.md`](docs/SEGURIDAD_FASE_1_IDENTIDAD_MEMBRESIAS.md).
+- Próximo bloqueante: autenticación + autorización por operación en cada controlador real, pruebas cruzadas A/B, auditoría, y alta/invitación de usuarios antes de producción.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
