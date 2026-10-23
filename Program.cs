@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
+using SistemaFacturacion.Services.Tenancy;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// TEMPORAL: legado exclusivamente en Development. En otros entornos no se
+// concede empresa; reemplazar por membresía verificada antes de SaaS real.
+builder.Services.AddScoped<IContextoEmpresa, ContextoEmpresaDesarrollo>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));

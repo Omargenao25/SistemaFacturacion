@@ -1,38 +1,48 @@
-﻿@model SistemaFacturacion.Models.Categoria
-
+@model SistemaFacturacion.Models.Categoria
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nuevo categoría";
 }
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Categorías</div>
+            <h1 class="page-title">Nuevo categoría</h1>
+            <p class="page-subtitle">Agrupa productos relacionados para organizar el catálogo comercial.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a categorías</a>
+    </div>
 
-<h1>Create</h1>
-
-<h4>Categoria</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-crud-heading">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-tags" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 class="nx-panel-title" id="nx-crud-heading">Información de la categoría</h2>
+                        <p class="nx-panel-subtitle">Los campos con * son obligatorios.</p>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+            <form asp-action="Create" method="post" class="nx-crud-form">
+                
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-4">
+                    <div class="col-12"><label asp-for="Nombre" class="form-label">Nombre de categoría <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Nombre" class="form-control" type="text" maxlength="60" placeholder="Ej. Electrónica" required /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+                <div class="col-12"><label asp-for="Descripcion" class="form-label">Descripción</label><textarea asp-for="Descripcion" class="form-control" rows="3" maxlength="150" placeholder="¿Qué artículos pertenecen a esta categoría?"></textarea><span asp-validation-for="Descripcion" class="text-danger small"></span></div>
+                </div>
+                <div class="nx-crud-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Guardar registro</button>
+                </div>
+            </form>
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
+            <h3>Consejo de Nexora</h3>
+            <p>Usa categorías claras y breves; así será más fácil mantener el inventario organizado.</p>
+        </aside>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }

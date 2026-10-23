@@ -1,338 +1,405 @@
-﻿@model SistemaFacturacion.Models.Factura
+@model SistemaFacturacion.Models.Factura
 @using SistemaFacturacion.Models
-
 @{
-    ViewData["Title"] = "Detalle de Factura";
-
+    ViewData["Title"] = "Detalle de factura";
     var pago = ViewBag.Pago as Pago;
+    var reembolso = ViewBag.Reembolso as Reembolso;
+    var recepciones = ViewBag.RecepcionesAnulacion as List<RecepcionAnulacion>
+        ?? new List<RecepcionAnulacion>();
+    var unidadesPendientes = recepciones.Sum(r => r.CantidadEsperada - r.CantidadRecibida);
+    var anulada = Model.Estado == "Anulada";
+    var puedeAnular = ViewBag.PuedeAnular is bool permitido && permitido;
+    var fechaLimiteAnulacion = ViewBag.FechaLimiteAnulacion is DateTime limite
+        ? limite : Model.Fecha.AddDays(7);
+    var nombreCliente = Model.Cliente == null
+        ? "Cliente no disponible"
+        : $"{Model.Cliente.Nombre} {Model.Cliente.Apellido}";
+    var unidadesPorVerificar = Model.Detalles.Sum(detalle => detalle.Cantidad);
+    var lineasFactura = Model.Detalles.Count;
 }
 
-<div class="container mt-4">
+<div class="nx-details-page">
+    <div class="page-intro no-print">
+        <div>
+            <div class="page-eyebrow">Nexora / Facturación</div>
+            <h1 class="page-title">Detalle de factura</h1>
+            <p class="page-subtitle">Consulta, imprime o administra el comprobante de esta venta.</p>
+        </div>
+        <div class="nx-receipt-actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial
+            </a>
+            <a asp-controller="Posventa" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> Posventa
+            </a>
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1" aria-hidden="true"></i> Imprimir
+            </button>
+            @if (puedeAnular)
+            {
+                <button type="button" class="btn btn-outline-danger nx-void-trigger"
+                        data-bs-toggle="modal" data-bs-target="#nxVoidInvoiceModal"
+                        aria-haspopup="dialog">
+                    <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Anular factura
+                </button>
+            }
+            else if (!anulada)
+            {
+                <span class="nx-receipt-expired" title="El plazo interno de anulación ha finalizado">
+                    <i class="bi bi-lock me-1" aria-hidden="true"></i> Anulación fuera de plazo
+                </span>
+            }
+        </div>
+    </div>
 
     @if (TempData["Mensaje"] != null)
     {
-        <div class="alert alert-success no-print">
-            @TempData["Mensaje"]
+        <div class="alert alert-success no-print" role="status">
+            <i class="bi bi-check-circle me-2" aria-hidden="true"></i>@TempData["Mensaje"]
         </div>
     }
 
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-
-        <div>
-            <h2>
-                Factura @Model.NumeroFactura
-            </h2>
-
-            <small class="text-muted">
-                Fecha: @Model.Fecha.ToString("dd/MM/yyyy HH:mm")
-            </small>
-        </div>
-
-
-        <div class="no-print">
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-
-                Historial
-
-            </a>
-
-
-            <button type="button"
-                    class="btn btn-primary"
-                    onclick="window.print()">
-
-                Imprimir Factura
-
-            </button>
-
-
-            @if (Model.Estado == "Emitida")
-            {
-                <form asp-action="Anular"
-                      asp-route-id="@Model.IdFactura"
-                      method="post"
-                      class="d-inline">
-
-                    <button type="submit"
-                            class="btn btn-danger"
-                            onclick="return confirm('¿Está seguro de que desea anular esta factura? El inventario será restaurado.');">
-
-                        Anular Factura
-
-                    </button>
-
-                </form>
-            }
-
-        </div>
-
-    </div>
-
-
-    @if (Model.Estado == "Anulada")
+    @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger text-center fw-bold">
-            FACTURA ANULADA
+        <div class="alert alert-warning no-print" role="alert">
+            <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>@TempData["Error"]
         </div>
     }
 
-
-    <hr />
-
-
-    <div class="row mb-4">
-
-        <!-- DATOS DEL CLIENTE -->
-        <div class="col-md-6">
-
-            <h5>Cliente</h5>
-
-            <p class="mb-1">
-                <strong>
-                    @Model.Cliente?.Nombre
-                    @Model.Cliente?.Apellido
-                </strong>
-            </p>
-
-            <p class="mb-1">
-                <strong>Teléfono:</strong>
-                @(Model.Cliente?.Telefono ?? "No registrado")
-            </p>
-
-            <p class="mb-1">
-                <strong>Correo:</strong>
-                @(Model.Cliente?.Correo ?? "No registrado")
-            </p>
-
-            <p class="mb-1">
-                <strong>Dirección:</strong>
-                @(Model.Cliente?.Direccion ?? "No registrada")
-            </p>
-
-        </div>
-
-
-        <!-- DATOS DE LA FACTURA -->
-        <div class="col-md-6">
-
-            <h5>Información de factura</h5>
-
-            <p class="mb-1">
-
-                <strong>Número:</strong>
-                @Model.NumeroFactura
-
-            </p>
-
-
-            <p class="mb-1">
-
-                <strong>Estado:</strong>
-
-                @if (Model.Estado == "Emitida")
+    @if (anulada)
+    {
+        <section class="nx-refund-summary no-print" aria-label="Situación del dinero del cliente">
+            <div class="nx-refund-summary-icon" aria-hidden="true">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="nx-refund-summary-content">
+                <span class="nx-refund-summary-eyebrow">Seguimiento financiero</span>
+                @if (reembolso != null)
                 {
-                    <span class="badge bg-success">
-                        Emitida
-                    </span>
+                    <h2>Reembolso @(reembolso.Estado == "PendienteRevision" ? "pendiente de revisión" : reembolso.Estado.ToLowerInvariant())</h2>
+                    <p>
+                        Importe solicitado: <strong>RD$ @reembolso.MontoSolicitado.ToString("N2")</strong>.
+                        Método original: <strong>@reembolso.MetodoPagoOriginal</strong>.
+                        La anulación por sí sola <strong>no confirma una devolución de dinero</strong>.
+                    </p>
+                    @if (reembolso.Estado == "PendienteRevision")
+                    {
+                        <p class="nx-refund-summary-note">El cobro registrado no coincide con una devolución simple; se requiere conciliación administrativa antes de devolver fondos.</p>
+                    }
                 }
                 else
                 {
-                    <span class="badge bg-danger">
-                        Anulada
-                    </span>
+                    <h2>Sin solicitud de reembolso registrada</h2>
+                    <p>Esta factura se anuló antes de habilitar el seguimiento de reembolsos o requiere conciliación manual. Comprueba los pagos originales.</p>
                 }
+            </div>
+            <span class="nx-refund-summary-badge">@(reembolso?.Estado == "PendienteRevision" ? "Revisar" : reembolso == null ? "Sin registro" : reembolso.Estado)</span>
+        </section>
+    }
 
-            </p>
-
-
-            <p class="mb-1">
-
-                <strong>Método de pago:</strong>
-
-                @(pago?.MetodoPago ?? "No registrado")
-
-            </p>
-
-
-            @if (pago != null)
+    @if (anulada)
+    {
+        <section class="nx-return-tracking no-print" aria-label="Recepción física de mercancía">
+            <div class="nx-return-tracking-header">
+                <div>
+                    <span class="nx-return-tracking-kicker">Control de mercancía</span>
+                    <h2>Recepción de productos</h2>
+                    @if (recepciones.Count > 0)
+                    {
+                        <p>La anulación <strong>no devolvió unidades al stock disponible</strong>.
+                            Hay @unidadesPendientes unidad(es) por recibir o verificar físicamente.
+                            La liberación al inventario requiere una recepción autorizada.</p>
+                    }
+                    else
+                    {
+                        <p>Esta factura se anuló antes de habilitar el control de
+                            recepciones, o requiere conciliación histórica. No se generó
+                            retroactivamente una devolución física.</p>
+                    }
+                </div>
+                <span class="nx-return-tracking-status">@(recepciones.Count > 0 ? "Pendiente de recepción" : "Sin registro histórico")</span>
+            </div>
+            @if (recepciones.Count > 0)
             {
-                <p class="mb-1">
+                <div class="table-responsive">
+                    <table class="table nx-return-tracking-table">
+                        <thead>
+                            <tr><th>Producto</th><th class="text-center">Esperadas</th>
+                                <th class="text-center">Recibidas</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var recepcion in recepciones)
+                            {
+                                var linea = Model.Detalles.FirstOrDefault(d => d.IdDetalle == recepcion.IdDetalle);
+                                <tr>
+                                    <td>@(linea?.Producto?.Nombre ?? "Producto no disponible")</td>
+                                    <td class="text-center">@recepcion.CantidadEsperada</td>
+                                    <td class="text-center">@recepcion.CantidadRecibida</td>
+                                    <td>
+                                        <span class="nx-status warn">@recepcion.Estado</span>
+                                        <a asp-controller="Recepciones" asp-action="Details"
+                                           asp-route-id="@recepcion.IdRecepcion"
+                                           class="nx-inspection-inline-link no-print">
+                                            Simular inspección <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            <p class="nx-return-tracking-footnote">
+                <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+                La recepción y liberación de existencias requieren permisos verificables.
+                Por ahora no existe una opción de confirmación habilitada.
+            </p>
+        </section>
+    }
 
-                    <strong>Monto pagado:</strong>
+    @if (!anulada && !puedeAnular)
+    {
+        <div class="alert alert-info no-print" role="status">
+            El plazo interno de 7 días para anular terminó el
+            <strong>@fechaLimiteAnulacion.ToString("dd/MM/yyyy HH:mm")</strong>.
+            Las devoluciones y garantías se gestionan por separado.
+        </div>
+    }
 
-                    RD$ @pago.Monto.ToString("N2")
+    <article class="nx-receipt" aria-label="Comprobante de venta @Model.NumeroFactura">
+        <div class="nx-receipt-topline"></div>
+        <div class="nx-receipt-inner">
+            <div class="nx-receipt-header">
+                <div class="nx-receipt-company">
+                    <span class="nx-receipt-brand-mark"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="nx-receipt-brand-name">NEXORA</div>
+                        <div class="nx-receipt-brand-subtitle">Sistema de gestión comercial y facturación</div>
+                    </div>
+                </div>
+                <div class="nx-receipt-identity">
+                    <div class="nx-receipt-document-type">Comprobante de venta</div>
+                    <div class="nx-receipt-reference">@Model.NumeroFactura</div>
+                    <div class="nx-receipt-document-note">Documento interno · No fiscal</div>
+                </div>
+            </div>
 
-                </p>
+            <div class="nx-receipt-separator"></div>
+
+            <div class="nx-receipt-info-grid">
+                <section class="nx-receipt-info-block">
+                    <h2>Facturado a</h2>
+                    <div class="nx-receipt-person">@(Model.Cliente == null ? "Cliente no disponible" : $"{Model.Cliente.Nombre} {Model.Cliente.Apellido}")</div>
+                    <div class="nx-receipt-info-line"><span>Teléfono</span><span>@(Model.Cliente?.Telefono ?? "No registrado")</span></div>
+                    <div class="nx-receipt-info-line"><span>Correo</span><span class="nx-receipt-break">@(Model.Cliente?.Correo ?? "No registrado")</span></div>
+                    <div class="nx-receipt-info-line"><span>Dirección</span><span class="nx-receipt-break">@(Model.Cliente?.Direccion ?? "No registrada")</span></div>
+                </section>
+
+                <section class="nx-receipt-info-block">
+                    <h2>Datos de la operación</h2>
+                    <div class="nx-receipt-info-line"><span>Fecha</span><strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    <div class="nx-receipt-info-line"><span>Plazo interno de anulación</span><span>@fechaLimiteAnulacion.ToString("dd/MM/yyyy HH:mm")</span></div>
+                    <div class="nx-receipt-info-line">
+                        <span>Estado</span>
+                        <strong class="nx-receipt-state @(anulada ? "is-void" : "is-issued")">
+                            @(anulada ? "Anulada" : Model.Estado)
+                        </strong>
+                    </div>
+                    <div class="nx-receipt-info-line"><span>Pago</span><strong>@(pago?.MetodoPago ?? "No registrado")</strong></div>
+                    @if (pago != null)
+                    {
+                        <div class="nx-receipt-info-line"><span>Monto registrado</span><strong class="nx-receipt-money">RD$ @pago.Monto.ToString("N2")</strong></div>
+                    }
+                </section>
+            </div>
+
+            @if (anulada)
+            {
+                <div class="nx-receipt-void" role="status">
+                    <i class="bi bi-exclamation-octagon me-2" aria-hidden="true"></i>
+                    FACTURA ANULADA — Este comprobante ya no representa una venta vigente.
+                </div>
             }
 
+            <section class="nx-receipt-items" aria-label="Productos facturados">
+                <h2>Detalle de productos</h2>
+                <div class="table-responsive">
+                    <table class="table nx-receipt-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto y garantía</th>
+                                <th scope="col" class="text-center">Cant.</th>
+                                <th scope="col" class="text-end">Precio unitario</th>
+                                <th scope="col" class="text-end">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detalle in Model.Detalles)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        @(detalle.Producto?.Nombre ?? "Producto no disponible")
+                                        @if (detalle.GarantiaMeses > 0)
+                                        {
+                                            <span class="nx-receipt-warranty is-covered">
+                                                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                                Garantía: <strong>@detalle.GarantiaMeses meses</strong>
+                                                <span class="nx-receipt-warranty-expiry">
+                                                    Vence: @Model.Fecha.AddMonths(detalle.GarantiaMeses).ToString("dd/MM/yyyy")
+                                                </span>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="nx-receipt-warranty is-unspecified">
+                                                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                                Garantía comercial no registrada en esta factura
+                                            </span>
+                                        }
+                                        @if (!anulada)
+                                        {
+                                            <a asp-controller="Posventa" asp-action="Create"
+                                               asp-route-detalleId="@detalle.IdDetalle"
+                                               class="nx-receipt-after-sale no-print">
+                                                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>
+                                                Solicitar devolución o garantía
+                                            </a>
+                                        }
+                                    </td>
+                                    <td class="text-center nx-receipt-money">@detalle.Cantidad</td>
+                                    <td class="text-end nx-receipt-money">RD$ @detalle.Precio.ToString("N2")</td>
+                                    <td class="text-end nx-receipt-money fw-semibold">RD$ @detalle.Subtotal.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="nx-receipt-bottom">
+                <div class="nx-receipt-note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <div>
+                        <strong>Información del comprobante</strong>
+                        <p>Este documento corresponde al registro interno de la venta en Nexora. No constituye un comprobante fiscal.</p>
+                    </div>
+                </div>
+                <section class="nx-receipt-totals" aria-label="Totales de la factura">
+                    <div class="nx-receipt-total-row"><span>Subtotal</span><strong>RD$ @Model.Subtotal.ToString("N2")</strong></div>
+                    <div class="nx-receipt-total-row"><span>ITBIS</span><strong>RD$ @Model.Impuesto.ToString("N2")</strong></div>
+                    <div class="nx-receipt-total-row"><span>Descuento</span><strong>- RD$ @Model.Descuento.ToString("N2")</strong></div>
+                    <div class="nx-receipt-grand-total">
+                        <span>Total <small>RD$</small></span>
+                        <strong>@Model.Total.ToString("N2")</strong>
+                    </div>
+                </section>
+            </div>
+
+            <div class="nx-receipt-footer">
+                <strong>¡Gracias por su compra!</strong>
+                <span>Nexora · Gestión comercial</span>
+            </div>
         </div>
-
-    </div>
-
-
-    <!-- DETALLE DE PRODUCTOS -->
-    <div class="table-responsive">
-
-        <table class="table table-bordered">
-
-            <thead class="table-dark">
-
-                <tr>
-                    <th>Producto</th>
-                    <th class="text-center">Cantidad</th>
-                    <th class="text-end">Precio</th>
-                    <th class="text-end">Subtotal</th>
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @foreach (var detalle in Model.Detalles)
-                {
-                    <tr>
-
-                        <td>
-                            @detalle.Producto?.Nombre
-                        </td>
-
-                        <td class="text-center">
-                            @detalle.Cantidad
-                        </td>
-
-                        <td class="text-end">
-                            RD$ @detalle.Precio.ToString("N2")
-                        </td>
-
-                        <td class="text-end">
-                            RD$ @detalle.Subtotal.ToString("N2")
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <!-- TOTALES -->
-    <div class="row justify-content-end mt-3">
-
-        <div class="col-md-5">
-
-            <table class="table">
-
-                <tr>
-
-                    <th>
-                        Subtotal
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Subtotal.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr>
-
-                    <th>
-                        ITBIS
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Impuesto.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr>
-
-                    <th>
-                        Descuento
-                    </th>
-
-                    <td class="text-end">
-                        RD$ @Model.Descuento.ToString("N2")
-                    </td>
-
-                </tr>
-
-
-                <tr class="table-success">
-
-                    <th>
-                        TOTAL
-                    </th>
-
-                    <td class="text-end fw-bold fs-5">
-                        RD$ @Model.Total.ToString("N2")
-                    </td>
-
-                </tr>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <div class="text-center mt-5 text-muted">
-        <small>
-            Gracias por su compra.
-        </small>
-    </div>
-
+    </article>
 </div>
 
 
-<style>
+@if (puedeAnular)
+{
+    <div class="modal fade nx-void-modal no-print" id="nxVoidInvoiceModal"
+         tabindex="-1" aria-labelledby="nxVoidInvoiceTitle"
+         aria-describedby="nxVoidInvoiceDescription">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="nx-void-modal-header">
+                    <div class="nx-void-modal-icon" aria-hidden="true">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="nx-void-modal-heading">
+                        <span class="nx-void-modal-eyebrow">Operación sensible</span>
+                        <h2 class="modal-title" id="nxVoidInvoiceTitle">Confirmar anulación</h2>
+                        <p>Factura <strong>@Model.NumeroFactura</strong></p>
+                    </div>
+                    <button type="button" class="btn-close nx-void-modal-close"
+                            data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
 
-    @@media print {
+                <div class="modal-body nx-void-modal-body">
+                    <p class="nx-void-modal-description" id="nxVoidInvoiceDescription">
+                        Revisa los datos de la venta antes de continuar. Si confirmas,
+                        la factura quedará <strong>Anulada</strong>, se registrará
+                        una recepción pendiente por producto y las unidades
+                        <strong>no volverán al stock disponible</strong> hasta verificarlas.
+                    </p>
 
-        .no-print,
-        header,
-        footer,
-        nav {
-            display: none !important;
-        }
+                    <div class="nx-void-modal-summary" aria-label="Resumen de la factura">
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-person me-1" aria-hidden="true"></i> Cliente</span>
+                            <strong>@nombreCliente</strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-calendar3 me-1" aria-hidden="true"></i> Fecha de venta</span>
+                            <strong>@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item">
+                            <span><i class="bi bi-box-arrow-in-down me-1" aria-hidden="true"></i> Unidades por recibir</span>
+                            <strong>@unidadesPorVerificar unidad(es) <small>en @lineasFactura línea(s)</small></strong>
+                        </div>
+                        <div class="nx-void-modal-summary-item nx-void-modal-summary-total">
+                            <span>Total de la factura</span>
+                            <strong>RD$ @Model.Total.ToString("N2")</strong>
+                        </div>
+                    </div>
 
-        body {
-            background: white !important;
-        }
+                    <div class="nx-void-modal-warning" role="note">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        <div>
+                            <strong>Antes de confirmar</strong>
+                            <p>Se creará una <strong>solicitud de reembolso pendiente</strong>
+                                y un registro de mercancía por recibir. No se devolverá dinero
+                                ni se repondrá stock automáticamente. Tampoco se emitirá una
+                                nota de crédito. El plazo interno de anulación es de 7 días.</p>
+                        </div>
+                    </div>
+                </div>
 
-        .container {
-            max-width: 100% !important;
-            width: 100% !important;
-        }
+                <form asp-controller="Facturas" asp-action="Anular"
+                      asp-route-id="@Model.IdFactura" method="post"
+                      id="nxVoidInvoiceForm" class="nx-void-modal-footer"
+                      asp-antiforgery="true">
+                    <button type="button" class="btn nx-void-modal-cancel"
+                            data-bs-dismiss="modal">
+                        Mantener factura
+                    </button>
+                    <button type="submit" class="btn btn-danger nx-void-modal-confirm"
+                            id="nxVoidInvoiceConfirm">
+                        <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>
+                        Sí, anular factura
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
-        .table-dark {
-            color: black !important;
-            background: white !important;
-        }
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("nxVoidInvoiceForm");
+            const confirmButton = document.getElementById("nxVoidInvoiceConfirm");
+            if (!form || !confirmButton) return;
 
-        .table-dark th {
-            color: black !important;
-            background: white !important;
-            border: 1px solid black !important;
-        }
-
-        .alert-danger {
-            border: 2px solid black;
-            color: black;
-            background: white;
-        }
-
-    }
-
-</style>
+            let submitting = false;
+            form.addEventListener("submit", (event) => {
+                if (submitting) {
+                    event.preventDefault();
+                    return;
+                }
+                submitting = true;
+                confirmButton.disabled = true;
+                confirmButton.setAttribute("aria-disabled", "true");
+                confirmButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Anulando...';
+            });
+        })();
+    </script>
+}

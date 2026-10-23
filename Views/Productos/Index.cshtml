@@ -1,77 +1,37 @@
-﻿@model IEnumerable<SistemaFacturacion.Models.Producto>
-
-@{
-    ViewData["Title"] = "Index";
+@model IEnumerable<SistemaFacturacion.Models.Producto>
+@{ ViewData["Title"] = "Productos"; }
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>@mensaje</div>
 }
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Codigo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Precio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Costo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCategoria)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Codigo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Precio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Costo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Stock)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdCategoria)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdProducto">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdProducto">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdProducto">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="page-intro">
+    <div><div class="page-eyebrow">Nexora / Inventario</div><h1 class="page-title">Productos</h1><p class="page-subtitle">El estado de inventario cambia automáticamente al vender o reponer. La desactivación manual se respeta.</p></div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nuevo producto</a>
+</div>
+<section class="nx-panel">
+    <div class="nx-panel-header"><h2 class="nx-panel-title">Catálogo de productos</h2><span class="text-muted small">@Model.Count() registros</span></div>
+    @if(!Model.Any()) {
+        <div class="nx-empty"><i class="bi bi-box-seam"></i>No hay productos registrados.</div>
+    } else {
+        <div class="table-responsive"><table class="table table-hover nx-table">
+            <thead><tr><th>Código</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Estado del inventario</th><th>Garantía</th><th>Control manual</th><th>Acciones</th></tr></thead>
+            <tbody>
+            @foreach(var item in Model) {
+                <tr>
+                    <td class="fw-semibold">@item.Codigo</td><td><div class="fw-semibold">@item.Nombre</div><small class="text-muted">@item.Descripcion</small></td>
+                    <td class="nx-mono">RD$ @item.Precio.ToString("N2")</td><td class="nx-mono">RD$ @item.Costo.ToString("N2")</td>
+                    <td class="nx-mono fw-semibold">@item.Stock</td>
+                    <td><span class="nx-status @item.ClaseEstadoInventario">@item.EstadoInventario</span></td>
+                    <td class="text-nowrap">@(item.GarantiaMeses > 0 ? $"{item.GarantiaMeses} meses" : "—")</td>
+                    <td><span class="nx-status @(item.Estado ? "good" : "danger")">@(item.Estado ? "Activo" : "Inactivo")</span></td>
+                    <td>
+                        <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdProducto">Ver</a>
+                        <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdProducto">Editar</a>
+                        <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdProducto">Eliminar</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+    }
+</section>

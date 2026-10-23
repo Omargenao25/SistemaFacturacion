@@ -460,7 +460,7 @@ a {
 
 
 /* ============================
-   IMPRESI�N
+   IMPRESIÓN
 ============================ */
 
 @media print {
@@ -487,3 +487,1101 @@ a {
         background: white !important;
     }
 }
+
+
+/* ===== Nexora: lenguaje visual y estados activos ===== */
+:root {
+    --nx-ink: #14213a;
+    --nx-accent: #3165e7;
+    --nx-muted: #64748b;
+    --nx-border: #e7ebf2;
+    --nx-surface: #ffffff;
+}
+body { color: var(--nx-ink); }
+.sidebar-link.active {
+    background: #28416b;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 #70a1ff;
+}
+.sidebar-link.active:hover { transform: none; background: #30517e; }
+.topbar-action { white-space: nowrap; }
+.mobile-nav-backdrop { display: none; }
+.page-intro { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:26px; flex-wrap:wrap; }
+.page-eyebrow { color:var(--nx-accent); font-size:.73rem; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:5px; }
+.page-title { color:var(--nx-ink); }
+.page-subtitle { max-width:680px; line-height:1.5; }
+.nx-stat-card { border:1px solid var(--nx-border); border-radius:16px; background:var(--nx-surface); box-shadow:0 8px 24px rgba(21,35,62,.04); padding:22px; height:100%; }
+.nx-stat-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--nx-muted); font-weight:600; font-size:.88rem; }
+.nx-stat-icon { display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border-radius:13px; background:#edf3ff; color:#3165e7; font-size:1.3rem; }
+.nx-stat-value { font-size:clamp(1.45rem,2vw,2rem); font-weight:800; letter-spacing:-.8px; margin:12px 0 4px; }
+.nx-stat-foot { font-size:.82rem; color:var(--nx-muted); }
+.nx-panel { border:1px solid var(--nx-border); border-radius:16px; background:#fff; box-shadow:0 8px 24px rgba(21,35,62,.035); overflow:hidden; }
+.nx-panel-header { padding:20px 22px; border-bottom:1px solid var(--nx-border); display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+.nx-panel-title { margin:0; font-size:1.05rem; font-weight:750; }
+.nx-table { margin-bottom:0; }
+.nx-table th { background:#f8fafd; color:#64748b!important; }
+.nx-table td { color:#334155; }
+.nx-action { display:inline-flex; gap:5px; align-items:center; font-weight:650; font-size:.87rem; }
+.nx-empty { padding:38px 24px; text-align:center; color:var(--nx-muted); }
+.nx-empty i { display:block; color:#97a9ca; font-size:2rem; margin-bottom:8px; }
+.nx-mono { font-variant-numeric:tabular-nums; }
+.nx-status { display:inline-block; padding:5px 10px; border-radius:30px; font-weight:700; font-size:.73rem; }
+.nx-status.good { background:#e7f8ef; color:#18734c; }
+.nx-status.warn { background:#fff5d9; color:#91620d; }
+.nx-status.danger { background:#fdebec; color:#a72b32; }
+.nx-list-action { display:inline-flex; margin:2px 7px 2px 0; font-size:.83rem; }
+@media(max-width:991px) {
+    .mobile-nav-backdrop.visible { display:block; position:fixed; inset:0; background:rgba(10,22,41,.55); z-index:950; }
+    .sidebar { z-index:1001; }
+    .topbar-action { display:none; }
+}
+@media(max-width:575px) {
+    .main-content { padding:16px; }
+    .page-intro .btn { width:100%; }
+    .topbar { padding:0 16px; }
+    .nx-panel-header { padding:16px; }
+}
+@media print { .mobile-nav-backdrop { display:none!important; } .nx-panel { box-shadow:none!important; } }
+
+
+/* ===== Nexora / Emisión de facturas ===== */
+.nx-invoice-page { width:100%; max-width:1480px; margin:0 auto 40px; }
+.nx-invoice-page .validation-summary-valid { display:none; }
+.nx-invoice-page .validation-summary-errors { border:1px solid #fecaca; }
+.nx-invoice-card {
+    background:#fff;
+    border:1px solid var(--nx-border,#e7ebf2);
+    border-radius:17px;
+    overflow:hidden;
+    box-shadow:0 12px 32px rgba(21,35,62,.045);
+}
+.nx-invoice-card-header {
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:20px 23px;
+    border-bottom:1px solid #edf0f5;
+}
+.nx-invoice-card-header h2 { margin:0; font-weight:750; letter-spacing:-.25px; font-size:1.06rem; }
+.nx-invoice-card-header p { margin:4px 0 0; font-size:.82rem; color:#728097; line-height:1.4; }
+.nx-invoice-step {
+    display:flex; flex:0 0 39px; width:39px; height:39px;
+    align-items:center; justify-content:center;
+    background:#edf3ff; color:#2c60d8; border-radius:12px;
+    font-size:.82rem; font-weight:800; letter-spacing:.4px;
+}
+.nx-invoice-card-body { padding:23px; }
+.nx-invoice-field-hint { margin-top:7px; font-size:.77rem; color:#8490a3; }
+.nx-invoice-hint-badge {
+    display:inline-flex; align-items:center; gap:7px; font-size:.78rem; font-weight:650;
+    padding:7px 12px; border-radius:30px; color:#4566a2; background:#eef4ff;
+}
+.nx-invoice-table-wrap { overflow-x:auto; }
+.nx-invoice-table { margin-bottom:0; min-width:650px; }
+.nx-invoice-table thead th {
+    background:#f8fafd; color:#718099; border-bottom:1px solid #edf0f5;
+    font-weight:750; font-size:.71rem; letter-spacing:.55px;
+    text-transform:uppercase; padding:15px 13px;
+}
+.nx-invoice-table tbody td { padding:17px 13px; border-color:#edf0f5; }
+.nx-invoice-table tbody tr:last-child td { border-bottom:0; }
+.nx-invoice-table td:first-child { min-width:270px; }
+.nx-invoice-table .nx-invoice-qty-col { width:105px; }
+.nx-invoice-table .cantidad { width:96px; }
+.nx-invoice-table .producto-select { min-width:255px; }
+.nx-invoice-table .precio, .nx-invoice-table .subtotal-fila { white-space:nowrap; color:#2f3d56; }
+.nx-invoice-table .eliminar { padding:7px 10px; border-color:#f4cbd0; }
+.nx-invoice-card-footer {
+    padding:18px 23px; border-top:1px solid #edf0f5;
+    display:flex; justify-content:space-between; align-items:center; gap:14px;
+}
+.nx-invoice-card-footer .btn { font-size:.87rem; }
+.nx-invoice-summary { position:sticky; top:92px; }
+.nx-invoice-summary-body { padding:22px 23px 24px; }
+.nx-invoice-summary-row {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:15px;
+}
+.nx-invoice-summary-row label { font-weight:550; color:#66758c; font-size:.9rem; }
+.nx-invoice-amount {
+    text-align:right; flex:1; min-width:0; width:100%;
+    background:transparent; outline:0; border:0; box-shadow:none;
+    font-variant-numeric:tabular-nums; font-size:.96rem; font-weight:750; color:#1c2a45;
+    pointer-events:none;
+}
+.nx-invoice-discount {
+    padding-top:19px; margin-top:17px; border-top:1px dashed #dbe2ec;
+}
+.nx-invoice-discount .form-control { background:#fbfcff; }
+.nx-invoice-total {
+    padding:20px; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:13px; margin:22px 0 18px;
+}
+.nx-invoice-total label {
+    display:block; color:#456291; font-size:.78rem; font-weight:800;
+    letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px;
+}
+.nx-invoice-total-value {
+    display:block; width:100%; color:#19428f; font-weight:850;
+    background:transparent; border:0; outline:0; box-shadow:none;
+    font-size:clamp(1.4rem,2.4vw,1.9rem); line-height:1.4;
+    letter-spacing:-.7px; font-variant-numeric:tabular-nums;
+    pointer-events:none;
+}
+.nx-invoice-total span { display:block; color:#6b83aa; font-size:.75rem; margin-top:6px; }
+.nx-invoice-submit { padding:13px 16px; font-weight:750; }
+.nx-invoice-summary-note {
+    text-align:center; font-size:.76rem; line-height:1.55; color:#8a96aa;
+    margin:14px 4px 0;
+}
+@media(max-width:1199px) { .nx-invoice-summary { position:static; } }
+@media(max-width:575px) {
+    .nx-invoice-card-header { padding:17px; gap:10px; }
+    .nx-invoice-card-body { padding:17px; }
+    .nx-invoice-card-footer { padding:16px 17px; }
+    .nx-invoice-summary-body { padding:18px; }
+    .nx-invoice-step { flex-basis:35px; width:35px; height:35px; }
+}
+
+
+/* ===== NEXORA / Comprobante de venta ===== */
+.nx-details-page { max-width:1240px; margin:0 auto 48px; }
+.nx-receipt-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.nx-receipt-actions form { margin:0; }
+.nx-receipt {
+    background:#fff; border:1px solid #e6ebf2; border-radius:18px;
+    overflow:hidden; box-shadow:0 14px 45px rgba(18,34,61,.06);
+    color:#172b49;
+}
+.nx-receipt-topline { height:7px; background:linear-gradient(90deg,#214ab5 0%,#487afb 60%,#8aafff 100%); }
+.nx-receipt-inner { padding:36px 43px 27px; }
+.nx-receipt-header { display:flex; justify-content:space-between; gap:26px; align-items:flex-start; }
+.nx-receipt-company { display:flex; align-items:center; gap:14px; min-width:0; }
+.nx-receipt-brand-mark {
+    flex:0 0 51px; width:51px; height:51px; border-radius:14px;
+    background:#3165e7; color:#fff; font-size:1.55rem;
+    display:flex; justify-content:center; align-items:center;
+}
+.nx-receipt-brand-name { font-size:1.63rem; font-weight:850; letter-spacing:-1px; line-height:1.2; }
+.nx-receipt-brand-subtitle { margin-top:3px; color:#74839a; font-size:.8rem; }
+.nx-receipt-identity { text-align:right; overflow-wrap:anywhere; }
+.nx-receipt-document-type { text-transform:uppercase; letter-spacing:1px; font-size:.67rem; font-weight:850; color:#647895; }
+.nx-receipt-reference { font-weight:800; font-size:1rem; margin-top:6px; font-variant-numeric:tabular-nums; }
+.nx-receipt-document-note { margin-top:6px; color:#7a899f; font-size:.75rem; }
+.nx-receipt-separator { height:1px; background:#e6ebf2; margin:27px 0; }
+.nx-receipt-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:35px; }
+.nx-receipt-info-block { min-width:0; }
+.nx-receipt-info-block h2, .nx-receipt-items h2 {
+    color:#637894; font-size:.71rem; font-weight:850;
+    letter-spacing:.85px; text-transform:uppercase; margin:0 0 16px;
+}
+.nx-receipt-person { font-size:1.16rem; font-weight:800; margin-bottom:12px; }
+.nx-receipt-info-line { display:flex; gap:12px; justify-content:space-between; margin:8px 0; line-height:1.55; font-size:.87rem; }
+.nx-receipt-info-line > span:first-child { color:#72829a; flex:0 0 auto; }
+.nx-receipt-info-line > span:last-child,
+.nx-receipt-info-line > strong { text-align:right; min-width:0; }
+.nx-receipt-info-block:first-child .nx-receipt-info-line { justify-content:flex-start; }
+.nx-receipt-break { overflow-wrap:anywhere; }
+.nx-receipt-money { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.nx-receipt-state { display:inline-block; padding:4px 10px; border-radius:30px; font-size:.76rem; font-weight:800; }
+.nx-receipt-state.is-issued { color:#1b8054; background:#e7f8ee; }
+.nx-receipt-state.is-void { color:#a92d38; background:#ffebee; }
+.nx-receipt-void {
+    border:1px solid #f4c5cb; background:#fff0f2; color:#99212f;
+    padding:14px 17px; border-radius:10px; font-weight:800;
+    margin:25px 0 0; font-size:.87rem;
+}
+.nx-receipt-items { margin-top:36px; }
+.nx-receipt-table { width:100%; margin:0; border-collapse:collapse; }
+.nx-receipt-table thead th {
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.6px;
+    color:#657890; background:#f2f5fa; border-bottom:1px solid #e5ebf3;
+    padding:15px 14px;
+}
+.nx-receipt-table td { padding:18px 14px; border-bottom:1px solid #ebeff5; color:#253650; vertical-align:middle; }
+.nx-receipt-table tbody tr:last-child td { border-bottom:0; }
+.nx-receipt-table tbody tr { break-inside:avoid; page-break-inside:avoid; }
+.nx-receipt-bottom { display:grid; grid-template-columns:1fr minmax(290px,360px); gap:36px; margin-top:32px; align-items:start; }
+.nx-receipt-note { display:flex; gap:11px; color:#7a8ba2; padding:13px 0; font-size:.78rem; line-height:1.6; }
+.nx-receipt-note > i { color:#416de0; font-size:1.05rem; }
+.nx-receipt-note strong { display:block; color:#465a78; margin-bottom:4px; }
+.nx-receipt-note p { margin:0; max-width:360px; }
+.nx-receipt-totals { background:#f7f9fc; border:1px solid #e9edf4; border-radius:13px; padding:20px; }
+.nx-receipt-total-row { display:flex; justify-content:space-between; gap:12px; margin-bottom:13px; font-size:.89rem; }
+.nx-receipt-total-row span { color:#708099; }
+.nx-receipt-total-row strong { font-weight:750; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.nx-receipt-grand-total {
+    border-top:1px dashed #cbd7e8; margin-top:17px; padding-top:16px;
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    color:#1e4caa; font-size:1.13rem; font-weight:850;
+}
+.nx-receipt-grand-total small { font-size:.73rem; }
+.nx-receipt-grand-total strong { font-size:1.6rem; letter-spacing:-.7px; font-variant-numeric:tabular-nums; }
+.nx-receipt-footer { text-align:center; border-top:1px solid #e8edf4; padding-top:22px; margin-top:34px; }
+.nx-receipt-footer strong { display:block; font-size:.91rem; }
+.nx-receipt-footer span { display:block; font-size:.76rem; color:#8b98aa; margin-top:4px; }
+@media(max-width:750px) {
+    .nx-receipt-inner { padding:25px 20px; }
+    .nx-receipt-header { flex-wrap:wrap; }
+    .nx-receipt-identity { text-align:left; }
+    .nx-receipt-info-grid { grid-template-columns:1fr; gap:21px; }
+    .nx-receipt-bottom { grid-template-columns:1fr; gap:14px; }
+    .nx-receipt-actions { width:100%; }
+    .nx-receipt-actions .btn { flex:1; }
+    .nx-receipt-actions form { display:flex!important; flex:1; }
+    .nx-receipt-actions form .btn { width:100%; }
+}
+@media(max-width:420px) {
+    .nx-receipt-inner { padding:22px 14px; }
+    .nx-receipt-brand-name { font-size:1.35rem; }
+    .nx-receipt-info-line { flex-wrap:wrap; gap:3px 9px; }
+    .nx-receipt-info-line > span:last-child,.nx-receipt-info-line > strong { text-align:left; }
+    .nx-receipt-actions { display:grid; grid-template-columns:1fr; }
+}
+@media print {
+    @page { size:A4; margin:12mm; }
+    html, body { width:auto!important; min-height:0!important; background:#fff!important; color:#151b29!important; }
+    .app-wrapper, .main-wrapper, .main-content {
+        display:block!important; min-height:0!important; margin:0!important;
+        padding:0!important; width:100%!important; background:#fff!important;
+    }
+    .nx-details-page { margin:0!important; max-width:none!important; padding:0!important; }
+    .nx-details-page .no-print, .nx-details-page .page-intro { display:none!important; }
+    .nx-receipt { box-shadow:none!important; border:0!important; border-radius:0!important; overflow:visible!important; }
+    .nx-receipt-topline { height:3px!important; background:#244ca1!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .nx-receipt-inner { padding:15px 0 0!important; }
+    .nx-receipt-header { gap:18px!important; }
+    .nx-receipt-brand-mark { background:#244ca1!important; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .nx-receipt-info-grid { grid-template-columns:1fr 1fr!important; gap:24px!important; }
+    .nx-receipt-bottom { grid-template-columns:1fr 46%!important; gap:20px!important; }
+    .nx-receipt-table { min-width:0!important; font-size:9pt; }
+    .nx-receipt-table td, .nx-receipt-table th { padding:9px 7px!important; }
+    .nx-receipt-items, .nx-receipt-info-grid { break-inside:avoid-page; }
+    .nx-receipt-totals, .nx-receipt-footer, .nx-receipt-void { break-inside:avoid; }
+    .nx-receipt-totals { background:#fff!important; }
+    .nx-receipt-state { border:1px solid #aeb7c5!important; background:#fff!important; color:#111!important; }
+    .nx-receipt-void { color:#9a1725!important; background:#fff!important; border:2px solid #9a1725!important; }
+}
+
+
+/* ===== NEXORA / Historial y reportes ===== */
+.nx-history-page, .nx-reports-page { max-width:1480px; margin:0 auto 44px; }
+.nx-filters-body { padding:20px 22px 24px; }
+.nx-search-control { position:relative; }
+.nx-search-control .bi-search {
+    position:absolute; top:50%; left:14px; transform:translateY(-50%);
+    color:#97a4b7; pointer-events:none;
+}
+.nx-search-control .form-control { padding-left:38px; }
+.nx-panel-subtitle { margin:5px 0 0; color:#8794a5; font-size:.8rem; line-height:1.4; }
+.nx-count-pill {
+    display:inline-flex; align-items:center; white-space:nowrap;
+    color:#375caa; background:#edf3ff; border:1px solid #dce8ff;
+    border-radius:30px; font-size:.78rem; font-weight:750; padding:6px 12px;
+}
+.nx-history-table td, .nx-report-invoices td { vertical-align:middle; }
+.nx-history-table .btn-sm, .nx-report-invoices .btn-sm { white-space:nowrap; }
+.nx-invoice-code { color:#2852a0; font-weight:750; font-size:.87rem; white-space:nowrap; }
+.nx-history-date { color:#6c7e96; white-space:nowrap; font-size:.87rem; }
+.nx-finance-card {
+    display:flex; align-items:flex-start; gap:17px; padding:23px 25px;
+    border:1px solid #e5eaf2; border-radius:15px; background:#fff; height:100%;
+    box-shadow:0 8px 24px rgba(21,35,62,.035);
+}
+.nx-finance-icon {
+    flex:0 0 48px; width:48px; height:48px; border-radius:14px;
+    background:#edf3ff; color:#3465d8; display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem;
+}
+.nx-finance-accent { border-color:#d7eadd; background:#f9fffb; }
+.nx-finance-accent .nx-finance-icon { background:#e4f8e8; color:#258554; }
+.nx-finance-label { color:#6d7d96; font-size:.87rem; font-weight:650; }
+.nx-finance-number { font-weight:850; font-size:clamp(1.3rem,2.2vw,1.9rem); margin:9px 0 5px; letter-spacing:-.6px; overflow-wrap:anywhere; }
+.nx-finance-accent .nx-finance-number { color:#1c7b51; }
+.nx-finance-caption { font-size:.75rem; color:#8a99ac; line-height:1.45; }
+.nx-report-disclaimer { font-size:.76rem; color:#76859d; line-height:1.5; }
+.nx-report-header-icon { font-size:1.4rem; }
+.nx-rank {
+    display:inline-flex; min-width:28px; height:28px; justify-content:center;
+    align-items:center; border-radius:8px; color:#3861b3;
+    font-weight:850; font-size:.78rem; background:#eef3fd;
+}
+@media(max-width:575px) {
+    .nx-filters-body { padding:17px; }
+    .nx-finance-card { padding:18px; }
+    .nx-panel-subtitle { font-size:.75rem; }
+    .nx-history-page .nx-panel-header, .nx-reports-page .nx-panel-header { align-items:flex-start; }
+}
+
+
+/* ===== NEXORA / Formularios de gestión ===== */
+.nx-crud-page { max-width:1390px; margin:0 auto 46px; }
+.nx-crud-shell { display:grid; grid-template-columns:minmax(0,1fr) 265px; align-items:start; gap:23px; }
+.nx-crud-shell > .nx-panel { min-width:0; }
+.nx-crud-form { padding:24px 27px 27px; }
+.nx-crud-form > .validation-summary-valid { display:none; }
+.nx-crud-form .form-label { display:block; font-size:.82rem; color:#3b4c66; margin-bottom:8px; }
+.nx-crud-form .form-control,
+.nx-crud-form .form-select { min-height:45px; background:#fbfcff; border-color:#dae2ee; }
+.nx-crud-form textarea.form-control { min-height:96px; resize:vertical; }
+.nx-crud-form .form-control:focus,
+.nx-crud-form .form-select:focus { background:#fff; }
+.nx-crud-heading { display:flex; align-items:center; gap:13px; }
+.nx-crud-heading-icon { width:43px; height:43px; display:inline-flex; align-items:center; justify-content:center; background:#eef3ff; color:#386bea; border-radius:12px; font-size:1.25rem; }
+.nx-crud-actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; flex-wrap:wrap; margin-top:29px; border-top:1px solid #edf0f6; padding-top:20px; }
+.nx-crud-actions .btn { min-width:125px; }
+.nx-crud-helper { font-size:.77rem; color:#7b8aa2; margin-top:7px; }
+.nx-crud-helper a { font-weight:650; }
+.nx-crud-toggle { border:1px solid #e6ecf5; background:#f8fafd; border-radius:10px; padding:16px 18px 16px 48px; }
+.nx-crud-toggle .form-check-input { cursor:pointer; }
+.nx-crud-toggle .form-check-label { font-weight:700; color:#3b4c66; cursor:pointer; }
+.nx-crud-sidebar { padding:23px; border:1px solid #dfebfc; background:#f4f8ff; border-radius:15px; }
+.nx-crud-sidebar-icon { display:inline-flex; align-items:center; justify-content:center; background:#e1edff; border-radius:11px; color:#2f65da; width:43px; height:43px; font-size:1.25rem; margin-bottom:16px; }
+.nx-crud-sidebar h3 { font-size:.94rem; font-weight:800; margin-bottom:9px; }
+.nx-crud-sidebar p { color:#657b9b; font-size:.83rem; line-height:1.65; margin:0; }
+@media(max-width:1100px) {
+  .nx-crud-shell { grid-template-columns:minmax(0,1fr); }
+  .nx-crud-sidebar { padding:18px 21px; }
+}
+@media(max-width:575px) {
+  .nx-crud-form { padding:17px; }
+  .nx-crud-actions { flex-direction:column-reverse; align-items:stretch; }
+  .nx-crud-actions .btn { width:100%; }
+  .nx-crud-heading-icon { width:38px; height:38px; }
+  .nx-crud-shell { gap:16px; }
+}
+
+
+/* ===== NEXORA / Fichas y confirmaciones de eliminación ===== */
+.nx-detail-grid {
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:13px 24px; margin:0; padding:24px 27px;
+}
+.nx-detail-row {
+    padding:13px 15px; margin:0; min-width:0;
+    background:#f9fbff; border:1px solid #e8eef7;
+    border-radius:11px; overflow-wrap:anywhere;
+}
+.nx-detail-row dt {
+    color:#73849d; text-transform:uppercase;
+    letter-spacing:.45px; font-size:.68rem; font-weight:800;
+    margin-bottom:9px;
+}
+.nx-detail-row dd {
+    font-size:.95rem; font-weight:650; margin:0;
+    color:#263b59; line-height:1.5;
+}
+.nx-detail-actions {
+    display:flex; align-items:center; justify-content:flex-end;
+    flex-wrap:wrap; gap:10px; padding:19px 27px 24px;
+    border-top:1px solid #edf0f6;
+}
+.nx-delete-form { margin:0; }
+.nx-delete-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    background:#fff7eb; border:1px solid #f5d6a0;
+    color:#83531d; padding:18px; margin:22px 27px 0;
+    border-radius:12px; line-height:1.6;
+}
+.nx-delete-warning > i { font-size:1.3rem; margin-top:1px; }
+.nx-delete-warning strong { display:block; margin-bottom:4px; }
+.nx-delete-warning p { margin:0; font-size:.85rem; }
+@media(max-width:650px) {
+    .nx-detail-grid { grid-template-columns:1fr; padding:17px; gap:10px; }
+    .nx-detail-actions { padding:17px; flex-direction:column-reverse; align-items:stretch; }
+    .nx-detail-actions > .btn, .nx-delete-form, .nx-delete-form .btn { width:100%; }
+    .nx-delete-warning { margin:17px 17px 0; padding:14px; }
+}
+
+
+/* ===== NEXORA / Protección visual de eliminaciones ===== */
+.nx-delete-blocked {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.88rem; font-weight:750; color:#9a3c24;
+    background:#fff0ea; border:1px solid #f2c9b9;
+    padding:10px 15px; border-radius:9px;
+}
+
+
+/* NEXORA / Garantías comerciales y anulación fuera de plazo */
+.nx-receipt-warranty {
+    display:block; margin-top:7px; padding:5px 8px;
+    font-size:.72rem; font-weight:600; line-height:1.55;
+    border-radius:7px; white-space:normal;
+}
+.nx-receipt-warranty.is-covered {
+    color:#276441; background:#edf8f0;
+    border:1px solid #cbe6d4;
+}
+.nx-receipt-warranty.is-unspecified {
+    color:#69798f; background:#f5f7fa;
+    border:1px solid #e4e8ef;
+}
+.nx-receipt-warranty .bi { margin-right:4px; }
+.nx-receipt-warranty strong { font-weight:800; }
+.nx-receipt-warranty-expiry { display:block; padding-left:17px; font-weight:650; }
+
+.nx-receipt-expired {
+    display:inline-flex; align-items:center; padding:9px 12px;
+    border:1px solid #e9cbb2; background:#fff8f1;
+    color:#98613c; border-radius:9px; font-size:.82rem; font-weight:750;
+}
+@media print {
+    .nx-receipt-warranty {
+        font-size:8pt!important; padding:3px 6px!important;
+        -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    .nx-receipt-warranty.is-covered { color:#2b6141!important; }
+    .nx-receipt-warranty.is-unspecified { color:#606f82!important; }
+    .nx-receipt-expired { display:none!important; }
+}
+
+
+/* NEXORA / Atención posventa */
+.nx-receipt-after-sale {
+    display:inline-flex; align-items:center; gap:2px; margin-top:8px;
+    padding:6px 9px; border:1px solid #c8dafa; border-radius:8px;
+    color:#2454af; background:#f1f6ff; font-size:.73rem;
+    font-weight:750; text-decoration:none; line-height:1.35;
+}
+.nx-receipt-after-sale:hover { color:#174491; background:#e7f0ff; }
+.nx-case-actions {
+    padding:24px 27px; border-top:1px solid #edf0f6;
+}
+.nx-case-actions textarea { max-width:100%; }
+@media print { .nx-receipt-after-sale, .nx-case-actions { display:none!important; } }
+
+/* ===== NEXORA / Confirmación profesional de anulación ===== */
+/* Estilos aislados del comprobante: el modal nunca se imprime. */
+.nx-void-trigger {
+    border-radius: 10px;
+    font-weight: 750;
+}
+.nx-void-modal .modal-dialog {
+    max-width: 600px;
+}
+.nx-void-modal .modal-content {
+    border: 1px solid rgba(224, 230, 240, .92);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 26px 80px rgba(15, 23, 42, .25);
+    background: #fff;
+}
+.nx-void-modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 27px 28px 23px;
+    border-bottom: 1px solid #edf1f6;
+    background: linear-gradient(115deg, #fff 35%, #fff7f7 100%);
+}
+.nx-void-modal-icon {
+    display: flex;
+    flex: 0 0 54px;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border: 1px solid #fecaca;
+    border-radius: 15px;
+    color: #c92c3a;
+    background: #fff0f1;
+    font-size: 1.45rem;
+}
+.nx-void-modal-heading {
+    flex: 1;
+    min-width: 0;
+}
+.nx-void-modal-eyebrow {
+    color: #ba3543;
+    font-size: .7rem;
+    letter-spacing: .10em;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+.nx-void-modal-heading h2 {
+    margin: 5px 0 6px;
+    color: #142641;
+    font-size: 1.38rem;
+    line-height: 1.3;
+    font-weight: 850;
+}
+.nx-void-modal-heading p {
+    margin: 0;
+    color: #64748b;
+    font-size: .84rem;
+    overflow-wrap: anywhere;
+}
+.nx-void-modal-heading p strong { color: #344b6b; }
+.nx-void-modal-close { flex: 0 0 auto; margin: 2px 0 0 4px; }
+.nx-void-modal-body { padding: 24px 28px 18px; }
+.nx-void-modal-description {
+    color: #53647d;
+    font-size: .92rem;
+    line-height: 1.65;
+    margin-bottom: 19px;
+}
+.nx-void-modal-description strong { color: #b42335; }
+.nx-void-modal-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.nx-void-modal-summary-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    gap: 7px;
+    padding: 15px 16px;
+    border: 1px solid #e7edf5;
+    border-radius: 12px;
+    background: #f8faff;
+    overflow-wrap: anywhere;
+}
+.nx-void-modal-summary-item > span {
+    color: #72829a;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.nx-void-modal-summary-item > strong {
+    color: #1c3355;
+    font-size: .92rem;
+    line-height: 1.45;
+    font-weight: 780;
+}
+.nx-void-modal-summary-item > strong small {
+    display: block;
+    font-weight: 500;
+    color: #70819a;
+    font-size: .76rem;
+    margin-top: 3px;
+}
+.nx-void-modal-summary-total {
+    background: #eef4ff;
+    border-color: #d7e6ff;
+}
+.nx-void-modal-summary-total > strong {
+    color: #1b55bf;
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+}
+.nx-void-modal-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    border: 1px solid #f1d6ab;
+    border-radius: 12px;
+    background: #fffaee;
+    color: #805a27;
+    padding: 15px 16px;
+}
+.nx-void-modal-warning > i { margin-top: 2px; font-size: 1.1rem; }
+.nx-void-modal-warning strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: .83rem;
+}
+.nx-void-modal-warning p {
+    margin: 0;
+    font-size: .79rem;
+    line-height: 1.6;
+}
+.nx-void-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 11px;
+    padding: 17px 28px 26px;
+    border-top: 1px solid #edf1f6;
+}
+.nx-void-modal-footer .btn {
+    border-radius: 10px;
+    padding: 11px 17px;
+    font-weight: 750;
+    font-size: .86rem;
+}
+.nx-void-modal-cancel {
+    border: 1px solid #d9e2ef;
+    background: #fff;
+    color: #445775;
+}
+.nx-void-modal-cancel:hover {
+    color: #213b61;
+    border-color: #bfd0e6;
+    background: #f4f7fb;
+}
+.nx-void-modal-confirm {
+    background: #d93648;
+    border-color: #d93648;
+}
+.nx-void-modal-confirm:hover {
+    background: #b82036;
+    border-color: #b82036;
+}
+.nx-void-modal-confirm:disabled { cursor: wait; opacity: .8; }
+.nx-void-modal-footer .btn:focus-visible,
+.nx-void-modal .btn-close:focus-visible {
+    outline: 3px solid #95b6f4;
+    outline-offset: 3px;
+}
+@media (max-width: 575px) {
+    .nx-void-modal .modal-dialog { margin: 12px; }
+    .nx-void-modal-header { gap: 12px; padding: 20px 18px 18px; }
+    .nx-void-modal-icon { flex-basis: 44px; width: 44px; height: 44px; font-size: 1.1rem; }
+    .nx-void-modal-heading h2 { font-size: 1.13rem; }
+    .nx-void-modal-body { padding: 19px 18px 12px; }
+    .nx-void-modal-summary { grid-template-columns: 1fr; }
+    .nx-void-modal-footer { padding: 16px 18px 20px; }
+    .nx-void-modal-footer .btn { flex: 1 1 100%; }
+}
+@media print {
+    .nx-void-modal, .nx-void-trigger, .modal-backdrop { display: none !important; }
+}
+
+/* NEXORA / Seguimiento de reembolsos en facturas anuladas */
+.nx-refund-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 20px 23px;
+    margin: 0 0 20px;
+    border-radius: 15px;
+    border: 1px solid #f0d6ab;
+    background: #fffaf0;
+    color: #765221;
+}
+.nx-refund-summary-icon {
+    width: 43px;
+    height: 43px;
+    flex: 0 0 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: #fff0cd;
+    font-size: 1.3rem;
+}
+.nx-refund-summary-content { flex: 1; min-width: 0; }
+.nx-refund-summary-eyebrow {
+    color: #a16a2c;
+    text-transform: uppercase;
+    font-size: .68rem;
+    letter-spacing: .08em;
+    font-weight: 800;
+}
+.nx-refund-summary h2 {
+    margin: 4px 0 8px;
+    color: #583d1f;
+    font-size: 1.03rem;
+    font-weight: 800;
+}
+.nx-refund-summary p { margin: 0; font-size: .84rem; line-height: 1.6; }
+.nx-refund-summary .nx-refund-summary-note {
+    margin-top: 8px;
+    font-weight: 650;
+}
+.nx-refund-summary-badge {
+    border-radius: 30px;
+    border: 1px solid #e6bc78;
+    padding: 5px 10px;
+    color: #8a5b23;
+    background: #fff3d9;
+    font-size: .72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+@media (max-width: 600px) {
+    .nx-refund-summary { flex-wrap: wrap; padding: 17px; }
+    .nx-refund-summary-badge { margin-left: 58px; }
+}
+@media print { .nx-refund-summary { display: none!important; } }
+
+
+/* NEXORA — Mercancía por recibir tras anular factura */
+.nx-return-tracking {
+    margin: 0 0 20px;
+    padding: 21px 23px 14px;
+    border: 1px solid #c8dafa;
+    border-radius: 15px;
+    background: #f5f9ff;
+    color: #243b60;
+}
+.nx-return-tracking-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.nx-return-tracking-header > div { flex: 1 1 350px; }
+.nx-return-tracking-kicker {
+    font-size: .7rem;
+    font-weight: 850;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    color: #346acc;
+}
+.nx-return-tracking h2 {
+    margin: 5px 0 8px;
+    color: #183d79;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+.nx-return-tracking p {
+    margin: 0 0 14px;
+    font-size: .84rem;
+    line-height: 1.65;
+}
+.nx-return-tracking-status {
+    display: inline-block;
+    padding: 7px 11px;
+    border: 1px solid #bdd2fb;
+    border-radius: 50px;
+    color: #2252a1;
+    background: #e7f0ff;
+    font-size: .72rem;
+    font-weight: 750;
+}
+.nx-return-tracking-table { margin-bottom: 12px; }
+.nx-return-tracking-table thead th {
+    color: #40577a;
+    font-size: .74rem;
+}
+.nx-return-tracking-table td {
+    color: #273d5d;
+    font-size: .82rem;
+    vertical-align: middle;
+}
+.nx-return-tracking .nx-return-tracking-footnote {
+    padding-top: 12px;
+    border-top: 1px solid #dae7ff;
+    font-size: .78rem;
+    color: #557098;
+}
+@media (max-width: 575px) {
+    .nx-return-tracking { padding: 17px 15px; }
+    .nx-return-tracking-status { max-width: 100%; white-space: normal; }
+}
+@media print { .nx-return-tracking { display: none !important; } }
+
+/* NEXORA / Recepciones e inspección (simulación de solo lectura) */
+.nx-inspection-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 17px 20px;
+    margin-bottom: 19px;
+    border: 1px solid #bed4f5;
+    border-radius: 13px;
+    background: #f0f6ff;
+    color: #27538c;
+}
+.nx-inspection-notice > i {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    background: #dceaff;
+}
+.nx-inspection-notice strong { font-size: .89rem; }
+.nx-inspection-notice p { margin: 5px 0 0; font-size: .83rem; line-height: 1.6; }
+.nx-inspection-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+.nx-inspection-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #e4eaf3;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(20, 38, 70, .035);
+}
+.nx-inspection-metric span {
+    color: #667b98;
+    font-size: .77rem;
+    font-weight: 650;
+}
+.nx-inspection-metric strong {
+    color: #1a376a;
+    font-size: 1.7rem;
+    font-weight: 830;
+    font-variant-numeric: tabular-nums;
+    margin: 6px 0;
+}
+.nx-inspection-metric small { color: #7b8ca6; font-size: .73rem; }
+.nx-inspection-table td { vertical-align: middle; }
+.nx-inspection-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr);
+    gap: 17px;
+    margin-bottom: 22px;
+}
+.nx-inspection-hero {
+    border-radius: 17px;
+    padding: 25px;
+    background: linear-gradient(135deg, #16396e 0%, #2563d7 100%);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(22, 72, 153, .16);
+}
+.nx-inspection-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+.nx-inspection-kicker {
+    color: #d5e5ff;
+    text-transform: uppercase;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    font-weight: 750;
+}
+.nx-inspection-hero .nx-status.warn {
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    border-color: rgba(255,255,255,.28);
+}
+.nx-inspection-hero h2 {
+    margin: 14px 0 5px;
+    font-size: 1.45rem;
+    line-height: 1.25;
+    font-weight: 840;
+}
+.nx-inspection-hero-subtitle {
+    color: #dce9ff;
+    font-size: .84rem;
+    overflow-wrap: anywhere;
+}
+.nx-inspection-hero-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+}
+.nx-inspection-hero-numbers > div {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,.11);
+    border: 1px solid rgba(255,255,255,.17);
+    border-radius: 11px;
+    padding: 12px 14px;
+}
+.nx-inspection-hero-numbers span { color: #dbeafe; font-size: .72rem; }
+.nx-inspection-hero-numbers strong {
+    margin-top: 4px;
+    font-size: 1.45rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.nx-inspection-origin {
+    border-radius: 17px;
+    border: 1px solid #e3e9f4;
+    padding: 24px;
+    background: #fff;
+}
+.nx-inspection-origin h3 {
+    margin: 0 0 16px;
+    font-size: .97rem;
+    font-weight: 800;
+    color: #1f355b;
+}
+.nx-inspection-origin dl { margin: 0; }
+.nx-inspection-origin dl > div {
+    padding: 10px 0;
+    border-bottom: 1px solid #edf1f7;
+}
+.nx-inspection-origin dl > div:last-child { border-bottom: none; }
+.nx-inspection-origin dt { color: #7888a0; font-size: .72rem; margin-bottom: 3px; }
+.nx-inspection-origin dd {
+    font-weight: 700;
+    font-size: .84rem;
+    color: #284166;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.nx-inspection-workspace { overflow: hidden; }
+.nx-inspection-form-wrap { padding: 24px; }
+.nx-inspection-small-heading {
+    font-size: .89rem;
+    font-weight: 800;
+    color: #263d62;
+    margin: 5px 0 7px;
+}
+.nx-inspection-simulation-badge {
+    display: inline-block;
+    white-space: nowrap;
+    border: 1px solid #bed4ff;
+    border-radius: 40px;
+    color: #2b5eb2;
+    background: #eef5ff;
+    font-size: .74rem;
+    font-weight: 750;
+    padding: 7px 11px;
+}
+.nx-inspection-option {
+    display: flex;
+    flex-direction: column;
+    min-height: 110px;
+    gap: 8px;
+    border: 1px solid #e0e9f4;
+    border-radius: 11px;
+    padding: 13px 12px;
+    margin-bottom: 8px;
+    background: #f9fbff;
+}
+.nx-inspection-option span { font-size: .82rem; font-weight: 800; }
+.nx-inspection-option small { font-size: .74rem; line-height: 1.45; color: #74859c; }
+.nx-inspection-option.is-good span { color: #23734c; }
+.nx-inspection-option.is-warn span { color: #9b6818; }
+.nx-inspection-option.is-service span { color: #3262ab; }
+.nx-inspection-option.is-danger span { color: #b63747; }
+.nx-inspection-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+.nx-inspection-actions .btn { border-radius: 10px; font-weight: 700; }
+.nx-inspection-result {
+    border: 1px solid #bcdcc9;
+    background: #f3fbf5;
+    border-radius: 12px;
+    padding: 19px;
+    color: #266145;
+}
+.nx-inspection-result-heading { font-weight: 800; margin-bottom: 14px; }
+.nx-inspection-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 13px;
+}
+.nx-inspection-result-grid > div {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cce5d5;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+}
+.nx-inspection-result-grid span { color: #527763; font-size: .71rem; }
+.nx-inspection-result-grid strong {
+    color: #1c6141;
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
+}
+.nx-inspection-result-grid small { color: #6e927c; font-size: .7rem; }
+.nx-inspection-result p { font-size: .82rem; }
+.nx-inspection-footer-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin: 15px 0 0;
+    color: #64748b;
+    font-size: .8rem;
+    line-height: 1.6;
+}
+.nx-inspection-inline-link {
+    display: block;
+    color: #2563b3;
+    font-size: .73rem;
+    font-weight: 750;
+    margin-top: 6px;
+    text-decoration: none;
+}
+.nx-inspection-inline-link:hover { color: #15458a; text-decoration: underline; }
+@media (max-width: 900px) {
+    .nx-inspection-overview { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+    .nx-inspection-metrics, .nx-inspection-result-grid { grid-template-columns: 1fr; }
+    .nx-inspection-form-wrap, .nx-inspection-hero, .nx-inspection-origin { padding: 18px; }
+    .nx-inspection-actions .btn { flex: 1 1 100%; }
+    .nx-inspection-hero h2 { font-size: 1.26rem; }
+    .nx-inspection-notice { padding: 14px; }
+}
+@media print {
+    .nx-inspection-page { display: none !important; }
+}
+
+/* NEXORA / Centro de control de anulaciones — solo lectura */
+.nx-reconciliation-banner {
+    display:flex; align-items:flex-start; gap:14px;
+    padding:18px 21px; margin-bottom:19px;
+    border:1px solid #c9dafa; border-radius:14px;
+    background:#f0f6ff; color:#2e568d;
+}
+.nx-reconciliation-banner > i {
+    display:flex; flex:0 0 42px; width:42px; height:42px;
+    align-items:center; justify-content:center; border-radius:11px;
+    background:#dceaff; font-size:1.25rem;
+}
+.nx-reconciliation-banner strong {font-size:.91rem; font-weight:800;}
+.nx-reconciliation-banner p {margin:5px 0 0; line-height:1.6; font-size:.82rem;}
+.nx-reconciliation-page-note {
+    font-size:.79rem; color:#61718c; line-height:1.55;
+    margin:15px 0 12px;
+}
+.nx-reconciliation-metrics {
+    display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:13px; margin-bottom:22px;
+}
+.nx-reconciliation-metric {
+    display:flex; flex-direction:column; min-width:0;
+    border:1px solid #e5ecf5; border-radius:13px;
+    background:#fff; padding:18px;
+    box-shadow:0 5px 16px rgba(22,49,94,.035);
+}
+.nx-reconciliation-metric > span {
+    color:#657994; font-size:.76rem; line-height:1.45; font-weight:700;
+}
+.nx-reconciliation-metric > strong {
+    color:#163967; margin:8px 0; font-size:1.48rem;
+    font-weight:850; line-height:1.15; font-variant-numeric:tabular-nums;
+    overflow-wrap:anywhere;
+}
+.nx-reconciliation-metric > small {
+    color:#7c8da5; font-size:.7rem; line-height:1.48;
+}
+.nx-reconciliation-metric.is-money > strong {color:#245bb6;}
+.nx-reconciliation-metric.is-alert > strong {color:#b7672f;}
+.nx-reconciliation-table th {
+    font-size:.74rem; font-weight:750; color:#60728d; white-space:nowrap;
+}
+.nx-reconciliation-table td {vertical-align:middle; font-size:.81rem;}
+.nx-reconciliation-table td:nth-child(4),
+.nx-reconciliation-table td:nth-child(5) {min-width:180px;}
+.nx-reconciliation-subline {
+    display:block; margin-top:6px; font-size:.72rem; line-height:1.45;
+    color:#72819a; font-weight:500;
+}
+.nx-reconciliation-pager {
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:12px; padding:17px 22px;
+    border-top:1px solid #e8edf5; color:#64748b; font-size:.8rem;
+}
+.nx-reconciliation-pager > div {display:flex; flex-wrap:wrap; gap:9px;}
+.nx-reconciliation-footer {
+    font-size:.77rem; line-height:1.6; color:#77869d; margin:16px 0;
+}
+@media (max-width:1100px) {
+    .nx-reconciliation-metrics {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:550px) {
+    .nx-reconciliation-metrics {grid-template-columns:1fr;}
+    .nx-reconciliation-banner {padding:15px; gap:10px;}
+    .nx-reconciliation-page-note {font-size:.75rem;}
+}
+@media print { .nx-reconciliation-page {display:none!important;} }

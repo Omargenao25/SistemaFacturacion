@@ -1,251 +1,160 @@
-﻿@model SistemaFacturacion.ViewModels.CrearFacturaViewModel
+@model SistemaFacturacion.ViewModels.CrearFacturaViewModel
 @using SistemaFacturacion.Models
 @using System.Globalization
-
 @{
-    ViewData["Title"] = "Nueva Factura";
-
-    var productos =
-        ViewBag.Productos as List<Producto>
-        ?? new List<Producto>();
+    ViewData["Title"] = "Nueva factura";
+    var productos = ViewBag.Productos as List<Producto> ?? new List<Producto>();
 }
 
-<div class="container mt-4">
-
-    <h2>Nueva Factura</h2>
-
-    <hr />
+<div class="nx-invoice-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Operaciones</div>
+            <h1 class="page-title">Nueva factura</h1>
+            <p class="page-subtitle">Registra una venta, selecciona los productos y revisa el total antes de emitir el comprobante.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver al historial
+        </a>
+    </div>
 
     <form asp-action="Create" method="post" id="facturaForm">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
 
-        <div asp-validation-summary="ModelOnly"
-             class="text-danger">
-        </div>
+        <div class="row g-4 align-items-start">
+            <div class="col-xl-8">
+                <section class="nx-invoice-card mb-4" aria-labelledby="nx-invoice-client-heading">
+                    <div class="nx-invoice-card-header">
+                        <span class="nx-invoice-step">01</span>
+                        <div>
+                            <h2 id="nx-invoice-client-heading">Información de la venta</h2>
+                            <p>Selecciona a quién se facturará y cómo pagará.</p>
+                        </div>
+                    </div>
+                    <div class="nx-invoice-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label asp-for="IdCliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                                <select asp-for="IdCliente" asp-items="ViewBag.Clientes" class="form-select" required>
+                                    <option value="">Seleccionar cliente...</option>
+                                </select>
+                                <span asp-validation-for="IdCliente" class="text-danger small"></span>
+                                <div class="nx-invoice-field-hint">Los datos del cliente aparecerán en la factura.</div>
+                            </div>
+                            <div class="col-md-5">
+                                <label asp-for="MetodoPago" class="form-label">Método de pago</label>
+                                <select asp-for="MetodoPago" class="form-select">
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Tarjeta">Tarjeta</option>
+                                    <option value="Transferencia">Transferencia</option>
+                                </select>
+                                <span asp-validation-for="MetodoPago" class="text-danger small"></span>
+                                <div class="nx-invoice-field-hint">Se registra el método seleccionado.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-        <div class="row mb-4">
+                <section class="nx-invoice-card" aria-labelledby="nx-invoice-products-heading">
+                    <div class="nx-invoice-card-header">
+                        <span class="nx-invoice-step">02</span>
+                        <div class="flex-grow-1">
+                            <h2 id="nx-invoice-products-heading">Productos de la factura</h2>
+                            <p>Agrega los artículos y especifica la cantidad de cada uno.</p>
+                        </div>
+                        <span class="nx-invoice-hint-badge d-none d-md-inline-flex"><i class="bi bi-box-seam" aria-hidden="true"></i> Inventario</span>
+                    </div>
 
-            <div class="col-md-6">
-                <label asp-for="IdCliente"
-                       class="form-label">
-                    Cliente
-                </label>
+                    <div class="nx-invoice-table-wrap">
+                        <table class="table nx-invoice-table align-middle" id="tablaProductos">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Producto</th>
+                                    <th scope="col" class="nx-invoice-qty-col">Cantidad</th>
+                                    <th scope="col" class="text-end">Precio</th>
+                                    <th scope="col" class="text-end">Importe</th>
+                                    <th scope="col"><span class="visually-hidden">Eliminar</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detalleBody"></tbody>
+                        </table>
+                    </div>
 
-                <select asp-for="IdCliente"
-                        asp-items="ViewBag.Clientes"
-                        class="form-select">
-
-                    <option value="">
-                        -- Seleccione un cliente --
-                    </option>
-
-                </select>
-
-                <span asp-validation-for="IdCliente"
-                      class="text-danger">
-                </span>
+                    <div class="nx-invoice-card-footer">
+                        <button type="button" class="btn btn-outline-primary" id="agregarProducto">
+                            <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Agregar producto
+                        </button>
+                        <small class="text-muted d-none d-sm-inline">Puedes añadir varios productos a la misma factura.</small>
+                    </div>
+                </section>
             </div>
 
-            <div class="col-md-3">
-                <label asp-for="MetodoPago"
-                       class="form-label">
-                    Método de pago
-                </label>
-
-                <select asp-for="MetodoPago"
-                        class="form-select">
-
-                    <option value="Efectivo">
-                        Efectivo
-                    </option>
-
-                    <option value="Tarjeta">
-                        Tarjeta
-                    </option>
-
-                    <option value="Transferencia">
-                        Transferencia
-                    </option>
-
-                </select>
+            <div class="col-xl-4">
+                <section class="nx-invoice-card nx-invoice-summary" aria-labelledby="nx-invoice-summary-heading">
+                    <div class="nx-invoice-card-header">
+                        <span class="nx-invoice-step">03</span>
+                        <div>
+                            <h2 id="nx-invoice-summary-heading">Resumen de pago</h2>
+                            <p>Importes calculados automáticamente.</p>
+                        </div>
+                    </div>
+                    <div class="nx-invoice-summary-body">
+                        <div class="nx-invoice-summary-row">
+                            <label for="subtotalVisual">Subtotal</label>
+                            <input id="subtotalVisual" class="nx-invoice-amount" value="RD$ 0.00" readonly aria-label="Subtotal calculado" />
+                        </div>
+                        <div class="nx-invoice-summary-row">
+                            <label for="impuestoVisual">ITBIS (18%)</label>
+                            <input id="impuestoVisual" class="nx-invoice-amount" value="RD$ 0.00" readonly aria-label="Impuesto calculado" />
+                        </div>
+                        <div class="nx-invoice-discount">
+                            <label asp-for="Descuento" class="form-label mb-1">Descuento (RD$)</label>
+                            <input asp-for="Descuento" class="form-control" type="number" min="0" step="0.01" placeholder="0.00" />
+                            <span asp-validation-for="Descuento" class="text-danger small"></span>
+                        </div>
+                        <div class="nx-invoice-total">
+                            <label for="totalVisual">Total a pagar</label>
+                            <input id="totalVisual" class="nx-invoice-total-value" value="RD$ 0.00" readonly aria-label="Total a pagar calculado" />
+                            <span>Importe estimado antes de confirmar.</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 nx-invoice-submit">
+                            <i class="bi bi-receipt me-2" aria-hidden="true"></i> Generar factura
+                        </button>
+                        <p class="nx-invoice-summary-note"><i class="bi bi-shield-check me-1" aria-hidden="true"></i> Al generar la factura se guardará la venta y se descontará el inventario disponible.</p>
+                    </div>
+                </section>
             </div>
-
         </div>
-
-
-        <h4>Productos</h4>
-
-        <table class="table table-bordered"
-               id="tablaProductos">
-
-            <thead class="table-light">
-
-                <tr>
-                    <th>Producto</th>
-                    <th width="130">Cantidad</th>
-                    <th width="150">Precio</th>
-                    <th width="160">Subtotal</th>
-                    <th width="80"></th>
-                </tr>
-
-            </thead>
-
-            <tbody id="detalleBody">
-            </tbody>
-
-        </table>
-
-        <button type="button"
-                class="btn btn-secondary mb-4"
-                id="agregarProducto">
-
-            + Agregar producto
-
-        </button>
-
-
-        <div class="row justify-content-end">
-
-            <div class="col-md-5">
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Subtotal
-                    </label>
-
-                    <input id="subtotalVisual"
-                           class="form-control"
-                           value="RD$ 0.00"
-                           readonly />
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        ITBIS (18%)
-                    </label>
-
-                    <input id="impuestoVisual"
-                           class="form-control"
-                           value="RD$ 0.00"
-                           readonly />
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label asp-for="Descuento"
-                           class="form-label">
-                        Descuento
-                    </label>
-
-                    <input asp-for="Descuento"
-                           class="form-control"
-                           type="number"
-                           min="0"
-                           step="0.01" />
-
-                    <span asp-validation-for="Descuento"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label fw-bold">
-                        TOTAL
-                    </label>
-
-                    <input id="totalVisual"
-                           class="form-control fw-bold"
-                           value="RD$ 0.00"
-                           readonly />
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <hr />
-
-        <button type="submit"
-                class="btn btn-primary btn-lg">
-
-            Generar Factura
-
-        </button>
-
     </form>
 </div>
 
-
 <template id="productoTemplate">
-
     <tr class="fila-producto">
-
         <td>
-
-            <select name="Detalles[__index__].IdProducto"
-                    class="form-select producto-select"
-                    required>
-
-                <option value="">
-                    -- Seleccione --
-                </option>
-
+            <select name="Detalles[__index__].IdProducto" class="form-select producto-select" aria-label="Seleccionar producto" required>
+                <option value="">Seleccionar producto...</option>
                 @foreach (var producto in productos)
                 {
                     <option value="@producto.IdProducto"
                             data-precio="@producto.Precio.ToString(CultureInfo.InvariantCulture)"
                             data-stock="@producto.Stock">
-
-                        @producto.Codigo - @producto.Nombre
-                        (Stock: @producto.Stock)
-
+                        @producto.Codigo - @producto.Nombre (Stock: @producto.Stock)
                     </option>
                 }
-
             </select>
-
         </td>
-
         <td>
-
-            <input name="Detalles[__index__].Cantidad"
-                   type="number"
-                   value="1"
-                   min="1"
-                   class="form-control cantidad" />
-
+            <input name="Detalles[__index__].Cantidad" type="number" value="1" min="1" class="form-control cantidad" aria-label="Cantidad" required />
         </td>
-
-        <td class="precio">
-            RD$ 0.00
-        </td>
-
-        <td class="subtotal-fila">
-            RD$ 0.00
-        </td>
-
-        <td>
-
-            <button type="button"
-                    class="btn btn-danger btn-sm eliminar">
-
-                X
-
+        <td class="precio text-end nx-mono">RD$ 0.00</td>
+        <td class="subtotal-fila text-end nx-mono fw-semibold">RD$ 0.00</td>
+        <td class="text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm eliminar" aria-label="Quitar producto" title="Quitar producto">
+                <i class="bi bi-trash3" aria-hidden="true"></i>
             </button>
-
         </td>
-
     </tr>
-
 </template>
-
 
 @section Scripts {
 

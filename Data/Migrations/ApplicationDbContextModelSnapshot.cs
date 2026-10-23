@@ -224,6 +224,67 @@ namespace SistemaFacturacion.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.Property<int>("IdCaso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCaso"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitud")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdDetalle")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(800)
+                        .HasColumnType("nvarchar(800)");
+
+                    b.Property<string>("Resolucion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
+                    b.HasKey("IdCaso");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdDetalle");
+
+                    b.HasIndex("IdDetalle", "Tipo", "Estado");
+
+                    b.ToTable("CasosPosventa");
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.Categoria", b =>
                 {
                     b.Property<int>("IdCategoria")
@@ -241,7 +302,16 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdCategoria");
+
+                    b.HasAlternateKey("IdEmpresa", "IdCategoria");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.ToTable("Categorias");
                 });
@@ -279,7 +349,16 @@ namespace SistemaFacturacion.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdCliente");
+
+                    b.HasAlternateKey("IdEmpresa", "IdCliente");
+
+                    b.HasIndex("IdEmpresa");
 
                     b.ToTable("Clientes");
                 });
@@ -293,6 +372,9 @@ namespace SistemaFacturacion.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDetalle"));
 
                     b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GarantiaMeses")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CostoUnitario")
@@ -310,13 +392,125 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdDetalle");
+
+                    b.HasAlternateKey("IdEmpresa", "IdDetalle");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdProducto");
+
+                    b.HasIndex("IdEmpresa", "IdFactura");
 
                     b.HasIndex("IdFactura");
 
                     b.HasIndex("IdProducto");
 
                     b.ToTable("DetallesFactura");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.Empresa", b =>
+                {
+                    b.Property<Guid>("IdEmpresa")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Moneda")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<string>("NombreComercial")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Rnc")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SlugNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(63)
+                        .HasColumnType("nvarchar(63)");
+
+                    b.Property<string>("ZonaHoraria")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("IdEmpresa");
+
+                    b.HasIndex("SlugNormalizado")
+                        .IsUnique();
+
+                    b.ToTable("Empresas", t =>
+                        {
+                            t.HasCheckConstraint("CK_Empresas_Estado",
+                                "[Estado] IN (N'PendienteConfiguracion', N'Activa', N'Suspendida', N'Archivada')");
+                        });
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.EmpresaUsuario", b =>
+                {
+                    b.Property<Guid>("IdEmpresa")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaAltaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaBajaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdEmpresa", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmpresaUsuarios", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmpresaUsuarios_Estado",
+                                "[Estado] IN (N'Invitado', N'Activo', N'Suspendido')");
+
+                            t.HasCheckConstraint("CK_EmpresaUsuarios_Rol",
+                                "[Rol] IN (N'Propietario', N'Administrador', N'Cajero')");
+                        });
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
@@ -355,7 +549,18 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdFactura");
+
+                    b.HasAlternateKey("IdEmpresa", "IdFactura");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdCliente");
 
                     b.HasIndex("IdCliente");
 
@@ -384,7 +589,16 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdPago");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdFactura");
 
                     b.HasIndex("IdFactura");
 
@@ -414,6 +628,9 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<bool>("Estado")
                         .HasColumnType("bit");
 
+                    b.Property<int>("GarantiaMeses")
+                        .HasColumnType("int");
+
                     b.Property<int>("IdCategoria")
                         .HasColumnType("int");
 
@@ -425,14 +642,164 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
                     b.HasKey("IdProducto");
+
+                    b.HasAlternateKey("IdEmpresa", "IdProducto");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdCategoria");
 
                     b.HasIndex("IdCategoria");
 
                     b.ToTable("Productos");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.RecepcionAnulacion", b =>
+                {
+                    b.Property<int>("IdRecepcion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRecepcion"));
+
+                    b.Property<int>("CantidadEsperada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CantidadLiberada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CantidadRecibida")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<DateTime?>("FechaRecepcionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdDetalle")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("RecibidoPorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdRecepcion");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdDetalle")
+                        .IsUnique();
+
+                    b.ToTable("RecepcionesAnulacion", t =>
+                        {
+                            t.HasCheckConstraint("CK_RecepcionesAnulacion_Estado",
+                                "[Estado] IN (N'Pendiente', N'Parcial', N'EnInspeccion', N'Completada', N'NoRecibida')");
+
+                            t.HasCheckConstraint("CK_RecepcionesAnulacion_Cantidades",
+                                "[CantidadEsperada] > 0 AND [CantidadRecibida] >= 0 AND [CantidadLiberada] >= 0 AND [CantidadLiberada] <= [CantidadRecibida] AND [CantidadRecibida] <= [CantidadEsperada]");
+                        });
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Reembolso", b =>
+                {
+                    b.Property<int>("IdReembolso")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdReembolso"));
+
+                    b.Property<string>("ConfirmadoPorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<DateTime?>("FechaConfirmacionUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitudUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdFactura")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdEmpresa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("09d17ec1-956c-4c6e-85b3-317c7cce4e01"));
+
+                    b.Property<string>("MetodoPagoOriginal")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("MontoSolicitado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ReferenciaDevolucion")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("IdReembolso");
+
+                    b.HasIndex("IdEmpresa");
+
+                    b.HasIndex("IdEmpresa", "IdFactura")
+                        .IsUnique();
+
+                    b.ToTable("Reembolsos", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reembolsos_Estado",
+                                "[Estado] IN (N'Pendiente', N'PendienteRevision', N'Aprobado', N'Procesando', N'Reembolsado', N'Rechazado', N'Fallido')");
+
+                            t.HasCheckConstraint("CK_Reembolsos_MontoSolicitado",
+                                "[MontoSolicitado] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -486,18 +853,95 @@ namespace SistemaFacturacion.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.Categoria", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Cliente", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Producto", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.DetalleFactura", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Pago", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.CasoPosventa", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.DetalleFactura", "DetalleFactura")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa", "IdDetalle")
+                        .HasPrincipalKey("IdEmpresa", "IdDetalle")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("DetalleFactura");
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.DetalleFactura", b =>
                 {
                     b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
                         .WithMany("Detalles")
-                        .HasForeignKey("IdFactura")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SistemaFacturacion.Models.Producto", "Producto")
                         .WithMany()
-                        .HasForeignKey("IdProducto")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdProducto")
+                        .HasPrincipalKey("IdEmpresa", "IdProducto")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Factura");
@@ -505,12 +949,32 @@ namespace SistemaFacturacion.Data.Migrations
                     b.Navigation("Producto");
                 });
 
+            modelBuilder.Entity("SistemaFacturacion.Models.SaaS.EmpresaUsuario", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>
                 {
                     b.HasOne("SistemaFacturacion.Models.Cliente", "Cliente")
                         .WithMany()
-                        .HasForeignKey("IdCliente")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdCliente")
+                        .HasPrincipalKey("IdEmpresa", "IdCliente")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Cliente");
@@ -520,8 +984,9 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
                         .WithMany()
-                        .HasForeignKey("IdFactura")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Factura");
@@ -531,11 +996,48 @@ namespace SistemaFacturacion.Data.Migrations
                 {
                     b.HasOne("SistemaFacturacion.Models.Categoria", "Categoria")
                         .WithMany()
-                        .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("IdEmpresa", "IdCategoria")
+                        .HasPrincipalKey("IdEmpresa", "IdCategoria")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.Reembolso", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SistemaFacturacion.Models.Factura", "Factura")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa", "IdFactura")
+                        .HasPrincipalKey("IdEmpresa", "IdFactura")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Factura");
+                });
+
+            modelBuilder.Entity("SistemaFacturacion.Models.RecepcionAnulacion", b =>
+                {
+                    b.HasOne("SistemaFacturacion.Models.SaaS.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SistemaFacturacion.Models.DetalleFactura", "DetalleFactura")
+                        .WithMany()
+                        .HasForeignKey("IdEmpresa", "IdDetalle")
+                        .HasPrincipalKey("IdEmpresa", "IdDetalle")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("DetalleFactura");
                 });
 
             modelBuilder.Entity("SistemaFacturacion.Models.Factura", b =>

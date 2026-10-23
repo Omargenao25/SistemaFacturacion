@@ -9,6 +9,9 @@ namespace SistemaFacturacion.Controllers
 {
     public class FacturasController : Controller
     {
+        // Política comercial interna: 7 días exactos desde la emisión.
+        private const int PlazoAnulacionDias = 7;
+
         private readonly ApplicationDbContext _context;
 
         public FacturasController(ApplicationDbContext context)
@@ -41,7 +44,18 @@ namespace SistemaFacturacion.Controllers
                 );
             }
 
-            if (!ModelState.IsValid)
+            // Solo se acepta un cliente visible para la empresa actual;
+            // evita referencias a clientes de otra empresa mediante POST.
+            if (!await _context.Clientes.AsNoTracking()
+                .AnyAsync(c => c.IdCliente == modelo.IdCliente))
+            {
+                ModelState.AddModelError(
+                    nameof(modelo.IdCliente),
+                    "Selecciona un cliente válido de la empresa.");
+            }
+
+            // El model binder puede entregar Detalles nulo: no continuar.
+            if (!ModelState.IsValid || modelo.Detalles == null)
             {
                 await CargarListas();
                 return View(modelo);
@@ -56,6 +70,8 @@ namespace SistemaFacturacion.Controllers
                     IdProducto = x.Key,
                     Cantidad = x.Sum(y => y.Cantidad)
                 })
+                // Orden fijo para disminuir conflictos entre ventas concurrentes.
+                .OrderBy(x => x.IdProducto)
                 .ToList();
 
             var idsProductos = productosSolicitados
@@ -63,6 +79,7 @@ namespace SistemaFacturacion.Controllers
                 .ToList();
 
             var productos = await _context.Productos
+                .AsNoTracking()
                 .Where(p => idsProductos.Contains(p.IdProducto))
                 .ToDictionaryAsync(p => p.IdProducto);
 
@@ -127,6 +144,37 @@ namespace SistemaFacturacion.Controllers
 
             try
             {
+                // Reservar existencias de manera atómica dentro de la transacción.
+                // El WHERE se vuelve a evaluar en SQL Server al efectuar cada UPDATE:
+                // dos ventas simultáneas no pueden descontar la misma unidad.
+                foreach (var item in productosSolicitados)
+                {
+                    var producto = productos[item.IdProducto];
+                    var versionAlCotizar = producto.RowVersion;
+
+                    var filasActualizadas = await _context.Productos
+                        .Where(p =>
+                            p.IdProducto == item.IdProducto &&
+                            p.Estado &&
+                            p.RowVersion == versionAlCotizar &&
+                            p.Stock >= item.Cantidad)
+                        .ExecuteUpdateAsync(cambios => cambios
+                            .SetProperty(p => p.Stock, p => p.Stock - item.Cantidad));
+
+                    if (filasActualizadas != 1)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"El inventario de {producto.Nombre} cambió mientras se procesaba la venta. " +
+                            "No se generó la factura. Verifica las existencias e inténtalo de nuevo.");
+
+                        await CargarListas();
+                        return View(modelo);
+                    }
+                }
+
                 var factura = new Factura
                 {
                     NumeroFactura =
@@ -154,15 +202,13 @@ namespace SistemaFacturacion.Controllers
                         IdFactura = factura.IdFactura,
                         IdProducto = producto.IdProducto,
                         Cantidad = item.Cantidad,
+                        GarantiaMeses = producto.GarantiaMeses,
                         Precio = producto.Precio,
                         CostoUnitario = producto.Costo,
                         Subtotal = producto.Precio * item.Cantidad
                     };
 
                     _context.DetallesFactura.Add(detalle);
-
-                    // Descontar inventario
-                    producto.Stock -= item.Cantidad;
                 }
 
                 var pago = new Pago
@@ -314,6 +360,19 @@ namespace SistemaFacturacion.Controllers
                 .FirstOrDefaultAsync(p => p.IdFactura == id);
 
             ViewBag.Pago = pago;
+            ViewBag.Reembolso = await _context.Reembolsos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.IdFactura == id);
+            // Obligatoriedades físicas, sin asumir que se devolvió mercancía.
+            var idsDetalles = factura.Detalles.Select(d => d.IdDetalle).ToList();
+            ViewBag.RecepcionesAnulacion = await _context.RecepcionesAnulacion
+                .AsNoTracking()
+                .Where(r => idsDetalles.Contains(r.IdDetalle))
+                .OrderBy(r => r.IdDetalle)
+                .ToListAsync();
+            ViewBag.FechaLimiteAnulacion = factura.Fecha.AddDays(PlazoAnulacionDias);
+            ViewBag.PuedeAnular = factura.Estado == "Emitida" &&
+                DateTime.Now <= factura.Fecha.AddDays(PlazoAnulacionDias);
 
             return View(factura);
         }
@@ -323,8 +382,8 @@ namespace SistemaFacturacion.Controllers
         public async Task<IActionResult> Anular(int id)
         {
             var factura = await _context.Facturas
+                .AsNoTracking()
                 .Include(f => f.Detalles)
-                .ThenInclude(d => d.Producto)
                 .FirstOrDefaultAsync(f => f.IdFactura == id);
 
             if (factura == null)
@@ -335,11 +394,18 @@ namespace SistemaFacturacion.Controllers
             if (factura.Estado == "Anulada")
             {
                 TempData["Mensaje"] = "La factura ya se encuentra anulada.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id = factura.IdFactura }
-                );
+            // La restricción se comprueba en el servidor, aunque el usuario
+            // envíe el POST directamente y no desde el botón de la vista.
+            var ahora = DateTime.Now;
+            if (ahora > factura.Fecha.AddDays(PlazoAnulacionDias))
+            {
+                TempData["Error"] =
+                    "Se agotó el plazo interno de 7 días para anular esta factura. " +
+                    "Las devoluciones o garantías deben gestionarse por separado.";
+                return RedirectToAction(nameof(Details), new { id });
             }
 
             await using var transaccion =
@@ -347,29 +413,111 @@ namespace SistemaFacturacion.Controllers
 
             try
             {
-                // Devolver los productos al inventario
-                foreach (var detalle in factura.Detalles)
+                // Solo una solicitud puede cambiar esta factura de Emitida
+                // a Anulada. Las siguientes no crean recepciones ni reembolsos duplicados.
+                // Revalidación atómica: dos solicitudes no pueden anular la
+                // misma factura, ni saltarse el plazo con un POST manual.
+                var fechaLimiteInferior = DateTime.Now.AddDays(-PlazoAnulacionDias);
+                var filasActualizadas = await _context.Facturas
+                    .Where(f =>
+                        f.IdFactura == id &&
+                        f.Estado == "Emitida" &&
+                        f.Fecha >= fechaLimiteInferior)
+                    .ExecuteUpdateAsync(cambios => cambios
+                        .SetProperty(f => f.Estado, "Anulada"));
+
+                if (filasActualizadas != 1)
                 {
-                    if (detalle.Producto != null)
-                    {
-                        detalle.Producto.Stock += detalle.Cantidad;
-                    }
+                    await transaccion.RollbackAsync();
+                    TempData["Error"] =
+                        "La factura ya fue anulada o superó los 7 días permitidos. " +
+                        "No se modificó el inventario.";
+                    return RedirectToAction(nameof(Details), new { id });
                 }
 
-                // Cambiar estado
-                factura.Estado = "Anulada";
+                // El dinero NO se mueve aquí. Capturamos los pagos originales
+                // bajo la misma transacción que la anulación y las recepciones pendientes.
+                var pagosRegistrados = await _context.Pagos
+                    .AsNoTracking()
+                    .Where(p => p.IdFactura == id)
+                    .Select(p => new { p.Monto, p.MetodoPago })
+                    .ToListAsync();
+
+                if (pagosRegistrados.Any(p => p.Monto < 0))
+                {
+                    await transaccion.RollbackAsync();
+                    TempData["Error"] =
+                        "La factura contiene un pago negativo que requiere revisión. " +
+                        "No se anuló ni se modificó el inventario.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                decimal montoCobrado = pagosRegistrados.Sum(p => p.Monto);
+                var metodos = pagosRegistrados
+                    .Select(p => p.MetodoPago)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                string metodoOriginal = metodos.Count switch
+                {
+                    0 => "SinRegistro",
+                    1 => metodos[0],
+                    _ => "Mixto"
+                };
+
+                // Un cobro faltante, mixto o de importe diferente no se
+                // presume conciliado: requiere una revisión administrativa.
+                bool requiereRevision = montoCobrado <= 0 ||
+                    montoCobrado != factura.Total ||
+                    metodos.Count != 1 ||
+                    pagosRegistrados.Any(p => p.Monto <= 0);
+
+                // No se suma stock aquí: hasta que una recepción física sea
+                // inspeccionada y autorizada, las unidades NO son vendibles.
+                // Cada línea genera una obligación pendiente, sin simular una
+                // devolución ya realizada. Se crea en la misma transacción.
+                if (factura.Detalles.Count == 0 ||
+                    factura.Detalles.Any(d => d.Cantidad <= 0))
+                {
+                    throw new InvalidOperationException(
+                        "La factura contiene detalles inválidos para la recepción. " +
+                        "Se revirtió la anulación completa.");
+                }
+
+                foreach (var detalle in factura.Detalles)
+                {
+                    _context.RecepcionesAnulacion.Add(new RecepcionAnulacion
+                    {
+                        IdDetalle = detalle.IdDetalle,
+                        CantidadEsperada = detalle.Cantidad,
+                        CantidadRecibida = 0,
+                        CantidadLiberada = 0,
+                        Estado = "Pendiente",
+                        FechaCreacionUtc = DateTime.UtcNow
+                    });
+                }
+
+                // Una única solicitud por factura. El índice único
+                // (IdEmpresa, IdFactura) también bloquea duplicados en SQL.
+                _context.Reembolsos.Add(new Reembolso
+                {
+                    IdFactura = factura.IdFactura,
+                    MontoSolicitado = montoCobrado,
+                    MetodoPagoOriginal = metodoOriginal,
+                    Estado = requiereRevision ? "PendienteRevision" : "Pendiente",
+                    FechaSolicitudUtc = DateTime.UtcNow
+                });
 
                 await _context.SaveChangesAsync();
-
                 await transaccion.CommitAsync();
 
-                TempData["Mensaje"] =
-                    "La factura fue anulada correctamente y el inventario fue actualizado.";
+                TempData["Mensaje"] = requiereRevision
+                    ? "Factura anulada. Mercancía pendiente de recepción: el stock no aumentó. " +
+                      "La solicitud financiera requiere revisión; no se devolvió dinero."
+                    : "Factura anulada. Mercancía pendiente de recepción: el stock no aumentó. " +
+                      "Se creó un reembolso pendiente, sin devolver dinero automáticamente.";
 
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id = factura.IdFactura }
-                );
+                return RedirectToAction(nameof(Details), new { id });
             }
             catch
             {

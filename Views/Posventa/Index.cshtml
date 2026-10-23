@@ -1,0 +1,92 @@
+@model IEnumerable<SistemaFacturacion.Models.CasoPosventa>
+@{
+    ViewData["Title"] = "Atención posventa";
+    var casos = Model.ToList();
+    var tipoSeleccionado = ViewBag.Tipo as string ?? "";
+    var estadoSeleccionado = ViewBag.Estado as string ?? "";
+}
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Operaciones</div>
+            <h1 class="page-title">Atención posventa</h1>
+            <p class="page-subtitle">Da seguimiento a solicitudes de devolución y reclamaciones de garantía.</p>
+        </div>
+        <a asp-controller="Facturas" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-receipt me-1" aria-hidden="true"></i> Buscar factura
+        </a>
+    </div>
+
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div class="alert alert-success" role="status">@mensaje</div>
+    }
+    <section class="nx-panel">
+        <div class="nx-panel-header">
+            <h2 class="nx-panel-title">Solicitudes registradas</h2>
+            <span class="text-muted small">@casos.Count registros</span>
+        </div>
+        <div class="p-3 border-bottom">
+            <form method="get" asp-action="Index" class="row g-2 align-items-end">
+                <div class="col-sm-5 col-lg-4">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select name="tipo" id="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Garantia" selected="@(tipoSeleccionado == "Garantia")">Garantías</option>
+                        <option value="Devolucion" selected="@(tipoSeleccionado == "Devolucion")">Devoluciones</option>
+                    </select>
+                </div>
+                <div class="col-sm-5 col-lg-4">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Abierto" selected="@(estadoSeleccionado == "Abierto")">Abierto</option>
+                        <option value="EnRevision" selected="@(estadoSeleccionado == "EnRevision")">En revisión</option>
+                        <option value="Resuelto" selected="@(estadoSeleccionado == "Resuelto")">Resuelto</option>
+                        <option value="Rechazado" selected="@(estadoSeleccionado == "Rechazado")">Rechazado</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 col-lg-4 d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">Filtrar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+        @if (!casos.Any())
+        {
+            <div class="nx-empty"><i class="bi bi-clipboard2-check"></i>No hay solicitudes para estos filtros.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover nx-table">
+                    <thead><tr>
+                        <th>Caso</th><th>Factura</th><th>Producto</th><th>Tipo</th>
+                        <th>Cantidad</th><th>Fecha</th><th>Estado</th><th>Acción</th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach (var caso in casos)
+                    {
+                        <tr>
+                            <td class="fw-semibold">PV-@caso.IdCaso.ToString("D5")</td>
+                            <td>@(caso.DetalleFactura?.Factura?.NumeroFactura ?? "—")</td>
+                            <td>@(caso.DetalleFactura?.Producto?.Nombre ?? "—")</td>
+                            <td>@(caso.Tipo == "Garantia" ? "Garantía" : "Devolución")</td>
+                            <td>@caso.Cantidad</td>
+                            <td>@caso.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                            <td><span class="nx-status @(caso.Estado == "Resuelto" ? "good" : caso.Estado == "Rechazado" ? "danger" : "warn")">
+                                @(caso.Estado == "EnRevision" ? "En revisión" : caso.Estado)
+                            </span></td>
+                            <td><a asp-action="Details" asp-route-id="@caso.IdCaso" class="nx-list-action">Ver caso</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+    <div class="alert alert-light border mt-3 small">
+        La gestión de solicitudes es administrativa. Un caso marcado como resuelto no representa
+        automáticamente un reembolso, una reposición ni una reparación ejecutada.
+    </div>
+</div>

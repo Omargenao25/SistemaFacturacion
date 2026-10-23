@@ -1,0 +1,201 @@
+@model SistemaFacturacion.ViewModels.ControlAnulacionesViewModel
+@{
+    ViewData["Title"] = "Control de anulaciones";
+    var inicio = Model.TotalFacturas == 0 ? 0 : (Model.Pagina - 1) * 25 + 1;
+    var fin = Math.Min(Model.Pagina * 25, Model.TotalFacturas);
+}
+<div class="nx-crud-page nx-reconciliation-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Operaciones / Seguimiento</div>
+            <h1 class="page-title">Centro de control de anulaciones</h1>
+            <p class="page-subtitle">Consulta juntos los pendientes financieros y las recepciones físicas por factura.</p>
+        </div>
+        <a asp-controller="Facturas" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial
+        </a>
+    </div>
+
+    <div class="nx-reconciliation-banner" role="note">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <div>
+            <strong>Seguimiento informativo · sin movimientos de dinero ni inventario</strong>
+            <p>El importe solicitado no acredita que se haya pagado un reembolso. Una recepción pendiente
+               no significa mercancía físicamente devuelta. Las aprobaciones permanecen bloqueadas
+               hasta integrar los permisos por empresa y la auditoría.</p>
+        </div>
+    </div>
+
+    <section class="nx-panel mb-3" aria-labelledby="nx-reconciliation-search">
+        <div class="nx-panel-header">
+            <h2 id="nx-reconciliation-search" class="nx-panel-title">Buscar operaciones</h2>
+            <span class="nx-count-pill">@Model.TotalFacturas factura(s) anulada(s) encontradas</span>
+        </div>
+        <div class="p-3">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <div class="col-md-8 col-lg-6">
+                    <label for="nxControlBuscar" class="form-label">Número de factura o nombre del cliente</label>
+                    <input type="search" id="nxControlBuscar" class="form-control"
+                           name="buscar" value="@Model.Buscar" maxlength="80"
+                           placeholder="Ej. FAC-2026 o nombre..." />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1" aria-hidden="true"></i> Buscar
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div class="nx-reconciliation-page-note">
+        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+        Los indicadores siguientes corresponden <strong>solo a las @Model.Facturas.Count factura(s) visibles en esta página</strong>,
+        no al total histórico. Las solicitudes financieras no equivalen a fondos efectivamente devueltos.
+    </div>
+
+    <div class="nx-reconciliation-metrics">
+        <div class="nx-reconciliation-metric">
+            <span>Solicitudes financieras abiertas</span>
+            <strong>@Model.FacturasConSolicitudAbierta</strong>
+            <small>Sin confirmación de cierre en los registros consultados</small>
+        </div>
+        <div class="nx-reconciliation-metric is-money">
+            <span>Monto solicitado abierto</span>
+            <strong>RD$ @Model.MontoSolicitudesAbiertas.ToString("N2")</strong>
+            <small>No representa una salida de caja ni deuda conciliada</small>
+        </div>
+        <div class="nx-reconciliation-metric">
+            <span>Unidades pendientes registradas</span>
+            <strong>@Model.UnidadesPorRecibirRegistradas</strong>
+            <small>Solo recepciones con registros completos</small>
+        </div>
+        <div class="nx-reconciliation-metric is-alert">
+            <span>Facturas por conciliar</span>
+            <strong>@Model.FacturasConDatosPorConciliar</strong>
+            <small>Faltantes de registro o incidencias financieras</small>
+        </div>
+    </div>
+
+    <section class="nx-panel" aria-labelledby="nx-reconciliation-list">
+        <div class="nx-panel-header">
+            <div>
+                <h2 id="nx-reconciliation-list" class="nx-panel-title">Operaciones anuladas</h2>
+                <p class="nx-panel-subtitle">Estado financiero y mercancía, cada uno registrado por separado.</p>
+            </div>
+            <span class="text-muted small">Mostrando @inicio–@fin de @Model.TotalFacturas</span>
+        </div>
+
+        @if (Model.Facturas.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-clipboard2-data" aria-hidden="true"></i>
+                <strong>No se encontraron facturas anuladas</strong>
+                <p class="mb-0">Prueba buscar otro número o cliente, o consulta el historial de facturas.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover nx-table nx-reconciliation-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Factura</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Importe de venta</th>
+                            <th scope="col">Seguimiento financiero</th>
+                            <th scope="col">Mercancía</th>
+                            <th scope="col" class="text-end">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fila in Model.Facturas)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="nx-invoice-code">@fila.NumeroFactura</span>
+                                    <small class="nx-reconciliation-subline">@fila.Fecha.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td class="fw-semibold">@fila.Cliente</td>
+                                <td class="nx-mono">RD$ @fila.TotalFactura.ToString("N2")</td>
+                                <td>
+                                    <span class="nx-status @fila.ClaseReembolso">
+                                        @(fila.EstadoReembolso == "PendienteRevision" ? "Pendiente de revisión" : fila.EstadoReembolso)
+                                    </span>
+                                    @if (fila.MontoSolicitado.HasValue)
+                                    {
+                                        <small class="nx-reconciliation-subline">
+                                            Solicitud: RD$ @fila.MontoSolicitado.Value.ToString("N2")
+                                        </small>
+                                        <small class="nx-reconciliation-subline">Cobro: @fila.MetodoPagoOriginal</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="nx-reconciliation-subline">No hay solicitud registrada</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="nx-status @fila.ClaseMercancia">@fila.EstadoMercancia</span>
+                                    @if (fila.UnidadesPendientes.HasValue)
+                                    {
+                                        <small class="nx-reconciliation-subline">
+                                            @fila.UnidadesPendientes unidad(es) pendiente(s)
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <small class="nx-reconciliation-subline">Recepción histórica por revisar</small>
+                                    }
+                                    <small class="nx-reconciliation-subline">
+                                        @fila.RegistrosRecepcion de @fila.LineasFactura línea(s) registradas
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="Facturas" asp-action="Details"
+                                       asp-route-id="@fila.IdFactura"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1" aria-hidden="true"></i> Abrir
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav class="nx-reconciliation-pager" aria-label="Páginas de operaciones anuladas">
+                <span>Página @Model.Pagina de @Model.TotalPaginas</span>
+                <div>
+                    @if (Model.Pagina > 1)
+                    {
+                        <a asp-action="Index" asp-route-buscar="@Model.Buscar"
+                           asp-route-pagina="@(Model.Pagina - 1)"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-chevron-left me-1" aria-hidden="true"></i> Anterior
+                        </a>
+                    }
+                    @if (Model.Pagina < Model.TotalPaginas)
+                    {
+                        <a asp-action="Index" asp-route-buscar="@Model.Buscar"
+                           asp-route-pagina="@(Model.Pagina + 1)"
+                           class="btn btn-outline-secondary btn-sm">
+                            Siguiente <i class="bi bi-chevron-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+
+    <p class="nx-reconciliation-footer">
+        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+        Los registros anteriores al módulo de reembolsos o recepciones pueden aparecer sin solicitud.
+        Nexora no reconstruye ni inventa operaciones históricas.
+    </p>
+</div>

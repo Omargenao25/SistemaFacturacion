@@ -1,0 +1,110 @@
+@model SistemaFacturacion.Models.CasoPosventa
+@{
+    ViewData["Title"] = "Caso de posventa";
+    var detalle = Model.DetalleFactura;
+    var factura = detalle?.Factura;
+    var producto = detalle?.Producto;
+    var vence = factura?.Fecha.AddMonths(detalle?.GarantiaMeses ?? 0);
+    var cerrado = Model.Estado == "Resuelto" || Model.Estado == "Rechazado";
+}
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Posventa / PV-@Model.IdCaso.ToString("D5")</div>
+            <h1 class="page-title">Caso de posventa</h1>
+            <p class="page-subtitle">Información y seguimiento de la solicitud.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a posventa
+        </a>
+    </div>
+
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div class="alert alert-success" role="status">@mensaje</div>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-warning" role="alert">@error</div>
+    }
+
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-case-heading">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 id="nx-case-heading" class="nx-panel-title">PV-@Model.IdCaso.ToString("D5")</h2>
+                        <p class="nx-panel-subtitle">@(Model.Tipo == "Garantia" ? "Reclamación de garantía" : "Solicitud de devolución")</p>
+                    </div>
+                </div>
+                <span class="nx-status @(Model.Estado == "Resuelto" ? "good" : Model.Estado == "Rechazado" ? "danger" : "warn")">
+                    @(Model.Estado == "EnRevision" ? "En revisión" : Model.Estado)
+                </span>
+            </div>
+            <dl class="nx-detail-grid">
+                <div class="nx-detail-row"><dt>Factura</dt><dd>
+                    @if (factura != null)
+                    {
+                        <a asp-controller="Facturas" asp-action="Details" asp-route-id="@factura.IdFactura">@factura.NumeroFactura</a>
+                    }
+                    else { <text>—</text> }
+                </dd></div>
+                <div class="nx-detail-row"><dt>Producto</dt><dd>@(producto?.Nombre ?? "Producto no disponible")</dd></div>
+                <div class="nx-detail-row"><dt>Unidades solicitadas</dt><dd>@Model.Cantidad</dd></div>
+                <div class="nx-detail-row"><dt>Fecha de solicitud</dt><dd>@Model.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</dd></div>
+                <div class="nx-detail-row"><dt>Garantía comercial de la venta</dt><dd>
+                    @(detalle?.GarantiaMeses > 0 ? $"{detalle.GarantiaMeses} meses" : "No registrada")
+                </dd></div>
+                <div class="nx-detail-row"><dt>Vencimiento comercial</dt><dd>
+                    @(detalle?.GarantiaMeses > 0 ? vence?.ToString("dd/MM/yyyy") : "No registrado")
+                </dd></div>
+                <div class="nx-detail-row"><dt>Motivo declarado</dt><dd>@Model.Motivo</dd></div>
+                <div class="nx-detail-row"><dt>Última observación</dt><dd>@(Model.Resolucion ?? "Pendiente")</dd></div>
+            </dl>
+            @if (!cerrado)
+            {
+                <div class="nx-case-actions">
+                    <h3 class="h6 fw-bold">Actualizar seguimiento</h3>
+                    <p class="text-muted small">Deja constancia de la revisión. Cerrar un caso no genera movimientos de caja o inventario.</p>
+                    <form asp-action="CambiarEstado" asp-route-id="@Model.IdCaso" method="post">
+                        <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(Model.RowVersion)" />
+                        <div class="mb-3">
+                            <label for="resolucion" class="form-label">Observación o resolución</label>
+                            <textarea name="resolucion" id="resolucion" rows="3" class="form-control"
+                                      maxlength="1000" placeholder="Especifica el resultado de la revisión y próximos pasos."></textarea>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            @if (Model.Estado == "Abierto")
+                            {
+                                <button type="submit" name="estado" value="EnRevision" class="btn btn-primary">
+                                    <i class="bi bi-search me-1" aria-hidden="true"></i> Pasar a revisión
+                                </button>
+                            }
+                            else if (Model.Estado == "EnRevision")
+                            {
+                                <button type="submit" name="estado" value="Resuelto" class="btn btn-success">
+                                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i> Cerrar como resuelto
+                                </button>
+                            }
+                            <button type="submit" name="estado" value="Rechazado" class="btn btn-outline-danger"
+                                    onclick="return confirm('¿Marcar este caso como rechazado?');">
+                                <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Rechazar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+            <h3>Seguimiento del caso</h3>
+            <p>Los casos se registran por artículo de una venta. La resolución administrativa
+               no altera la factura, el inventario, los impuestos ni el dinero recibido.</p>
+            @if (Model.FechaActualizacion.HasValue)
+            {
+                <p class="mt-3">Última actualización: @Model.FechaActualizacion.Value.ToString("dd/MM/yyyy HH:mm")</p>
+            }
+        </aside>
+    </div>
+</div>

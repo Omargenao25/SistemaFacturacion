@@ -1,65 +1,29 @@
-﻿@model IEnumerable<SistemaFacturacion.Models.Cliente>
-
-@{
-    ViewData["Title"] = "Index";
+@model IEnumerable<SistemaFacturacion.Models.Cliente>
+@{ ViewData["Title"] = "Clientes"; }
+@if (TempData["Mensaje"] is string mensaje)
+{
+    <div class="alert alert-success" role="status"><i class="bi bi-check-circle me-2" aria-hidden="true"></i>@mensaje</div>
 }
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Correo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Direccion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdentificacionFiscal)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Correo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Direccion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdentificacionFiscal)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdCliente">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdCliente">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdCliente">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="page-intro">
+    <div><div class="page-eyebrow">Nexora / Gestión</div><h1 class="page-title">Clientes</h1><p class="page-subtitle">Consulta y administra la información de tus clientes.</p></div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Nuevo cliente</a>
+</div>
+<section class="nx-panel">
+    <div class="nx-panel-header"><h2 class="nx-panel-title">Directorio de clientes</h2><span class="text-muted small">@Model.Count() registros</span></div>
+    @if(!Model.Any()) {
+        <div class="nx-empty"><i class="bi bi-people"></i>No hay clientes registrados. Agrega el primero.</div>
+    } else {
+        <div class="table-responsive"><table class="table table-hover nx-table">
+            <thead><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Acciones</th></tr></thead>
+            <tbody>
+            @foreach(var item in Model) {
+                <tr><td class="fw-semibold">@item.Nombre @item.Apellido</td><td>@(item.Telefono ?? "—")</td><td>@(item.Correo ?? "—")</td><td>@(item.Direccion ?? "—")</td><td>
+                    <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdCliente">Ver</a>
+                    <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdCliente">Editar</a>
+                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdCliente">Eliminar</a>
+                </td></tr>
+            }
+            </tbody>
+        </table></div>
+    }
+</section>

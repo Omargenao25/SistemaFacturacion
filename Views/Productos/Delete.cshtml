@@ -1,69 +1,91 @@
-﻿@model SistemaFacturacion.Models.Producto
-
+@model SistemaFacturacion.Models.Producto
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar producto";
 }
 
-<h1>Delete</h1>
+<div class="nx-crud-page">
+    @if (TempData["Error"] is string mensajeError)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>@mensajeError
+        </div>
+    }
+    @if (ViewBag.Bloqueado == true)
+    {
+        <div class="alert alert-warning" role="status">
+            <strong>Este producto no se puede eliminar porque forma parte del historial de facturación.</strong>
+            <div>Puedes marcarlo como inactivo desde Editar para impedir nuevas ventas sin perder las anteriores.</div>
+        </div>
+    }
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Productos / Eliminar</div>
+            <h1 class="page-title">Eliminar producto</h1>
+            <p class="page-subtitle">Verifica los datos antes de confirmar la eliminación.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a productos
+        </a>
+    </div>
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-detail-title">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 class="nx-panel-title" id="nx-detail-title">@Model.Nombre</h2>
+                        <p class="nx-panel-subtitle">Información del registro</p>
+                    </div>
+                </div>
+                <span class="nx-status danger">Pendiente de eliminar</span>
+            </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Producto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Codigo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Codigo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Costo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Costo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCategoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdCategoria)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdProducto" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+            <div class="nx-delete-warning" role="alert">
+                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                <div>
+                    <strong>¿Deseas eliminar este registro?</strong>
+                    <p>Esta acción intenta borrar el registro de la base de datos. Si el producto tiene ventas registradas, eliminarlo puede afectar el historial de facturación. Considera desactivarlo en lugar de borrarlo.</p>
+                </div>
+            </div>
+
+            <dl class="nx-detail-grid">
+                <div class="nx-detail-row"><dt>Código / SKU</dt><dd>@Model.Codigo</dd></div>
+                    <div class="nx-detail-row"><dt>Nombre</dt><dd>@Model.Nombre</dd></div>
+                    <div class="nx-detail-row"><dt>Descripción</dt><dd>@(Model.Descripcion ?? "Sin descripción")</dd></div>
+                    <div class="nx-detail-row"><dt>Categoría</dt><dd>@(Model.Categoria?.Nombre ?? $"Categoría #{Model.IdCategoria}")</dd></div>
+                    <div class="nx-detail-row"><dt>Precio de venta</dt><dd>RD$ @Model.Precio.ToString("N2")</dd></div>
+                    <div class="nx-detail-row"><dt>Costo unitario</dt><dd>RD$ @Model.Costo.ToString("N2")</dd></div>
+                    <div class="nx-detail-row"><dt>Existencias</dt><dd>@Model.Stock</dd></div>
+                    <div class="nx-detail-row"><dt>Estado del inventario</dt><dd><span class="nx-status @Model.ClaseEstadoInventario">@Model.EstadoInventario</span></dd></div>
+                    <div class="nx-detail-row"><dt>Garantía comercial</dt><dd>@(Model.GarantiaMeses > 0 ? $"{Model.GarantiaMeses} meses" : "No registrada")</dd></div>
+                    <div class="nx-detail-row"><dt>Control manual</dt><dd><span class="nx-status @(Model.Estado ? "good" : "danger")">@(Model.Estado ? "Activo" : "Inactivo")</span></dd></div>
+            </dl>
+
+            <div class="nx-detail-actions">
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                @if (ViewBag.Bloqueado == true)
+                {
+                    <span class="nx-delete-blocked">
+                        <i class="bi bi-shield-lock me-1" aria-hidden="true"></i> Eliminación no permitida
+                    </span>
+                }
+                else
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.IdProducto" method="post" class="nx-delete-form">
+                    <input type="hidden" asp-for="IdProducto" />
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Confirmas la eliminación de este registro?');">
+                        <i class="bi bi-trash3 me-1" aria-hidden="true"></i> Confirmar eliminación
+                    </button>
+                </form>
+                }
+            </div>
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon">
+                <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+            </span>
+            <h3>Antes de eliminar</h3>
+            <p>Si el producto tiene ventas registradas, eliminarlo puede afectar el historial de facturación. Considera desactivarlo en lugar de borrarlo.</p>
+        </aside>
+    </div>
 </div>

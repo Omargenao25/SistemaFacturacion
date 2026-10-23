@@ -3,8 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SistemaFacturacion.Models
 {
-    public class Producto
+    public class Producto : IEntidadEmpresa
     {
+        // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
+        // solicitudes y permisos se implementará después de validar la migración.
+        // Mientras exista un valor por defecto, NO activar múltiples empresas.
+        public Guid IdEmpresa { get; set; }
+
         [Key]
         public int IdProducto { get; set; }
 
@@ -25,9 +30,46 @@ namespace SistemaFacturacion.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Costo { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
         public int Stock { get; set; }
 
+        // 0 indica que no se registró garantía comercial adicional.
+        // El plazo se copia a cada detalle cuando se emite una factura.
+        [Range(0, 120, ErrorMessage = "La garantía debe estar entre 0 y 120 meses.")]
+        public int GarantiaMeses { get; set; }
+
+        // Estado es exclusivamente el control MANUAL del administrador:
+        // una venta, devolución o reposición no debe modificarlo.
         public bool Estado { get; set; } = true;
+
+        // Los siguientes valores se calculan en memoria desde el stock actual.
+        // No se almacenan ni requieren migraciones de Entity Framework.
+        [NotMapped]
+        public bool Agotado => Stock <= 0;
+
+        [NotMapped]
+        public bool DisponibleParaVenta => Estado && !Agotado;
+
+        [NotMapped]
+        public string EstadoInventario =>
+            Agotado ? "Agotado" : Stock <= 5 ? "Stock bajo" : "Disponible";
+
+        [NotMapped]
+        public string ClaseEstadoInventario =>
+            Agotado ? "danger" : Stock <= 5 ? "warn" : "good";
+
+        [NotMapped]
+        public string DisponibilidadVenta =>
+            !Estado ? "Inactivo" : EstadoInventario;
+
+        [NotMapped]
+        public string ClaseDisponibilidadVenta =>
+            !Estado ? "danger" : ClaseEstadoInventario;
+
+        // SQL Server actualiza automáticamente esta versión cada vez que
+        // cambia la fila (ventas, anulaciones y ediciones incluidas).
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         [Required]
         [ForeignKey(nameof(Categoria))]

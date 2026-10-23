@@ -73,7 +73,7 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(e => e.IdCliente == id);
             if (cliente == null)
             {
                 return NotFound();
@@ -97,7 +97,19 @@ namespace SistemaFacturacion.Controllers
             {
                 try
                 {
-                    _context.Update(cliente);
+                    // Se carga el registro dentro del tenant filtrado por EF.
+                    // Nunca actualizar directamente un objeto enviado por POST.
+                    var actual = await _context.Clientes
+                        .FirstOrDefaultAsync(e => e.IdCliente == id);
+                    if (actual == null)
+                        return NotFound();
+
+                    actual.Nombre = cliente.Nombre;
+                    actual.Apellido = cliente.Apellido;
+                    actual.Telefono = cliente.Telefono;
+                    actual.Correo = cliente.Correo;
+                    actual.Direccion = cliente.Direccion;
+                    actual.IdentificacionFiscal = cliente.IdentificacionFiscal;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -131,6 +143,11 @@ namespace SistemaFacturacion.Controllers
                 return NotFound();
             }
 
+            // Previene borrados de registros con información histórica asociada.
+            ViewBag.Bloqueado = await _context.Facturas
+                .AsNoTracking()
+                .AnyAsync(x => x.IdCliente == id);
+
             return View(cliente);
         }
 
@@ -139,14 +156,39 @@ namespace SistemaFacturacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(e => e.IdCliente == id);
+
+            if (cliente == null)
             {
-                _context.Clientes.Remove(cliente);
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            // La comprobación se repite al confirmar, no solo al abrir la pantalla.
+            var tieneRelaciones = await _context.Facturas
+                .AsNoTracking()
+                .AnyAsync(x => x.IdCliente == id);
+
+            if (tieneRelaciones)
+            {
+                TempData["Error"] = "Este cliente tiene facturas registradas, por lo que no puede eliminarse. Conserva el registro para mantener el historial.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
+            try
+            {
+                _context.Clientes.Remove(cliente);
+                await _context.SaveChangesAsync();
+
+                TempData["Mensaje"] = "Cliente eliminado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                // Las FK NO ACTION refuerzan el control ante relaciones nuevas
+                // o cambios concurrentes entre la consulta y el borrado.
+                TempData["Error"] = "No se pudo eliminar el registro. Puede tener información relacionada o existir una restricción de base de datos.";
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         private bool ClienteExists(int id)

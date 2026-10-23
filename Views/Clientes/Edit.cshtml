@@ -1,59 +1,52 @@
-﻿@model SistemaFacturacion.Models.Cliente
-
+@model SistemaFacturacion.Models.Cliente
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar cliente";
 }
+<div class="nx-crud-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Clientes</div>
+            <h1 class="page-title">Editar cliente</h1>
+            <p class="page-subtitle">Actualiza los datos de contacto sin cambiar el historial de ventas.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a clientes</a>
+    </div>
 
-<h1>Edit</h1>
-
-<h4>Cliente</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdCliente" />
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+    <div class="nx-crud-shell">
+        <section class="nx-panel" aria-labelledby="nx-crud-heading">
+            <div class="nx-panel-header">
+                <div class="nx-crud-heading">
+                    <span class="nx-crud-heading-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i></span>
+                    <div>
+                        <h2 class="nx-panel-title" id="nx-crud-heading">Información del cliente</h2>
+                        <p class="nx-panel-subtitle">Los campos con * son obligatorios.</p>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Apellido" class="control-label"></label>
-                <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Correo" class="control-label"></label>
-                <input asp-for="Correo" class="form-control" />
-                <span asp-validation-for="Correo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Direccion" class="control-label"></label>
-                <input asp-for="Direccion" class="form-control" />
-                <span asp-validation-for="Direccion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdentificacionFiscal" class="control-label"></label>
-                <input asp-for="IdentificacionFiscal" class="form-control" />
-                <span asp-validation-for="IdentificacionFiscal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+            <form asp-action="Edit" method="post" class="nx-crud-form">
+                <input type="hidden" asp-for="IdCliente" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="row g-4">
+                    <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Nombre" class="form-control" type="text" maxlength="50" placeholder="Ej. Juan" required /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Apellido" class="form-label">Apellido <span class="text-danger" aria-hidden="true">*</span></label><input asp-for="Apellido" class="form-control" type="text" maxlength="50" placeholder="Ej. Pérez" required /><span asp-validation-for="Apellido" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" class="form-control" type="tel" maxlength="20" placeholder="Ej. 809-555-0000" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="Correo" class="form-label">Correo electrónico</label><input asp-for="Correo" class="form-control" type="email" placeholder="cliente@ejemplo.com" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
+                <div class="col-md-6"><label asp-for="IdentificacionFiscal" class="form-label">Identificación fiscal (opcional)</label><input asp-for="IdentificacionFiscal" class="form-control" type="text" maxlength="30" placeholder="Cédula o RNC" /><span asp-validation-for="IdentificacionFiscal" class="text-danger small"></span></div>
+                <div class="col-12"><label asp-for="Direccion" class="form-label">Dirección</label><textarea asp-for="Direccion" class="form-control" rows="3" maxlength="150" placeholder="Dirección del cliente"></textarea><span asp-validation-for="Direccion" class="text-danger small"></span></div>
+                </div>
+                <div class="nx-crud-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Guardar cambios</button>
+                </div>
+            </form>
+        </section>
+        <aside class="nx-crud-sidebar">
+            <span class="nx-crud-sidebar-icon"><i class="bi bi-info-circle" aria-hidden="true"></i></span>
+            <h3>Consejo de Nexora</h3>
+            <p>Mantener la información del cliente actualizada facilita consultar las facturas y localizar compras anteriores.</p>
+        </aside>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }

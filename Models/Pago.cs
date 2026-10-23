@@ -3,8 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SistemaFacturacion.Models
 {
-    public class Pago
+    public class Pago : IEntidadEmpresa
     {
+        // Fase 1B-1: asociado a la empresa inicial; el aislamiento de
+        // solicitudes y permisos se implementará después de validar la migración.
+        // Mientras exista un valor por defecto, NO activar múltiples empresas.
+        public Guid IdEmpresa { get; set; }
+
         [Key]
         public int IdPago { get; set; }
 
