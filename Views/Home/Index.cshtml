@@ -3,6 +3,7 @@
     ViewData["Title"] = "Dashboard";
     var bajoStock = ViewBag.ProductosBajoStock as List<Producto> ?? new();
     var facturas = ViewBag.UltimasFacturas as List<Factura> ?? new();
+    var slugEmpresaActual = ViewContext.RouteData.Values["empresaSlug"]?.ToString();
 }
 <div class="page-intro">
     <div>
@@ -10,34 +11,34 @@
         <h1 class="page-title">Panel principal</h1>
         <p class="page-subtitle">Ventas, operaciones e inventario de tu negocio en un solo lugar.</p>
     </div>
-    <a class="btn btn-primary" asp-controller="Facturas" asp-action="Create"><i class="bi bi-plus-lg me-2"></i>Nueva factura</a>
+    <a class="btn btn-primary" asp-controller="Facturas" asp-action="Create" asp-route-empresaSlug="@slugEmpresaActual"><i class="bi bi-plus-lg me-2"></i>Nueva factura</a>
 </div>
 <div class="row g-3 mb-4">
     <div class="col-xl-3 col-sm-6"><div class="nx-stat-card">
         <div class="nx-stat-heading"><span>Ventas de hoy</span><span class="nx-stat-icon"><i class="bi bi-graph-up-arrow"></i></span></div>
         <div class="nx-stat-value nx-mono">RD$ @(((decimal)ViewBag.VentasHoy).ToString("N2"))</div>
-        <a class="nx-stat-foot" asp-controller="Reportes" asp-action="Index">Consultar reportes <i class="bi bi-arrow-right"></i></a>
+        <a class="nx-stat-foot" asp-controller="Reportes" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual">Consultar reportes <i class="bi bi-arrow-right"></i></a>
     </div></div>
     <div class="col-xl-3 col-sm-6"><div class="nx-stat-card">
         <div class="nx-stat-heading"><span>Facturas registradas</span><span class="nx-stat-icon"><i class="bi bi-receipt"></i></span></div>
         <div class="nx-stat-value nx-mono">@ViewBag.TotalFacturas</div>
-        <a class="nx-stat-foot" asp-controller="Facturas" asp-action="Index">Ver historial <i class="bi bi-arrow-right"></i></a>
+        <a class="nx-stat-foot" asp-controller="Facturas" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual">Ver historial <i class="bi bi-arrow-right"></i></a>
     </div></div>
     <div class="col-xl-3 col-sm-6"><div class="nx-stat-card">
         <div class="nx-stat-heading"><span>Productos</span><span class="nx-stat-icon"><i class="bi bi-box-seam"></i></span></div>
         <div class="nx-stat-value nx-mono">@ViewBag.TotalProductos</div>
-        <a class="nx-stat-foot" asp-controller="Productos" asp-action="Index">Ver inventario <i class="bi bi-arrow-right"></i></a>
+        <a class="nx-stat-foot" asp-controller="Productos" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual">Ver inventario <i class="bi bi-arrow-right"></i></a>
     </div></div>
     <div class="col-xl-3 col-sm-6"><div class="nx-stat-card">
         <div class="nx-stat-heading"><span>Clientes</span><span class="nx-stat-icon"><i class="bi bi-people"></i></span></div>
         <div class="nx-stat-value nx-mono">@ViewBag.TotalClientes</div>
-        <a class="nx-stat-foot" asp-controller="Clientes" asp-action="Index">Ver directorio <i class="bi bi-arrow-right"></i></a>
+        <a class="nx-stat-foot" asp-controller="Clientes" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual">Ver directorio <i class="bi bi-arrow-right"></i></a>
     </div></div>
 </div>
 <div class="row g-4">
     <div class="col-xl-8">
         <section class="nx-panel h-100">
-            <div class="nx-panel-header"><h2 class="nx-panel-title">Facturas recientes</h2><a asp-controller="Facturas" asp-action="Index" class="nx-action">Ver todas <i class="bi bi-arrow-right"></i></a></div>
+            <div class="nx-panel-header"><h2 class="nx-panel-title">Facturas recientes</h2><a asp-controller="Facturas" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual" class="nx-action">Ver todas <i class="bi bi-arrow-right"></i></a></div>
             @if (!facturas.Any()) {
                 <div class="nx-empty"><i class="bi bi-receipt"></i>Todavía no hay facturas registradas.</div>
             } else {
@@ -50,7 +51,7 @@
                             <td>@f.Cliente?.Nombre @f.Cliente?.Apellido</td>
                             <td>@f.Fecha.ToString("dd/MM/yyyy")</td>
                             <td class="nx-mono fw-semibold">RD$ @f.Total.ToString("N2")</td>
-                            <td><a asp-controller="Facturas" asp-action="Details" asp-route-id="@f.IdFactura" class="nx-action">Ver</a></td>
+                            <td><a asp-controller="Facturas" asp-action="Details" asp-route-empresaSlug="@slugEmpresaActual" asp-route-id="@f.IdFactura" class="nx-action">Ver</a></td>
                         </tr>
                     }
                     </tbody>
@@ -60,7 +61,7 @@
     </div>
     <div class="col-xl-4">
         <section class="nx-panel h-100">
-            <div class="nx-panel-header"><h2 class="nx-panel-title">Alertas de inventario</h2><a asp-controller="Productos" asp-action="Index" class="nx-action">Productos <i class="bi bi-arrow-right"></i></a></div>
+            <div class="nx-panel-header"><h2 class="nx-panel-title">Alertas de inventario</h2><a asp-controller="Productos" asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual" class="nx-action">Productos <i class="bi bi-arrow-right"></i></a></div>
             @if (!bajoStock.Any()) {
                 <div class="nx-empty"><i class="bi bi-check-circle"></i>No hay alertas de stock bajo.</div>
             } else {
