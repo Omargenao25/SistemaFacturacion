@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
 using SistemaFacturacion.ViewModels;
 
 namespace SistemaFacturacion.Controllers
 {
+    [Authorize]
     public class ReportesController : Controller
     {
         private readonly ApplicationDbContext _context;
