@@ -1,4 +1,5 @@
 @model SistemaFacturacion.Models.Categoria
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Eliminar categoría";
 }
@@ -23,7 +24,7 @@
             <h1 class="page-title">Eliminar categoría</h1>
             <p class="page-subtitle">Verifica los datos antes de confirmar la eliminación.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a categorías
         </a>
     </div>
@@ -54,7 +55,7 @@
             </dl>
 
             <div class="nx-detail-actions">
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">Cancelar</a>
                 @if (ViewBag.Bloqueado == true)
                 {
                     <span class="nx-delete-blocked">
@@ -63,7 +64,7 @@
                 }
                 else
                 {
-                    <form asp-action="Delete" asp-route-id="@Model.IdCategoria" method="post" class="nx-delete-form">
+                    <form asp-action="Delete" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@Model.IdCategoria" method="post" class="nx-delete-form">
                     <input type="hidden" asp-for="IdCategoria" />
                     <button type="submit" class="btn btn-danger" onclick="return confirm('¿Confirmas la eliminación de este registro?');">
                         <i class="bi bi-trash3 me-1" aria-hidden="true"></i> Confirmar eliminación

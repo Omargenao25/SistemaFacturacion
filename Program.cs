@@ -50,10 +50,14 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
  // Con el flag apagado no se agregan filtros: desarrollo conserva el flujo
  // mononegocio ya probado.
 builder.Services.AddScoped<FiltroPermisosComerciales>();
+builder.Services.AddScoped<PreservarRutaEmpresaFiltro>();
 builder.Services.AddControllersWithViews(opciones =>
 {
     if (activarTenancyValidada)
+    {
         opciones.Filters.AddService<FiltroPermisosComerciales>();
+        opciones.Filters.AddService<PreservarRutaEmpresaFiltro>();
+    }
 });
 
 var app = builder.Build();

@@ -244,6 +244,17 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Sin cambios en controladores comerciales ni migraciones de esta fase. Documento: [`docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md`](docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md).
 - Flags comerciales siguen OFF; no probar dos tenants en base normal ni publicar la plataforma. Después: navegación real HTTP/cookies, formularios, rutas y concurrencia.
 
+## Seguridad empresarial — fase 8: navegación y pruebas de login reales (laboratorio)
+
+**Rama:** `feature/nexora-security-phase8-navigation`, basada en fase 7. Revisión estática satisfactoria; **falta compilación y prueba en el navegador del usuario**.
+
+- `PreservarRutaEmpresaFiltro`, solo cuando `Seguridad:ActivarTenancyValidada=true`: preserva slug empresarial validado en `RedirectToAction` y evita reenvíos a rutas comerciales sin empresa.
+- Enlaces y formularios de clientes, categorías, productos, facturas, posventa, recepciones, anulaciones y reportes incluyen la empresa actual explícitamente (si existe); el modo Development legado queda igual.
+- Runner lógico: **58 casos preparados** (5 pruebas nuevas de rutas, redirecciones y denegación financiera). Las 21 pruebas SQL anteriores permanecen independientes.
+- `tests/Nexora.Browser.Lab`: genera cuatro cuentas temporales con hash real de ASP.NET Identity y contraseñas aleatorias para **dos empresas ficticias** con roles Propietario/Cajero y una identidad sin membresía. Solo acepta SQL local, DB `NexoraIsolationTest` y marca de guardia explícita; se niega a utilizar base con datos previos y dispone de `--cleanup` con validación exacta de fixture.
+- `docs/SEGURIDAD_FASE_8_NAVEGADOR_IDENTIDAD.md`: guía para pruebas reales de login, cookie, selector, navegación por roles y acceso cruzado. El programa de navegación sigue requiriendo comprobación manual de HTTP, no simular resultados.
+- Sin migraciones nuevas ni cambios a facturación/stock/dinero. **No activar modo validado en la base habitual**, ni fusionar a master ni desplegar público.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales

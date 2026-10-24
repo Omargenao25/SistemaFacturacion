@@ -1,4 +1,5 @@
 @model SistemaFacturacion.ViewModels.CrearCasoPosventaViewModel
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Nueva solicitud de posventa";
     var vence = Model.FechaVenta.AddMonths(Model.GarantiaMeses);
@@ -10,7 +11,7 @@
             <h1 class="page-title">Nueva solicitud</h1>
             <p class="page-subtitle">Registra una devolución o reclamación de garantía sin alterar la factura original.</p>
         </div>
-        <a asp-controller="Facturas" asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-controller="Facturas" asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial de facturas
         </a>
     </div>
@@ -26,7 +27,7 @@
                     </div>
                 </div>
             </div>
-            <form asp-action="Create" method="post" class="nx-crud-form">
+            <form asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" method="post" class="nx-crud-form">
                 <input asp-for="IdDetalle" type="hidden" />
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                 <div class="row g-3 mb-4">
@@ -82,7 +83,7 @@
                     El inventario y los pagos permanecen intactos hasta que se implemente un proceso autorizado.
                 </div>
                 <div class="nx-crud-actions">
-                    <a asp-controller="Facturas" asp-action="Details"
+                    <a asp-controller="Facturas" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug"
                        asp-route-id="@Model.IdFactura" class="btn btn-outline-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Registrar solicitud

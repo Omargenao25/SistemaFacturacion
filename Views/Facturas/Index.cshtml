@@ -1,4 +1,5 @@
 @model IEnumerable<SistemaFacturacion.Models.Factura>
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Historial de facturas";
     var estado = ViewBag.Estado as string ?? "Todos";
@@ -14,7 +15,7 @@
             <h1 class="page-title">Historial de facturas</h1>
             <p class="page-subtitle">Consulta los comprobantes registrados y encuentra una venta por cliente, estado o fecha.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary">
+        <a asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva factura
         </a>
     </div>
@@ -26,11 +27,11 @@
             </h2>
             @if (conFiltros)
             {
-                <a asp-action="Index" class="nx-action"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Limpiar filtros</a>
+                <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="nx-action"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Limpiar filtros</a>
             }
         </div>
         <div class="nx-filters-body">
-            <form method="get" asp-action="Index">
+            <form method="get" asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug">
                 <div class="row g-3 align-items-end">
                     <div class="col-lg-4 col-md-6">
                         <label for="nxBuscarFactura" class="form-label">Número o cliente</label>
@@ -112,7 +113,7 @@
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <a asp-action="Details" asp-route-id="@factura.IdFactura"
+                                    <a asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@factura.IdFactura"
                                        class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-eye me-1" aria-hidden="true"></i> Ver detalle
                                     </a>

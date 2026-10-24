@@ -431,6 +431,53 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
         Verificar(ReglasAccesoControladores.ObtenerPermiso(
             "EmpresasAcceso", "Crear", "POST") == null);
         return Task.CompletedTask;
+    }),
+    ("Un redirect comercial conserva la empresa validada", () =>
+    {
+        var ruta = PreservarRutaEmpresaFiltro.ConservarEmpresa(
+            new { id = 42 }, "lab-browser-a");
+        Verificar(ruta["empresaSlug"]?.ToString() == "lab-browser-a");
+        Verificar(Convert.ToInt32(ruta["id"]) == 42);
+        return Task.CompletedTask;
+    }),
+    ("No se acepta empresa falsificada en los valores de redirect", () =>
+    {
+        var ruta = PreservarRutaEmpresaFiltro.ConservarEmpresa(
+            new { empresaSlug = "lab-browser-b", id = 33 },
+            "lab-browser-a");
+        Verificar(ruta["empresaSlug"]?.ToString() == "lab-browser-a");
+        Verificar(Convert.ToInt32(ruta["id"]) == 33);
+        return Task.CompletedTask;
+    }),
+    ("Una redirección con slug inválido falla cerrada", () =>
+    {
+        try
+        {
+            PreservarRutaEmpresaFiltro.ConservarEmpresa(
+                new { id = 2 }, "../otra-empresa");
+            throw new Exception("Se admitió una ruta malformada.");
+        }
+        catch (ArgumentException)
+        {
+            return Task.CompletedTask;
+        }
+    }),
+    ("El filtro de redirección conserva valores de consulta", () =>
+    {
+        var ruta = PreservarRutaEmpresaFiltro.ConservarEmpresa(
+            new { buscar = "abc", pagina = 2 }, "lab-browser-b");
+        Verificar(ruta["pagina"]?.ToString() == "2");
+        Verificar(ruta["buscar"]?.ToString() == "abc");
+        Verificar(ruta["empresaSlug"]?.ToString() == "lab-browser-b");
+        return Task.CompletedTask;
+    }),
+    ("Los permisos sensibles continúan sin activarse", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Recepciones", "Confirmar", "POST") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "ControlAnulaciones", "ConfirmarReembolso", "POST") == null);
+        return Task.CompletedTask;
     })
 };
 
