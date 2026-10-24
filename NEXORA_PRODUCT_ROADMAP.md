@@ -244,6 +244,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Sin cambios en controladores comerciales ni migraciones de esta fase. Documento: [`docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md`](docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md).
 - Flags comerciales siguen OFF; no probar dos tenants en base normal ni publicar la plataforma. Después: navegación real HTTP/cookies, formularios, rutas y concurrencia.
 
+## Seguridad empresarial — fase 8: cookies reales y HTTP en laboratorio
+
+**Rama:** `feature/nexora-security-phase8-http-lab`, basada en fase 7. Todavía **pendiente de compilar y ejecutar localmente**.
+
+- Nuevo proyecto `tests/Nexora.Http.Lab`: **16 comprobaciones HTTP con Identity real, antiforgery y cookies separadas**, usando `WebApplicationFactory` / `TestServer` en memoria, sin abrir puertos a la red. Paquete oficial `Microsoft.AspNetCore.Mvc.Testing 8.0.23`.
+- Dos usuarios ficticios y dos empresas A/B en **`NexoraIsolationTest` local únicamente**: navegación `/mis-empresas`, login, acceso permitido/denegado, directorio de miembros, POST no autorizado y sin CSRF, suspensión de membresías/empresa con sesión activa.
+- El guard SQL exige variable `NEXORA_ISOLATION_TEST_CONNECTION`, base exacta, servidor local, marca manual `NEXORA_EXPLICIT_LAB_ONLY` y ausencia de datos preexistentes. Limpieza en `finally`; falla si no puede limpiar. Nunca migra ni crea DB ni usa datos reales.
+- Exposición del punto de entrada `public partial class Program` (sin cambio de comportamiento en la web).
+- `Nexora.Security.Checks` 53 + `Nexora.Integration.Lab` 21 **ya superadas por el usuario**; esta fase añade 16 escenarios, objetivo acumulado **90 comprobaciones**, todavía no ejecutadas estas últimas.
+- **Sin nuevas migraciones ni cambios en módulos comerciales**. Guía: [`docs/SEGURIDAD_FASE_8_HTTP_IDENTITY_LAB.md`](docs/SEGURIDAD_FASE_8_HTTP_IDENTITY_LAB.md).
+- Navegación SaaS completa, servicios de correo, seguridad de impresión/descargas y pruebas de concurrencia siguen pendientes antes de producción. No activar la flag en la base habitual ni fusionar a master.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
