@@ -221,6 +221,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/SEGURIDAD_FASE_5_REVOCACION_INVITACIONES.md`](docs/SEGURIDAD_FASE_5_REVOCACION_INVITACIONES.md).
 - El modo SaaS validado sigue OFF por defecto en Development habitual; no desplegar públicamente ni fusionar a master.
 
+## Seguridad empresarial — fase 6: selector y navegación con empresa verificada
+
+**Rama:** `feature/nexora-security-phase6-company-selector` sobre fase 5. Fuente subida; compilación y pruebas HTTP/SQL pendientes de confirmar localmente.
+
+- `GET /mis-empresas` muestra **solo** empresas Activa en las que el usuario Identity tenga membresía Activo sin baja. Consulta global `EmpresaUsuarios` restringida explícitamente al UserId autenticado; sin alta de empresas ni selección automática.
+- `/e/{empresaSlug}/...` sigue validándose contra SQL y políticas por petición. El selector no almacena ni concede autorización empresarial; la URL contiene únicamente un slug candidato.
+- Modo SaaS OFF por defecto: funcionamiento normal del Development legado sin cambios. ON solo en laboratorio: `/` lleva al selector, menú comercial se oculta hasta verificar empresa, links principales preservan slug y se muestran según permisos del rol.
+- Validador SQL y selector comparten reglas de slug `SlugEmpresaSeguro`. `EmpresasAcceso.Index.GET` solo se exceptúa del filtro comercial para un Identity autenticado; no hay POST ni nuevos permisos administrativos.
+- **Sin migración de esta fase ni escrituras a datos comerciales.** Suite de verificación preparada: **53** casos. Aplicar migraciones pendientes de fases 4–5 **solo en base de laboratorio aislada** antes de activar multiempresa; no tocar base normal.
+- Guía: [`docs/SEGURIDAD_FASE_6_SELECTOR_EMPRESAS.md`](docs/SEGURIDAD_FASE_6_SELECTOR_EMPRESAS.md).
+- Pendientes: rutas y redirecciones de TODAS las vistas comerciales, flujo de onboarding, Identity email y pruebas HTTP/SQL entre empresas antes de publicar.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
