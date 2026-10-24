@@ -165,14 +165,17 @@ namespace SistemaFacturacion.Controllers
                     _empresa.RolEmpresa, PermisosNexora.AdministrarUsuarios))
                 return Forbid();
 
-            estado = GestionMembresiasSegura.EstadoInvitacionPermitido(estado)
+            // Convertir el filtro opcional a un valor no nulo antes de
+            // pasarlo al servicio, sin perder la lista cerrada de estados.
+            string estadoValidado = estado is not null &&
+                GestionMembresiasSegura.EstadoInvitacionPermitido(estado)
                 ? estado : "Pendiente";
 
             try
             {
                 var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
                 var registros = await _gestion.ConsultarInvitacionesAsync(
-                    actor, estado, pagina, cancellationToken);
+                    actor, estadoValidado, pagina, cancellationToken);
 
                 var nombre = await _context.Empresas.AsNoTracking()
                     .Where(e => e.IdEmpresa == _empresa.IdEmpresa &&
@@ -187,7 +190,7 @@ namespace SistemaFacturacion.Controllers
                 return View(new InvitacionesEmpresaViewModel
                 {
                     Empresa = nombre,
-                    EstadoSeleccionado = estado,
+                    EstadoSeleccionado = estadoValidado,
                     Pagina = registros.Pagina,
                     TotalPaginas = Math.Max(1, (registros.Total + 19) / 20),
                     TotalResultados = registros.Total,
