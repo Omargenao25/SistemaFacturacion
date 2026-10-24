@@ -10,6 +10,15 @@ using Nexora.Http.Lab;
 using SistemaFacturacion.Data;
 using SistemaFacturacion.Models.SaaS;
 
+namespace Nexora.Http.Lab;
+
+// Evitar el Program implícito de sentencias top-level en la herramienta
+// de pruebas: WebApplicationFactory<global::Program> debe resolver el Program
+// PUBLICO de la aplicación web, nunca el ejecutable de test.
+public static class HttpLabRunner
+{
+    public static async Task<int> Main(string[] args)
+    {
 // HTTP real a TestServer con cookies reales ASP.NET Core Identity.
 // No levanta puertos ni llama servidores externos.
 // La única base aceptada es el laboratorio SQL local, VACÍO y autorizado.
@@ -297,8 +306,9 @@ finally
 
 Console.WriteLine($"HTTP Identity: {ejecutadas} verificaciones, {fallos} errores.");
 return fallos == 0 && ejecutadas == 16 ? 0 : 1;
+    }
 
-static async Task CrearIdentidadAsync(
+    private static async Task CrearIdentidadAsync(
     UserManager<IdentityUser> manager, string id, string email, string password)
 {
     var user = new IdentityUser
@@ -311,7 +321,7 @@ static async Task CrearIdentidadAsync(
             string.Join("; ", result.Errors.Select(e => e.Code)));
 }
 
-static async Task IniciarSesionAsync(
+private static async Task IniciarSesionAsync(
     HttpClient client, string email, string password)
 {
     using var landing = await client.GetAsync("/Identity/Account/Login");
@@ -335,7 +345,7 @@ static async Task IniciarSesionAsync(
             "Identity no inició sesión; comprobar configuración de Login / antiforgery.");
 }
 
-static string ExtraerAntiforgery(string html)
+private static string ExtraerAntiforgery(string html)
 {
     foreach (Match input in Regex.Matches(html,
         @"<input\b[^>]*>", RegexOptions.IgnoreCase | RegexOptions.Singleline))
@@ -353,19 +363,20 @@ static string ExtraerAntiforgery(string html)
     throw new InvalidOperationException("No se encontró antiforgery en la página Identity Login.");
 }
 
-static bool EsLogin(HttpResponseMessage r) =>
+private static bool EsLogin(HttpResponseMessage r) =>
     r.StatusCode == HttpStatusCode.Redirect &&
     r.Headers.Location?.OriginalString.Contains(
         "/Identity/Account/Login", StringComparison.OrdinalIgnoreCase) == true;
 
-static bool EsAccesoDenegado(HttpResponseMessage r) =>
+private static bool EsAccesoDenegado(HttpResponseMessage r) =>
     r.StatusCode == HttpStatusCode.Forbidden ||
     (r.StatusCode == HttpStatusCode.Redirect &&
      r.Headers.Location?.OriginalString.Contains(
          "AccessDenied", StringComparison.OrdinalIgnoreCase) == true);
 
-static void Exigir(bool condicion)
+private static void Exigir(bool condicion)
 {
     if (!condicion)
         throw new InvalidOperationException("Condición HTTP esperada incumplida.");
+}
 }
