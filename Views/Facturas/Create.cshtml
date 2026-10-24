@@ -1,4 +1,5 @@
 @model SistemaFacturacion.ViewModels.CrearFacturaViewModel
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @using SistemaFacturacion.Models
 @using System.Globalization
 @{
@@ -13,12 +14,12 @@
             <h1 class="page-title">Nueva factura</h1>
             <p class="page-subtitle">Registra una venta, selecciona los productos y revisa el total antes de emitir el comprobante.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver al historial
         </a>
     </div>
 
-    <form asp-action="Create" method="post" id="facturaForm">
+    <form asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" method="post" id="facturaForm">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
 
         <div class="row g-4 align-items-start">
