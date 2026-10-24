@@ -1,4 +1,5 @@
 @model IEnumerable<SistemaFacturacion.Models.Categoria>
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{ ViewData["Title"] = "Categorías"; }
 @if (TempData["Mensaje"] is string mensaje)
 {
@@ -6,7 +7,7 @@
 }
 <div class="page-intro">
     <div><div class="page-eyebrow">Nexora / Gestión</div><h1 class="page-title">Categorías</h1><p class="page-subtitle">Organiza tus productos por grupos para encontrarlos más rápido.</p></div>
-    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nueva categoría</a>
+    <a asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nueva categoría</a>
 </div>
 <section class="nx-panel">
     <div class="nx-panel-header"><h2 class="nx-panel-title">Catálogo de categorías</h2><span class="text-muted small">@Model.Count() registros</span></div>
@@ -18,9 +19,9 @@
             <tbody>
             @foreach(var item in Model) {
                 <tr><td class="fw-semibold">@item.Nombre</td><td>@(item.Descripcion ?? "—")</td><td>
-                    <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdCategoria">Ver</a>
-                    <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdCategoria">Editar</a>
-                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdCategoria">Eliminar</a>
+                    <a class="nx-list-action" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCategoria">Ver</a>
+                    <a class="nx-list-action" asp-action="Edit" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCategoria">Editar</a>
+                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCategoria">Eliminar</a>
                 </td></tr>
             }
             </tbody>
