@@ -1,4 +1,5 @@
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
@@ -7,6 +8,7 @@ using SistemaFacturacion.ViewModels;
 
 namespace SistemaFacturacion.Controllers
 {
+    [Authorize]
     public class PosventaController : Controller
     {
         private readonly ApplicationDbContext _context;
