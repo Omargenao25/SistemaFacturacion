@@ -1702,3 +1702,74 @@ body { color: var(--nx-ink); }
 @media (max-width:700px) {
     .nx-invitations-table { min-width:810px; }
 }
+
+/* Nexora SaaS — selector de empresas autenticado (sin permisos implícitos) */
+.nx-company-safety-note {
+    display: flex; align-items: flex-start; gap: 14px;
+    border: 1px solid #c6d9f6; border-radius: 14px;
+    background: #f1f7ff; color: #28558d; padding: 18px 20px;
+    margin-bottom: 24px;
+}
+.nx-company-safety-note > i {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex: 0 0 38px;
+    background: #dceafe; border-radius: 11px; font-size: 1.1rem;
+}
+.nx-company-safety-note strong { font-weight: 800; font-size: .89rem; }
+.nx-company-safety-note p {
+    margin: 5px 0 0; font-size: .8rem; line-height: 1.6;
+}
+.nx-company-selector-heading {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+}
+.nx-company-selector-heading h2 {
+    font-size: 1.04rem; font-weight: 800; margin: 0; color: #253d63;
+}
+.nx-company-selector-heading > span {
+    font-size: .78rem; color: #73849c;
+}
+.nx-company-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+    gap: 17px;
+}
+.nx-company-card {
+    display: flex; flex-direction: column; padding: 23px;
+    min-width: 0; background: #fff;
+    border: 1px solid #e0e8f5; border-radius: 16px;
+    box-shadow: 0 7px 22px rgba(29, 57, 101, .04);
+}
+.nx-company-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin-bottom: 17px;
+}
+.nx-company-avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 50px; height: 50px; flex: 0 0 50px; font-size: 1.3rem;
+    border-radius: 13px; background: #e7f0ff; color: #2b66be;
+}
+.nx-company-card h3 {
+    font-size: 1.05rem; font-weight: 830; line-height: 1.3;
+    color: #263b62; margin: 0 0 5px; overflow-wrap: anywhere;
+}
+.nx-company-slug {
+    font-family: Consolas, monospace; color: #7788a3;
+    font-size: .75rem; margin-bottom: 18px; overflow-wrap: anywhere;
+}
+.nx-company-info {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px; margin-top: auto; padding-bottom: 19px;
+}
+.nx-company-info > div {
+    display: flex; flex-direction: column; gap: 4px;
+    background: #f6f9fe; border-radius: 10px; padding: 12px;
+}
+.nx-company-info span { font-size: .71rem; color: #7b8ca5; }
+.nx-company-info strong { font-size: .84rem; color: #35547f; }
+.nx-company-open { display: flex; justify-content: center; align-items: center; font-weight: 750; }
+@media (max-width: 570px) {
+    .nx-company-card, .nx-company-safety-note { padding: 16px; }
+    .nx-company-grid { grid-template-columns: 1fr; }
+    .nx-company-safety-note { gap: 10px; }
+}
+@media print { .nx-company-selector { display: none !important; } }
