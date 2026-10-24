@@ -1,6 +1,7 @@
 using System.Data;
 using System.Security.Claims;
 using Microsoft.Data.SqlClient;
+using SistemaFacturacion.Security;
 
 namespace SistemaFacturacion.Services.Tenancy
 {
@@ -38,8 +39,8 @@ namespace SistemaFacturacion.Services.Tenancy
 
             // La entrada HTTP únicamente indica la empresa que solicita el
             // usuario; la pertenencia se valida siempre contra SQL Server.
-            var slug = slugCandidato?.Trim().ToLowerInvariant();
-            if (!SlugValido(slug))
+            var slug = SlugEmpresaSeguro.Normalizar(slugCandidato);
+            if (slug == null)
                 return null;
 
             const string sql = @"
@@ -73,23 +74,5 @@ WHERE eu.UserId = @UserId
             return new MembresiaEmpresaValidada(lector.GetGuid(0), rol);
         }
 
-        private static bool SlugValido(string? slug)
-        {
-            if (slug is null || slug.Length is < 3 or > 63)
-                return false;
-
-            if (slug[0] == '-' || slug[^1] == '-')
-                return false;
-
-            foreach (var caracter in slug)
-            {
-                if (!((caracter >= 'a' && caracter <= 'z') ||
-                      (caracter >= '0' && caracter <= '9') ||
-                       caracter == '-'))
-                    return false;
-            }
-
-            return true;
-        }
     }
 }

@@ -78,8 +78,27 @@ app.UseRouting();
 // Identity debe determinar primero la identidad del usuario. Únicamente
 // después se comprueba en SQL su membresía para el slug de la ruta.
 app.UseAuthentication();
+
 if (activarTenancyValidada)
+{
+    // Landing seguro en modo SaaS: el usuario debe elegir una empresa
+    // antes de ejecutar consultas comerciales. No se asigna tenant por
+    // cookie ni se selecciona automáticamente la primera membresía.
+    app.Use(async (context, next) =>
+    {
+        if (HttpMethods.IsGet(context.Request.Method) &&
+            context.Request.Path == "/")
+        {
+            context.Response.Redirect("/mis-empresas");
+            return;
+        }
+
+        await next();
+    });
+
     app.UseMiddleware<VerificacionMembresiaMiddleware>();
+}
+
 app.UseAuthorization();
 
 // El contexto validado SOLO se puede crear si hay slug en ruta,

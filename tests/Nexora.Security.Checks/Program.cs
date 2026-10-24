@@ -379,6 +379,58 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
         Verificar(!GestionMembresiasSegura.EstadoInvitacionPermitido("Propietario"));
         Verificar(!GestionMembresiasSegura.EstadoInvitacionPermitido("Pendiente'; DROP TABLE"));
         return Task.CompletedTask;
+    }),
+    ("Un slug válido permite entrar a una empresa", () =>
+    {
+        Verificar(SlugEmpresaSeguro.EsValido("nexora-tienda-1"));
+        return Task.CompletedTask;
+    }),
+    ("Un slug se normaliza sin conceder permisos", () =>
+    {
+        Verificar(SlugEmpresaSeguro.Normalizar("  TIENDA-UNO  ") == "tienda-uno");
+        return Task.CompletedTask;
+    }),
+    ("Slug vacío o sin longitud suficiente se rechaza", () =>
+    {
+        Verificar(!SlugEmpresaSeguro.EsValido(null));
+        Verificar(!SlugEmpresaSeguro.EsValido(""));
+        Verificar(!SlugEmpresaSeguro.EsValido("ab"));
+        return Task.CompletedTask;
+    }),
+    ("Slug con caracteres peligrosos se rechaza", () =>
+    {
+        Verificar(SlugEmpresaSeguro.Normalizar("../nexora") == null);
+        Verificar(SlugEmpresaSeguro.Normalizar("tienda/otra") == null);
+        Verificar(SlugEmpresaSeguro.Normalizar("tienda_a") == null);
+        Verificar(SlugEmpresaSeguro.Normalizar("ñandú") == null);
+        return Task.CompletedTask;
+    }),
+    ("Slug de empresa sin guiones internos válidos se rechaza", () =>
+    {
+        Verificar(!SlugEmpresaSeguro.EsValido("-empresa"));
+        Verificar(!SlugEmpresaSeguro.EsValido("empresa-"));
+        Verificar(SlugEmpresaSeguro.EsValido("empresa-a"));
+        return Task.CompletedTask;
+    }),
+    ("Slug de empresa mayor a 63 caracteres se rechaza", () =>
+    {
+        Verificar(SlugEmpresaSeguro.Normalizar(new string('a', 64)) == null);
+        Verificar(SlugEmpresaSeguro.EsValido(new string('a', 63)));
+        return Task.CompletedTask;
+    }),
+    ("El selector no crea permisos comerciales por sí mismo", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "EmpresasAcceso", "Index", "GET") == null);
+        return Task.CompletedTask;
+    }),
+    ("Un POST al selector no tiene permiso de modificación", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "EmpresasAcceso", "Index", "POST") == null);
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "EmpresasAcceso", "Crear", "POST") == null);
+        return Task.CompletedTask;
     })
 };
 

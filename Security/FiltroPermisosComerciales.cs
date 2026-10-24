@@ -36,6 +36,19 @@ namespace SistemaFacturacion.Security
                 return;
             }
 
+            // La selección de empresa aún no tiene tenant. Permitir
+            // exclusivamente el GET de lectura para un usuario autenticado;
+            // el propio controlador consulta SOLO las membresías activas de
+            // ese usuario. NO autorizar POST ni ningún método arbitrario.
+            if (descriptor?.ControllerName == "EmpresasAcceso" &&
+                descriptor.ActionName == "Index" &&
+                context.HttpContext.Request.Method == "GET")
+            {
+                if (context.HttpContext.User.Identity?.IsAuthenticated != true)
+                    context.Result = new ChallengeResult();
+                return;
+            }
+
             var permiso = ReglasAccesoControladores.ObtenerPermiso(
                 descriptor?.ControllerName,
                 descriptor?.ActionName,

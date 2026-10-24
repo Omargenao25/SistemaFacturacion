@@ -1,0 +1,96 @@
+@model SistemaFacturacion.ViewModels.EmpresasAccesoViewModel
+@{
+    ViewData["Title"] = "Mis empresas";
+    var primero = Model.TotalEmpresas == 0 ? 0 : (Model.Pagina - 1) * 12 + 1;
+    var ultimo = Math.Min(Model.Pagina * 12, Model.TotalEmpresas);
+}
+<div class="nx-crud-page nx-company-selector">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Cuenta / Espacios de trabajo</div>
+            <h1 class="page-title">Mis empresas</h1>
+            <p class="page-subtitle">Selecciona una empresa donde tienes una membresía activa y verificada.</p>
+        </div>
+        <span class="nx-team-readonly"><i class="bi bi-shield-check me-1" aria-hidden="true"></i> Acceso protegido</span>
+    </div>
+
+    <div class="nx-company-safety-note" role="note">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <div>
+            <strong>Tu acceso se comprueba en cada petición.</strong>
+            <p>Elegir una tarjeta no concede permisos adicionales. Si tu empresa o
+               membresía cambia de estado, Nexora denegará el acceso automáticamente.</p>
+        </div>
+    </div>
+
+    @if (Model.Empresas.Count == 0)
+    {
+        <section class="nx-panel p-4" aria-labelledby="nxSinEmpresas">
+            <div class="nx-empty">
+                <i class="bi bi-buildings" aria-hidden="true"></i>
+                <strong id="nxSinEmpresas">No tienes empresas activas disponibles</strong>
+                <p class="mb-0">Contacta al propietario para recibir una invitación. Si aceptaste
+                   una recientemente, verifica que siga activa y recarga la página.</p>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section aria-labelledby="nxEmpresasTitulo">
+            <div class="nx-company-selector-heading">
+                <h2 id="nxEmpresasTitulo">Tus espacios de trabajo</h2>
+                <span>@Model.TotalEmpresas empresa(s) vinculada(s)</span>
+            </div>
+            <div class="nx-company-grid">
+                @foreach (var empresa in Model.Empresas)
+                {
+                    <article class="nx-company-card">
+                        <div class="nx-company-card-top">
+                            <span class="nx-company-avatar" aria-hidden="true">
+                                <i class="bi bi-buildings"></i>
+                            </span>
+                            <span class="nx-status good">Membresía activa</span>
+                        </div>
+                        <h3>@empresa.Nombre</h3>
+                        <p class="nx-company-slug">@empresa.Slug</p>
+                        <div class="nx-company-info">
+                            <div><span>Tu rol</span><strong>@empresa.Rol</strong></div>
+                            <div><span>Moneda</span><strong>@empresa.Moneda</strong></div>
+                        </div>
+                        <a asp-controller="Home" asp-action="Index"
+                           asp-route-empresaSlug="@empresa.Slug"
+                           class="btn btn-primary nx-company-open">
+                            Entrar a la empresa
+                            <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                        </a>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.TotalPaginas > 1)
+    {
+        <nav aria-label="Paginación de empresas" class="nx-team-pager mt-3">
+            <span>Mostrando @primero–@ultimo de @Model.TotalEmpresas · Página @Model.Pagina de @Model.TotalPaginas</span>
+            <div>
+                @if (Model.Pagina > 1)
+                {
+                    <a asp-controller="EmpresasAcceso" asp-action="Index"
+                       asp-route-pagina="@(Model.Pagina - 1)"
+                       class="btn btn-outline-secondary btn-sm">Anterior</a>
+                }
+                @if (Model.Pagina < Model.TotalPaginas)
+                {
+                    <a asp-controller="EmpresasAcceso" asp-action="Index"
+                       asp-route-pagina="@(Model.Pagina + 1)"
+                       class="btn btn-outline-secondary btn-sm">Siguiente</a>
+                }
+            </div>
+        </nav>
+    }
+    <p class="nx-reconciliation-footer mt-4">
+        <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+        Nexora no selecciona automáticamente empresas ni comparte información entre ellas.
+    </p>
+</div>
