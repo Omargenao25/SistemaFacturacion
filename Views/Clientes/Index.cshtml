@@ -1,4 +1,5 @@
 @model IEnumerable<SistemaFacturacion.Models.Cliente>
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{ ViewData["Title"] = "Clientes"; }
 @if (TempData["Mensaje"] is string mensaje)
 {
@@ -6,7 +7,7 @@
 }
 <div class="page-intro">
     <div><div class="page-eyebrow">Nexora / Gestión</div><h1 class="page-title">Clientes</h1><p class="page-subtitle">Consulta y administra la información de tus clientes.</p></div>
-    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Nuevo cliente</a>
+    <a asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i>Nuevo cliente</a>
 </div>
 <section class="nx-panel">
     <div class="nx-panel-header"><h2 class="nx-panel-title">Directorio de clientes</h2><span class="text-muted small">@Model.Count() registros</span></div>
@@ -18,9 +19,9 @@
             <tbody>
             @foreach(var item in Model) {
                 <tr><td class="fw-semibold">@item.Nombre @item.Apellido</td><td>@(item.Telefono ?? "—")</td><td>@(item.Correo ?? "—")</td><td>@(item.Direccion ?? "—")</td><td>
-                    <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdCliente">Ver</a>
-                    <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdCliente">Editar</a>
-                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdCliente">Eliminar</a>
+                    <a class="nx-list-action" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCliente">Ver</a>
+                    <a class="nx-list-action" asp-action="Edit" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCliente">Editar</a>
+                    <a class="nx-list-action text-danger" asp-action="Delete" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdCliente">Eliminar</a>
                 </td></tr>
             }
             </tbody>
