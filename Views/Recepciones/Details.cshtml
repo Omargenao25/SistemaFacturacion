@@ -1,4 +1,5 @@
 @model SistemaFacturacion.ViewModels.InspeccionRecepcionViewModel
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Inspección de mercancía";
     var recepcion = Model.Recepcion;
@@ -17,7 +18,7 @@
             <h1 class="page-title">Inspección de mercancía</h1>
             <p class="page-subtitle">Consulta los datos reales y simula una clasificación sin registrar operaciones.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a recepciones
         </a>
     </div>
@@ -52,7 +53,7 @@
                 <div><dt>Factura</dt><dd>
                     @if (factura != null)
                     {
-                        <a asp-controller="Facturas" asp-action="Details" asp-route-id="@factura.IdFactura">
+                        <a asp-controller="Facturas" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@factura.IdFactura">
                             @factura.NumeroFactura
                         </a>
                     }
@@ -90,7 +91,7 @@
             }
             else
             {
-                <form asp-action="Details" asp-route-id="@recepcion.IdRecepcion" method="get">
+                <form asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@recepcion.IdRecepcion" method="get">
                 <input type="hidden" name="simular" value="true" />
                 <div class="row g-3">
                     <div class="col-lg-4 col-md-6">
@@ -140,7 +141,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-calculator me-1" aria-hidden="true"></i> Simular clasificación
                     </button>
-                    <a asp-action="Details" asp-route-id="@recepcion.IdRecepcion"
+                    <a asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@recepcion.IdRecepcion"
                        class="btn btn-outline-secondary">Limpiar simulación</a>
                 </div>
                 </form>
