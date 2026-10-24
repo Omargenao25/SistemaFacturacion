@@ -233,6 +233,17 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/SEGURIDAD_FASE_6_SELECTOR_EMPRESAS.md`](docs/SEGURIDAD_FASE_6_SELECTOR_EMPRESAS.md).
 - Pendientes: rutas y redirecciones de TODAS las vistas comerciales, flujo de onboarding, Identity email y pruebas HTTP/SQL entre empresas antes de publicar.
 
+## Seguridad empresarial — fase 7: integración SQL real con dos tenants ficticios
+
+**Rama:** `feature/nexora-security-phase7-sql-lab`, basada en la fase 6. *Suite implementada pero todavía NO ejecutada en SQL Server ni compilada por el asistente*.
+
+- Nuevo runner `tests/Nexora.Integration.Lab`: **21 casos SQL + backend** con dos empresas y dos usuarios Identity ficticios, validación real de membresía, middleware, permisos, query-filters EF, bloqueos de escritura cruzada, suspensión y baja.
+- Sólo admite **SQL Server local + base exacta `NexoraIsolationTest` + marca manual `NexoraIsolationLabGuard`**, y se niega a escribir si hay datos comerciales o usuarios anteriores. No utiliza `DefaultConnection`, no ejecuta migraciones y limpia sus datos falsos en `finally`.
+- Se mantiene runner anterior de **53 comprobaciones lógicas**. Objetivo combinado **74**; falta verificarlo de verdad en Visual Studio. **No son pruebas HTTP con cookie real ni publicación SaaS aprobada**.
+- `tests/Nexora.Integration.Lab/VALIDAR_LAB.sql` crea marca de autorización solo si ya estás en la base de laboratorio correcta.
+- Sin cambios en controladores comerciales ni migraciones de esta fase. Documento: [`docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md`](docs/SEGURIDAD_FASE_7_PRUEBAS_SQL_AISLAMIENTO.md).
+- Flags comerciales siguen OFF; no probar dos tenants en base normal ni publicar la plataforma. Después: navegación real HTTP/cookies, formularios, rutas y concurrencia.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales
