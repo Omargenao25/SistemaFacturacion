@@ -34,6 +34,7 @@ namespace SistemaFacturacion.ViewModels
 
     public sealed class PaginaInvitacionesEmpresa
     {
+        public int Pagina { get; set; } = 1;
         public int Total { get; set; }
         public List<InvitacionEmpresaItem> Registros { get; set; } = new();
     }
