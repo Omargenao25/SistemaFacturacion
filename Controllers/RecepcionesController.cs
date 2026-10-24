@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
@@ -11,6 +12,7 @@ namespace SistemaFacturacion.Controllers
     /// No hay POST, guardado, liberación de stock ni confirmación de recepción.
     /// La seguridad de escrituras dependerá de los roles por empresa.
     /// </summary>
+    [Authorize]
     public sealed class RecepcionesController : Controller
     {
         private readonly ApplicationDbContext _context;
