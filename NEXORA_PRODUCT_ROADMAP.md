@@ -209,6 +209,18 @@ Antes de admitir a cualquier segunda empresa, implementar y probar:
 - Guía: [`docs/SEGURIDAD_FASE_4_GESTION_EMPLEADOS.md`](docs/SEGURIDAD_FASE_4_GESTION_EMPLEADOS.md).
 - Todavía falta revocación de invitaciones, proveedor de correo + confirmación Identity, propagación completa de rutas SaaS, SQL integration A/B, y hardening antes de producción. No activar tenants en base usual ni fusionar a master.
 
+## Seguridad empresarial — fase 5: revocación de invitaciones (laboratorio)
+
+**Rama:** `feature/nexora-security-phase5-invites`, basada en fase 4. **No compilada ni probada con SQL Server desde el asistente.**
+
+- `GET /e/{empresaSlug}/Equipo/Invitaciones`: bandeja paginada por empresa, filtros de pendientes vigentes, vencidas, aceptadas, revocadas y todas. No muestra token ni hash.
+- `POST /e/{empresaSlug}/Equipo/RevocarInvitacion`: propietario autenticado, anti-CSRF, verificación SQL de pertenencia y permiso con transacción Serializable; invalida solo enlace `Pendiente` y vigente, y audita atómicamente `InvitacionRevocada`.
+- La revocación solo invalida un enlace aún no aceptado, **no cambia membresías ya activas**. La aceptación previa rechaza token cuyo estado no sea `Pendiente`.
+- Migración SQL `20261024143000_RegistrarRevocacionInvitaciones`: amplía check constraint de auditoría para la nueva acción. **Aplicar solamente en BD aislada después de la migración de fase 4**, con backup, compilación y tests previos.
+- Pruebas unitarias preparadas: **45** en total; integración A/B, idempotencia y concurrencia de revocación requieren verificación local.
+- Guía: [`docs/SEGURIDAD_FASE_5_REVOCACION_INVITACIONES.md`](docs/SEGURIDAD_FASE_5_REVOCACION_INVITACIONES.md).
+- El modo SaaS validado sigue OFF por defecto en Development habitual; no desplegar públicamente ni fusionar a master.
+
 ## Prioridades: primero integridad, después automatización
 
 ### P0 — Bloqueantes antes de un piloto con operaciones reales

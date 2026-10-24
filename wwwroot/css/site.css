@@ -1691,3 +1691,14 @@ body { color: var(--nx-ink); }
     .nx-team-actions {min-width:190px;}
     .nx-team-audit-table {min-width:680px;}
 }
+
+/* Nexora: invitations inbox and revocation */
+.nx-invitations-table th { color:#667b97; font-size:.75rem; white-space:nowrap; }
+.nx-invitations-table td { font-size:.8rem; vertical-align:middle; }
+.nx-invitations-table td:first-child { min-width:210px; overflow-wrap:anywhere; }
+.nx-invitations-table td:last-child { min-width:116px; }
+.nx-invitations-table form { margin:0; }
+.nx-invitations-page .nx-team-filters { margin:0; }
+@media (max-width:700px) {
+    .nx-invitations-table { min-width:810px; }
+}

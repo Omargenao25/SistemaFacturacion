@@ -63,7 +63,7 @@ namespace SistemaFacturacion.Security
 
                 // Empleados contiene correos/roles; solo el propietario con
                 // membresía verificada puede consultar este endpoint.
-                // Ningún método POST está autorizado en esta fase.
+                // Solo los POST expresamente registrados están autorizados.
                 ("Equipo", "Index", "GET") =>
                     PermisosNexora.AdministrarUsuarios,
                 ("Equipo", "CambiarRol", "POST") =>
@@ -71,6 +71,10 @@ namespace SistemaFacturacion.Security
                 ("Equipo", "CambiarEstado", "POST") =>
                     PermisosNexora.AdministrarUsuarios,
                 ("Equipo", "CrearInvitacion", "POST") =>
+                    PermisosNexora.AdministrarUsuarios,
+                ("Equipo", "Invitaciones", "GET") =>
+                    PermisosNexora.AdministrarUsuarios,
+                ("Equipo", "RevocarInvitacion", "POST") =>
                     PermisosNexora.AdministrarUsuarios,
 
                 // La política del controlador es una segunda capa. El filtro
