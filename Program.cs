@@ -44,7 +44,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+// En desarrollo local no hay proveedor de correo configurado para
+// completar confirmaciones. Solo el entorno Development permite probar
+// cuentas aún no confirmadas; en cualquier otro entorno se exige confirmación.
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    options.SignIn.RequireConfirmedAccount = !builder.Environment.IsDevelopment())
     .AddEntityFrameworkStores<ApplicationDbContext>();
 // En el laboratorio SaaS se protegen todas las acciones MVC por permiso.
  // Con el flag apagado no se agregan filtros: desarrollo conserva el flujo
