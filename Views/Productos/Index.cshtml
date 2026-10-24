@@ -1,4 +1,5 @@
 @model IEnumerable<SistemaFacturacion.Models.Producto>
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{ ViewData["Title"] = "Productos"; }
 @if (TempData["Mensaje"] is string mensaje)
 {
@@ -6,7 +7,7 @@
 }
 <div class="page-intro">
     <div><div class="page-eyebrow">Nexora / Inventario</div><h1 class="page-title">Productos</h1><p class="page-subtitle">El estado de inventario cambia automáticamente al vender o reponer. La desactivación manual se respeta.</p></div>
-    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nuevo producto</a>
+    <a asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nuevo producto</a>
 </div>
 <section class="nx-panel">
     <div class="nx-panel-header"><h2 class="nx-panel-title">Catálogo de productos</h2><span class="text-muted small">@Model.Count() registros</span></div>
@@ -25,9 +26,9 @@
                     <td class="text-nowrap">@(item.GarantiaMeses > 0 ? $"{item.GarantiaMeses} meses" : "—")</td>
                     <td><span class="nx-status @(item.Estado ? "good" : "danger")">@(item.Estado ? "Activo" : "Inactivo")</span></td>
                     <td>
-                        <a class="nx-list-action" asp-action="Details" asp-route-id="@item.IdProducto">Ver</a>
-                        <a class="nx-list-action" asp-action="Edit" asp-route-id="@item.IdProducto">Editar</a>
-                        <a class="nx-list-action text-danger" asp-action="Delete" asp-route-id="@item.IdProducto">Eliminar</a>
+                        <a class="nx-list-action" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdProducto">Ver</a>
+                        <a class="nx-list-action" asp-action="Edit" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdProducto">Editar</a>
+                        <a class="nx-list-action text-danger" asp-action="Delete" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@item.IdProducto">Eliminar</a>
                     </td>
                 </tr>
             }
