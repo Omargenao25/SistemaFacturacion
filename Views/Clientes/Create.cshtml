@@ -1,4 +1,5 @@
 @model SistemaFacturacion.Models.Cliente
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Nuevo cliente";
 }
@@ -9,7 +10,7 @@
             <h1 class="page-title">Nuevo cliente</h1>
             <p class="page-subtitle">Completa los datos del cliente para utilizarlo durante la facturación.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a clientes</a>
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a clientes</a>
     </div>
 
     <div class="nx-crud-shell">
@@ -23,7 +24,7 @@
                     </div>
                 </div>
             </div>
-            <form asp-action="Create" method="post" class="nx-crud-form">
+            <form asp-action="Create" asp-route-empresaSlug="@nxRutaEmpresaSlug" method="post" class="nx-crud-form">
                 
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                 <div class="row g-4">
@@ -35,7 +36,7 @@
                 <div class="col-12"><label asp-for="Direccion" class="form-label">Dirección</label><textarea asp-for="Direccion" class="form-control" rows="3" maxlength="150" placeholder="Dirección del cliente"></textarea><span asp-validation-for="Direccion" class="text-danger small"></span></div>
                 </div>
                 <div class="nx-crud-actions">
-                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i> Guardar registro</button>
                 </div>
             </form>
