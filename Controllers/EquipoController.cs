@@ -154,6 +154,89 @@ namespace SistemaFacturacion.Controllers
             return View(modelo);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Invitaciones(
+            string? estado = "Pendiente", int pagina = 1,
+            CancellationToken cancellationToken = default)
+        {
+            // No leer tabla global sin tenant y autorización activa.
+            if (!_empresa.TieneEmpresa ||
+                !PermisosNexora.TienePermiso(
+                    _empresa.RolEmpresa, PermisosNexora.AdministrarUsuarios))
+                return Forbid();
+
+            estado = GestionMembresiasSegura.EstadoInvitacionPermitido(estado)
+                ? estado : "Pendiente";
+
+            try
+            {
+                var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var registros = await _gestion.ConsultarInvitacionesAsync(
+                    actor, estado, pagina, cancellationToken);
+
+                var nombre = await _context.Empresas.AsNoTracking()
+                    .Where(e => e.IdEmpresa == _empresa.IdEmpresa &&
+                                e.Estado == "Activa")
+                    .Select(e => e.NombreComercial)
+                    .SingleOrDefaultAsync(cancellationToken);
+
+                if (nombre == null)
+                    return Forbid();
+
+                Response.Headers["Cache-Control"] = "private, no-store";
+                return View(new InvitacionesEmpresaViewModel
+                {
+                    Empresa = nombre,
+                    EstadoSeleccionado = estado,
+                    Pagina = registros.Pagina,
+                    TotalPaginas = Math.Max(1, (registros.Total + 19) / 20),
+                    TotalResultados = registros.Total,
+                    Invitaciones = registros.Registros
+                });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RevocarInvitacion(
+            Guid idInvitacion, CancellationToken cancellationToken)
+        {
+            if (!_empresa.TieneEmpresa)
+                return Forbid();
+
+            try
+            {
+                var actor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                await _gestion.RevocarInvitacionAsync(
+                    actor, idInvitacion, cancellationToken);
+                TempData["EquipoMensaje"] =
+                    "Invitación revocada. Ese enlace ya no puede utilizarse.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["EquipoError"] = ex.Message;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (SqlException ex)
+            {
+                _log.LogError(ex, "No fue posible revocar una invitación");
+                TempData["EquipoError"] =
+                    "No fue posible revocar la invitación. Consulta la bitácora.";
+            }
+
+            return RedirectToAction(nameof(Invitaciones), new
+            {
+                empresaSlug = RouteData.Values["empresaSlug"]
+            });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = PermisosNexora.AdministrarRoles)]
