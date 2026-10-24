@@ -371,6 +371,144 @@ WHERE IdInvitacion = @Id AND Estado = N'Pendiente'
             }
         }
 
+        public static bool EstadoInvitacionPermitido(string? estado) =>
+            estado is "Pendiente" or "Vencida" or "Aceptada" or
+                "Revocada" or "Caducada" or "Todas";
+
+        /// <summary>
+        /// Listado paginado de tokens omitidos: solo metadatos de la empresa
+        /// validada. Incluso la consulta exige propietario vigente en SQL.
+        /// </summary>
+        public async Task<PaginaInvitacionesEmpresa> ConsultarInvitacionesAsync(
+            string actor, string estado, int pagina, CancellationToken ct)
+        {
+            if (!EstadoInvitacionPermitido(estado))
+                throw new InvalidOperationException("Filtro de invitaciones no permitido.");
+
+            // Selección de fragmentos FIJOS, nunca SQL construido con datos
+            // arbitrarios de formularios/URLs.
+            var condicion = estado switch
+            {
+                "Pendiente" => "i.Estado = N'Pendiente' AND i.VenceUtc > SYSUTCDATETIME()",
+                "Vencida" => "i.Estado = N'Pendiente' AND i.VenceUtc <= SYSUTCDATETIME()",
+                "Aceptada" => "i.Estado = N'Aceptada'",
+                "Revocada" => "i.Estado = N'Revocada'",
+                "Caducada" => "i.Estado = N'Caducada'",
+                _ => "1 = 1"
+            };
+
+            var (conexion, tx) = await AbrirAsync(ct);
+            await using (conexion)
+            await using (tx)
+            {
+                await ExigirPropietarioAsync(conexion, tx, actor, ct);
+                int total;
+                {
+                    var sql = $@"
+SELECT COUNT(*)
+FROM dbo.InvitacionesEmpresa i
+WHERE i.IdEmpresa = @Empresa AND ({condicion});";
+                    await using var cmd = Comando(conexion, tx, sql);
+                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, _empresa.IdEmpresa);
+                    total = Convert.ToInt32(await cmd.ExecuteScalarAsync(ct));
+                }
+
+                const int tamano = 20;
+                var totalPaginas = Math.Max(1, (total + tamano - 1) / tamano);
+                pagina = Math.Clamp(pagina, 1, totalPaginas);
+                var resultado = new PaginaInvitacionesEmpresa
+                {
+                    Pagina = pagina,
+                    Total = total
+                };
+
+                {
+                    var sql = $@"
+SELECT i.IdInvitacion, i.EmailNormalizado, i.Rol, i.Estado,
+       i.CreadoUtc, i.VenceUtc, i.ConsumidoUtc,
+       COALESCE(u.UserName, N'Cuenta anterior')
+FROM dbo.InvitacionesEmpresa i
+LEFT JOIN dbo.AspNetUsers u ON u.Id = i.CreadoPorUserId
+WHERE i.IdEmpresa = @Empresa AND ({condicion})
+ORDER BY i.CreadoUtc DESC, i.IdInvitacion DESC
+OFFSET @Omitir ROWS FETCH NEXT @Tomar ROWS ONLY;";
+                    await using var cmd = Comando(conexion, tx, sql);
+                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, _empresa.IdEmpresa);
+                    Param(cmd, "@Omitir", SqlDbType.Int, (pagina - 1) * tamano);
+                    Param(cmd, "@Tomar", SqlDbType.Int, tamano);
+                    await using var rd = await cmd.ExecuteReaderAsync(ct);
+                    while (await rd.ReadAsync(ct))
+                    {
+                        resultado.Registros.Add(new InvitacionEmpresaItem
+                        {
+                            IdInvitacion = rd.GetGuid(0),
+                            Correo = rd.GetString(1),
+                            Rol = rd.GetString(2),
+                            EstadoRegistrado = rd.GetString(3),
+                            CreadoUtc = rd.GetDateTime(4),
+                            VenceUtc = rd.GetDateTime(5),
+                            ConsumidoUtc = rd.IsDBNull(6) ? null : rd.GetDateTime(6),
+                            CreadoPor = rd.GetString(7)
+                        });
+                    }
+                }
+
+                await tx.CommitAsync(ct);
+                return resultado;
+            }
+        }
+
+        /// <summary>
+        /// Invalidación permanente de un enlace: empresa, rol del actor,
+        /// estado y expiración se verifican dentro de una transacción.
+        /// El cambio y su auditoría se confirman o revierten juntos.
+        /// </summary>
+        public async Task RevocarInvitacionAsync(
+            string actor, Guid idInvitacion, CancellationToken ct)
+        {
+            if (idInvitacion == Guid.Empty)
+                throw new InvalidOperationException("La invitación indicada no es válida.");
+
+            var (conexion, tx) = await AbrirAsync(ct);
+            await using (conexion)
+            await using (tx)
+            {
+                await ExigirPropietarioAsync(conexion, tx, actor, ct);
+                string rol;
+                {
+                    const string sql = @"
+SELECT Rol FROM dbo.InvitacionesEmpresa WITH (UPDLOCK, HOLDLOCK)
+WHERE IdEmpresa = @Empresa AND IdInvitacion = @Id
+  AND Estado = N'Pendiente' AND VenceUtc > SYSUTCDATETIME();";
+                    await using var cmd = Comando(conexion, tx, sql);
+                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, _empresa.IdEmpresa);
+                    Param(cmd, "@Id", SqlDbType.UniqueIdentifier, idInvitacion);
+                    var valor = await cmd.ExecuteScalarAsync(ct);
+                    if (valor is not string permitido)
+                        throw new InvalidOperationException(
+                            "La invitación ya no está pendiente o pertenece a otra empresa.");
+                    rol = permitido;
+                }
+
+                {
+                    const string sql = @"
+UPDATE dbo.InvitacionesEmpresa SET Estado = N'Revocada'
+WHERE IdEmpresa = @Empresa AND IdInvitacion = @Id
+  AND Estado = N'Pendiente' AND VenceUtc > SYSUTCDATETIME();";
+                    await using var cmd = Comando(conexion, tx, sql);
+                    Param(cmd, "@Empresa", SqlDbType.UniqueIdentifier, _empresa.IdEmpresa);
+                    Param(cmd, "@Id", SqlDbType.UniqueIdentifier, idInvitacion);
+                    if (await cmd.ExecuteNonQueryAsync(ct) != 1)
+                        throw new InvalidOperationException(
+                            "La invitación cambió de estado. Actualiza el listado.");
+                }
+
+                await AuditarAsync(conexion, tx, actor, null, idInvitacion,
+                    "InvitacionRevocada", rol, rol, "Pendiente", "Revocada", ct);
+                await tx.CommitAsync(ct);
+            }
+        }
+
         public async Task<List<AuditoriaEquipoItem>> UltimosEventosAsync(
             string actor, CancellationToken ct)
         {
