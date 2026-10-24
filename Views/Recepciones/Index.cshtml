@@ -1,4 +1,5 @@
 @model IReadOnlyList<SistemaFacturacion.Models.RecepcionAnulacion>
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Recepción de mercancía";
     var estado = ViewBag.Estado as string ?? "";
@@ -12,7 +13,7 @@
             <h1 class="page-title">Recepción e inspección</h1>
             <p class="page-subtitle">Mercancía asociada a facturas anuladas, todavía sin incorporar al inventario disponible.</p>
         </div>
-        <a asp-controller="Facturas" asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-controller="Facturas" asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Historial de facturas
         </a>
     </div>
@@ -49,7 +50,7 @@
             </div>
         </div>
         <div class="p-3 border-bottom">
-            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+            <form asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" method="get" class="row g-2 align-items-end">
                 <div class="col-md-6 col-lg-4">
                     <label class="form-label" for="nxFiltroRecepcion">Estado de la recepción</label>
                     <select class="form-select" name="estado" id="nxFiltroRecepcion">
@@ -63,7 +64,7 @@
                 </div>
                 <div class="col-md-auto">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1" aria-hidden="true"></i> Filtrar</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary ms-1">Limpiar</a>
+                    <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary ms-1">Limpiar</a>
                 </div>
             </form>
         </div>
@@ -101,7 +102,7 @@
                                 <td class="text-center nx-mono">@registro.CantidadRecibida</td>
                                 <td><span class="nx-status @(registro.Estado == "Completada" ? "good" : "warn")">@registro.Estado</span></td>
                                 <td class="text-end">
-                                    <a asp-action="Details" asp-route-id="@registro.IdRecepcion"
+                                    <a asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@registro.IdRecepcion"
                                        class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-clipboard-check me-1" aria-hidden="true"></i> Revisar
                                     </a>
