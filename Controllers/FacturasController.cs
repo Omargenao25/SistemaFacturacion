@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
@@ -7,6 +8,7 @@ using SistemaFacturacion.ViewModels;
 
 namespace SistemaFacturacion.Controllers
 {
+    [Authorize]
     public class FacturasController : Controller
     {
         // Política comercial interna: 7 días exactos desde la emisión.
