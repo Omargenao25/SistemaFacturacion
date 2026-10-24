@@ -1,4 +1,5 @@
 @model SistemaFacturacion.Models.CasoPosventa
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Caso de posventa";
     var detalle = Model.DetalleFactura;
@@ -14,7 +15,7 @@
             <h1 class="page-title">Caso de posventa</h1>
             <p class="page-subtitle">Información y seguimiento de la solicitud.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a posventa
         </a>
     </div>
@@ -46,7 +47,7 @@
                 <div class="nx-detail-row"><dt>Factura</dt><dd>
                     @if (factura != null)
                     {
-                        <a asp-controller="Facturas" asp-action="Details" asp-route-id="@factura.IdFactura">@factura.NumeroFactura</a>
+                        <a asp-controller="Facturas" asp-action="Details" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@factura.IdFactura">@factura.NumeroFactura</a>
                     }
                     else { <text>—</text> }
                 </dd></div>
@@ -67,7 +68,7 @@
                 <div class="nx-case-actions">
                     <h3 class="h6 fw-bold">Actualizar seguimiento</h3>
                     <p class="text-muted small">Deja constancia de la revisión. Cerrar un caso no genera movimientos de caja o inventario.</p>
-                    <form asp-action="CambiarEstado" asp-route-id="@Model.IdCaso" method="post">
+                    <form asp-action="CambiarEstado" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@Model.IdCaso" method="post">
                         <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(Model.RowVersion)" />
                         <div class="mb-3">
                             <label for="resolucion" class="form-label">Observación o resolución</label>
