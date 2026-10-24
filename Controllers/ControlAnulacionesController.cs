@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaFacturacion.Data;
@@ -10,6 +11,7 @@ namespace SistemaFacturacion.Controllers
     /// No confirma reembolsos, no registra recepción y no cambia inventario.
     /// El filtro tenant se aplica a cada DbSet comercial consultado.
     /// </summary>
+    [Authorize]
     public sealed class ControlAnulacionesController : Controller
     {
         private const int TamanoPagina = 25;
