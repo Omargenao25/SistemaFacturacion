@@ -1,5 +1,15 @@
 ﻿@using SistemaFacturacion.Security
+@using Microsoft.Extensions.Configuration
 @inject SistemaFacturacion.Services.Tenancy.ContextoEmpresaVerificado EquipoEmpresaActual
+@inject Microsoft.Extensions.Configuration.IConfiguration NexoraConfig
+@{
+    var modoEmpresarial = NexoraConfig.GetValue<bool>("Seguridad:ActivarTenancyValidada");
+    var empresaSeleccionada = modoEmpresarial && EquipoEmpresaActual.TieneEmpresa;
+    var slugEmpresaActual = empresaSeleccionada
+        ? ViewContext.RouteData.Values["empresaSlug"]?.ToString()
+        : null;
+    var mostrarModulos = !modoEmpresarial || empresaSeleccionada;
+}
 
 <!DOCTYPE html>
 
@@ -63,9 +73,19 @@
 
             <nav class="sidebar-menu">
 
+                @if (modoEmpresarial)
+                {
+                    <a href="/mis-empresas"
+                       class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmpresasAcceso" ? "active" : "")">
+                        <i class="bi bi-buildings" aria-hidden="true"></i>
+                        <span>Mis empresas</span>
+                    </a>
+                }
 
+                @if (mostrarModulos)
+                {
                 <a asp-controller="Home"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
 
                     <i class="bi bi-grid"></i>
@@ -83,7 +103,7 @@
 
 
                 <a asp-controller="Clientes"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clientes" ? "active" : "")">
 
                     <i class="bi bi-people"></i>
@@ -96,7 +116,7 @@
 
 
                 <a asp-controller="Categorias"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Categorias" ? "active" : "")">
 
                     <i class="bi bi-tags"></i>
@@ -109,7 +129,7 @@
 
 
                 <a asp-controller="Productos"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Productos" ? "active" : "")">
 
                     <i class="bi bi-box-seam"></i>
@@ -127,7 +147,7 @@
 
 
                 <a asp-controller="Facturas"
-                   asp-action="Create"
+                   asp-action="Create" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Facturas" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
 
                     <i class="bi bi-plus-circle"></i>
@@ -140,7 +160,7 @@
 
 
                 <a asp-controller="Facturas"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Facturas" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
 
                     <i class="bi bi-receipt-cutoff"></i>
@@ -153,28 +173,28 @@
 
 
                 <a asp-controller="Posventa"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Posventa" ? "active" : "")">
                     <i class="bi bi-arrow-repeat"></i>
                     <span>Atención posventa</span>
                 </a>
 
                 <a asp-controller="Recepciones"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Recepciones" ? "active" : "")">
                     <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
                     <span>Recepciones</span>
                 </a>
 
                 <a asp-controller="ControlAnulaciones"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ControlAnulaciones" ? "active" : "")">
                     <i class="bi bi-clipboard-data" aria-hidden="true"></i>
                     <span>Control de anulaciones</span>
                 </a>
 
                 <a asp-controller="Reportes"
-                   asp-action="Index"
+                   asp-action="Index" asp-route-empresaSlug="@slugEmpresaActual"
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reportes" ? "active" : "")">
 
                     <i class="bi bi-bar-chart"></i>
@@ -193,11 +213,12 @@
                     <div class="menu-title">ADMINISTRACIÓN</div>
                     <a asp-controller="Equipo"
                        asp-action="Index"
-                       asp-route-empresaSlug="@(ViewContext.RouteData.Values["empresaSlug"])"
+                       asp-route-empresaSlug="@slugEmpresaActual"
                        class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Equipo" ? "active" : "")">
                         <i class="bi bi-person-gear" aria-hidden="true"></i>
                         <span>Mi equipo</span>
                     </a>
+                }
                 }
 
             </nav>
@@ -227,15 +248,19 @@
 
 
                 <div class="topbar-right">
-                    <a asp-controller="Facturas" asp-action="Create" class="btn btn-primary btn-sm topbar-action">
-                        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva factura
-                    </a>
+                    @if (mostrarModulos)
+                    {
+                        <a asp-controller="Facturas" asp-action="Create" asp-route-empresaSlug="@slugEmpresaActual"
+                           class="btn btn-primary btn-sm topbar-action">
+                            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva factura
+                        </a>
+                    }
 
                     <div class="system-status">
 
                         <span class="status-dot"></span>
 
-                        Sistema activo
+                        @(modoEmpresarial && !empresaSeleccionada ? "Selecciona empresa" : "Sistema activo")
 
                     </div>
 
