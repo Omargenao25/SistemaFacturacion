@@ -391,12 +391,22 @@ IF NOT EXISTS (SELECT 1 FROM dbo.NexoraIsolationLabGuard
 IF OBJECT_ID(N'dbo.AspNetUsers', N'U') IS NULL OR
    OBJECT_ID(N'dbo.EmpresaUsuarios', N'U') IS NULL OR
    OBJECT_ID(N'dbo.Clientes', N'U') IS NULL OR
+   OBJECT_ID(N'dbo.Categorias', N'U') IS NULL OR
+   OBJECT_ID(N'dbo.Productos', N'U') IS NULL OR
+   OBJECT_ID(N'dbo.Facturas', N'U') IS NULL OR
+   OBJECT_ID(N'dbo.DetallesFactura', N'U') IS NULL OR
+   OBJECT_ID(N'dbo.Pagos', N'U') IS NULL OR
    OBJECT_ID(N'dbo.Empresas', N'U') IS NULL
     THROW 51043, 'Faltan migraciones de Nexora en la base aislada.', 1;
 IF EXISTS (SELECT 1 FROM dbo.AspNetUsers) OR
    EXISTS (SELECT 1 FROM dbo.EmpresaUsuarios) OR
-   EXISTS (SELECT 1 FROM dbo.Clientes)
-    THROW 51044, 'El laboratorio ya contiene usuarios/membresías/clientes; no escribir.', 1;
+   EXISTS (SELECT 1 FROM dbo.Clientes) OR
+   EXISTS (SELECT 1 FROM dbo.Categorias) OR
+   EXISTS (SELECT 1 FROM dbo.Productos) OR
+   EXISTS (SELECT 1 FROM dbo.Facturas) OR
+   EXISTS (SELECT 1 FROM dbo.DetallesFactura) OR
+   EXISTS (SELECT 1 FROM dbo.Pagos)
+    THROW 51044, 'Laboratorio con datos previos; requiere base limpia, no escribir.', 1;
 SELECT 1;";
     await using var cmd = new SqlCommand(sql, c);
     Exigir(Convert.ToInt32(await cmd.ExecuteScalarAsync()) == 1);
