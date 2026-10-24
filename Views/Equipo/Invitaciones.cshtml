@@ -1,0 +1,154 @@
+@model SistemaFacturacion.ViewModels.InvitacionesEmpresaViewModel
+@{
+    ViewData["Title"] = "Invitaciones del equipo";
+    var slugEmpresa = ViewContext.RouteData.Values["empresaSlug"]?.ToString();
+    var primero = Model.TotalResultados == 0 ? 0 : (Model.Pagina - 1) * 20 + 1;
+    var ultimo = Math.Min(Model.Pagina * 20, Model.TotalResultados);
+}
+<div class="nx-crud-page nx-team-page nx-invitations-page">
+    <div class="page-intro">
+        <div>
+            <div class="page-eyebrow">Nexora / Mi equipo / Control de acceso</div>
+            <h1 class="page-title">Invitaciones del equipo</h1>
+            <p class="page-subtitle">Administra los enlaces de acceso de @Model.Empresa, sin revelar sus tokens secretos.</p>
+        </div>
+        <a asp-controller="Equipo" asp-action="Index" asp-route-empresaSlug="@slugEmpresa"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Mi equipo
+        </a>
+    </div>
+
+    <div class="nx-team-banner" role="note">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <div>
+            <strong>Solo el propietario puede revocar invitaciones.</strong>
+            <p>Revocar es permanente y evita que ese enlace se acepte más adelante.
+               Las invitaciones aceptadas y vencidas no se pueden revocar; tampoco es posible
+               volver a recuperar el enlace secreto original.</p>
+        </div>
+    </div>
+
+    @if (TempData["EquipoMensaje"] is string mensaje)
+    {
+        <div class="alert alert-success" role="status">@mensaje</div>
+    }
+    @if (TempData["EquipoError"] is string error)
+    {
+        <div class="alert alert-warning" role="alert">@error</div>
+    }
+
+    <section class="nx-panel" aria-labelledby="nxInvitacionesListado">
+        <div class="nx-panel-header">
+            <div>
+                <h2 id="nxInvitacionesListado" class="nx-panel-title">Enlaces y estados</h2>
+                <p class="nx-panel-subtitle">Se muestran hasta 20 invitaciones por página.</p>
+            </div>
+            <span class="text-muted small">@Model.TotalResultados resultado(s)</span>
+        </div>
+        <form asp-action="Invitaciones" asp-route-empresaSlug="@slugEmpresa"
+              method="get" class="nx-team-filters row g-2 align-items-end">
+            <div class="col-sm-6 col-md-4">
+                <label class="form-label" for="nxInvitacionesEstado">Filtrar por estado</label>
+                <select class="form-select" id="nxInvitacionesEstado" name="estado">
+                    <option value="Pendiente" selected="@(Model.EstadoSeleccionado == "Pendiente")">Pendientes vigentes</option>
+                    <option value="Vencida" selected="@(Model.EstadoSeleccionado == "Vencida")">Vencidas</option>
+                    <option value="Aceptada" selected="@(Model.EstadoSeleccionado == "Aceptada")">Aceptadas</option>
+                    <option value="Revocada" selected="@(Model.EstadoSeleccionado == "Revocada")">Revocadas</option>
+                    <option value="Caducada" selected="@(Model.EstadoSeleccionado == "Caducada")">Caducadas registradas</option>
+                    <option value="Todas" selected="@(Model.EstadoSeleccionado == "Todas")">Todas</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" type="submit">Filtrar</button>
+            </div>
+        </form>
+
+        @if (Model.Invitaciones.Count == 0)
+        {
+            <div class="nx-empty">
+                <i class="bi bi-envelope-check" aria-hidden="true"></i>
+                <strong>No hay invitaciones con este estado</strong>
+                <p class="mb-0">Puedes generar nuevas invitaciones desde Mi equipo.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table nx-table nx-invitations-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Destinatario</th>
+                            <th scope="col">Rol solicitado</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Generada (UTC)</th>
+                            <th scope="col">Vencimiento (UTC)</th>
+                            <th scope="col" class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var invitacion in Model.Invitaciones)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@invitacion.Correo</strong>
+                                    <span class="nx-team-secondary">Por @invitacion.CreadoPor</span>
+                                </td>
+                                <td><span class="nx-team-role">@invitacion.Rol</span></td>
+                                <td>
+                                    <span class="nx-status @(invitacion.PuedeRevocar ? "warn" : invitacion.EstadoVisible == "Aceptada" ? "good" : "danger")">
+                                        @invitacion.EstadoVisible
+                                    </span>
+                                </td>
+                                <td><span class="nx-team-date">@invitacion.CreadoUtc.ToString("dd/MM/yyyy HH:mm")</span></td>
+                                <td><span class="nx-team-date">@invitacion.VenceUtc.ToString("dd/MM/yyyy HH:mm")</span></td>
+                                <td class="text-end">
+                                    @if (invitacion.PuedeRevocar)
+                                    {
+                                        <form asp-action="RevocarInvitacion"
+                                              asp-route-empresaSlug="@slugEmpresa" method="post"
+                                              onsubmit="return confirm('¿Revocar este enlace de invitación? No se podrá usar después.');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="idInvitacion" value="@invitacion.IdInvitacion" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-x-circle me-1" aria-hidden="true"></i> Revocar
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sin acciones</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav class="nx-team-pager" aria-label="Páginas de invitaciones">
+                <span>Mostrando @primero–@ultimo de @Model.TotalResultados · Página @Model.Pagina de @Model.TotalPaginas</span>
+                <div>
+                    @if (Model.Pagina > 1)
+                    {
+                        <a asp-action="Invitaciones" asp-route-empresaSlug="@slugEmpresa"
+                           asp-route-estado="@Model.EstadoSeleccionado" asp-route-pagina="@(Model.Pagina - 1)"
+                           class="btn btn-outline-secondary btn-sm">Anterior</a>
+                    }
+                    @if (Model.Pagina < Model.TotalPaginas)
+                    {
+                        <a asp-action="Invitaciones" asp-route-empresaSlug="@slugEmpresa"
+                           asp-route-estado="@Model.EstadoSeleccionado" asp-route-pagina="@(Model.Pagina + 1)"
+                           class="btn btn-outline-secondary btn-sm">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+    <p class="text-muted small mt-3">
+        La revocación no elimina empleados ya vinculados. Para suspender una membresía activa utiliza Mi equipo.
+        Los tokens no son recuperables desde esta pantalla.
+    </p>
+</div>
