@@ -1,4 +1,5 @@
 @model SistemaFacturacion.Models.Cliente
+@{ var nxRutaEmpresaSlug = ViewContext.RouteData.Values["empresaSlug"]?.ToString(); }
 @{
     ViewData["Title"] = "Detalle de cliente";
 }
@@ -10,7 +11,7 @@
             <h1 class="page-title">Detalle de cliente</h1>
             <p class="page-subtitle">Consulta la información registrada en el sistema.</p>
         </div>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a clientes
         </a>
     </div>
@@ -39,8 +40,8 @@
             </dl>
 
             <div class="nx-detail-actions">
-                <a asp-action="Index" class="btn btn-outline-secondary">Regresar</a>
-                <a asp-action="Edit" asp-route-id="@Model.IdCliente" class="btn btn-primary">
+                <a asp-action="Index" asp-route-empresaSlug="@nxRutaEmpresaSlug" class="btn btn-outline-secondary">Regresar</a>
+                <a asp-action="Edit" asp-route-empresaSlug="@nxRutaEmpresaSlug" asp-route-id="@Model.IdCliente" class="btn btn-primary">
                     <i class="bi bi-pencil-square me-1" aria-hidden="true"></i> Editar cliente
                 </a>
             </div>
