@@ -130,3 +130,7 @@ if (!app.Environment.IsDevelopment())
 app.MapRazorPages();
 
 app.Run();
+
+// Permite iniciar Nexora en TestServer (servidor HTTP EN MEMORIA)
+// para pruebas de cookies reales Identity; no cambia el host de producción.
+public partial class Program { }
