@@ -466,8 +466,10 @@ static async Task LimpiarFixtureAsync(
     await c.OpenAsync();
     await using var tx = (SqlTransaction)await c.BeginTransactionAsync();
     const string sql = @"
-DELETE FROM dbo.Clientes
- WHERE IdEmpresa IN (@EmpresaA, @EmpresaB) AND Nombre = @Marca;
+-- La base se verificó VACÍA antes de crear el fixture. La etiqueta
+-- aleatoria permite limpiar incluso si una prueba descubre un fallo grave
+-- que hubiera escrito el cliente con un tenant inesperado.
+DELETE FROM dbo.Clientes WHERE Nombre = @Marca;
 DELETE FROM dbo.EmpresaUsuarios
  WHERE (IdEmpresa = @EmpresaA AND UserId = @UsuarioA)
     OR (IdEmpresa = @EmpresaB AND UserId = @UsuarioB);
