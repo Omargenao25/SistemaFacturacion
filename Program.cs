@@ -73,6 +73,21 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Impide almacenar páginas dinámicas y datos comerciales en cachés del navegador.
+// Los archivos estáticos ya se sirvieron antes de este middleware.
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        context.Response.Headers.Pragma = "no-cache";
+        context.Response.Headers.Expires = "0";
+        return Task.CompletedTask;
+    });
+
+    await next();
+});
+
 app.UseRouting();
 
 // Identity debe determinar primero la identidad del usuario. Únicamente
