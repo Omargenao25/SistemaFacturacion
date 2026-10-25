@@ -325,6 +325,60 @@ var pruebas = new (string Nombre, Func<Task> Ejecutar)[]
     {
         Verificar(!PermisosNexora.TienePermiso("Propietario", "Nexora.AdministrarTodosLosSistemas"));
         return Task.CompletedTask;
+    }),
+    ("La bandeja de invitaciones requiere permiso empresarial", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "Invitaciones", "GET");
+        Verificar(permiso == PermisosNexora.AdministrarUsuarios);
+        Verificar(PermisosNexora.TienePermiso("Propietario", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Cajero y administrador no pueden ver invitaciones", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "Invitaciones", "GET");
+        Verificar(!PermisosNexora.TienePermiso("Cajero", permiso!));
+        Verificar(!PermisosNexora.TienePermiso("Administrador", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Revocar requiere POST y permiso de propietario", () =>
+    {
+        var permiso = ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "RevocarInvitacion", "POST");
+        Verificar(permiso == PermisosNexora.AdministrarUsuarios);
+        Verificar(PermisosNexora.TienePermiso("Propietario", permiso!));
+        return Task.CompletedTask;
+    }),
+    ("Revocación por GET está prohibida", () =>
+    {
+        Verificar(ReglasAccesoControladores.ObtenerPermiso(
+            "Equipo", "RevocarInvitacion", "GET") == null);
+        return Task.CompletedTask;
+    }),
+    ("No se conceden permisos a operaciones nuevas sobre invitaciones", () =>
+    {
+        foreach (var accion in new[] { "EliminarInvitacion", "ReactivarInvitacion",
+                                       "ReenviarToken", "VerToken" })
+        {
+            Verificar(ReglasAccesoControladores.ObtenerPermiso(
+                "Equipo", accion, "POST") == null);
+        }
+        return Task.CompletedTask;
+    }),
+    ("Los filtros de invitaciones aceptan únicamente estados definidos", () =>
+    {
+        foreach (var estado in new[] { "Pendiente", "Vencida", "Aceptada",
+                                       "Revocada", "Caducada", "Todas" })
+            Verificar(GestionMembresiasSegura.EstadoInvitacionPermitido(estado));
+        return Task.CompletedTask;
+    }),
+    ("Filtros de estado de invitaciones arbitrarios se rechazan", () =>
+    {
+        Verificar(!GestionMembresiasSegura.EstadoInvitacionPermitido(null));
+        Verificar(!GestionMembresiasSegura.EstadoInvitacionPermitido("Propietario"));
+        Verificar(!GestionMembresiasSegura.EstadoInvitacionPermitido("Pendiente'; DROP TABLE"));
+        return Task.CompletedTask;
     })
 };
 

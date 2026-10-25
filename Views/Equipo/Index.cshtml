@@ -40,6 +40,12 @@
                 <h2 class="nx-panel-title" id="nxEquipoInvitar">Invitar un empleado</h2>
                 <p class="nx-panel-subtitle">Genera un enlace temporal de un solo uso. La cuenta invitada debe confirmar su correo.</p>
             </div>
+            <a asp-controller="Equipo" asp-action="Invitaciones"
+               asp-route-empresaSlug="@slugEmpresa"
+               class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-envelope-open me-1" aria-hidden="true"></i>
+                Ver y revocar invitaciones
+            </a>
         </div>
         <form asp-action="CrearInvitacion" asp-route-empresaSlug="@slugEmpresa" method="post"
               class="p-3 row g-3 align-items-end">
