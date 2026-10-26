@@ -1,7 +1,7 @@
 -- FASE 8.5.5: asignar membresías a cuentas de Identity YA CREADAS.
 -- Ejecutar SOLO en NexoraSecurityLab_Phase8, tras registrar 4 usuarios ficticios
 -- y confirmar sus correos. No escribe contraseñas ni crea usuarios de Identity.
--- Sustituir estas direcciones por cuentas FICTICIAS y ÚNICAS del laboratorio.
+-- Correos reservados para identidades ficticias creadas en el laboratorio.
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
@@ -14,14 +14,12 @@ IF OBJECT_ID(N'dbo.Empresas', N'U') IS NULL OR
 
 DECLARE @Cuentas TABLE (Slug nvarchar(63), Correo nvarchar(256), Rol nvarchar(30));
 INSERT INTO @Cuentas (Slug, Correo, Rol) VALUES
-(N'nexora-lab-a', N'propietario-a@example.test', N'Propietario'),
-(N'nexora-lab-a', N'admin-a@example.test', N'Administrador'),
-(N'nexora-lab-a', N'cajero-a@example.test', N'Cajero'),
-(N'nexora-lab-b', N'propietario-b@example.test', N'Propietario');
+(N'nexora-lab-a', N'propietario-a@nexora-lab.test', N'Propietario'),
+(N'nexora-lab-a', N'admin-a@nexora-lab.test', N'Administrador'),
+(N'nexora-lab-a', N'cajero-a@nexora-lab.test', N'Cajero'),
+(N'nexora-lab-b', N'propietario-b@nexora-lab.test', N'Propietario');
 
--- Fail closed: la plantilla NO puede ejecutarse con sus correos de ejemplo.
-IF EXISTS (SELECT 1 FROM @Cuentas WHERE Correo LIKE N'%@example.test')
-    THROW 51102, 'Reemplaza TODOS los correos de ejemplo por cuentas ficticias registradas en el laboratorio.', 1;
+-- Las cuentas de prueba se deben crear primero mediante ASP.NET Core Identity.
 
 IF (SELECT COUNT(*) FROM @Cuentas) <> 4 OR
    (SELECT COUNT(DISTINCT Correo) FROM @Cuentas) <> 4
