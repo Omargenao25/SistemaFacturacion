@@ -43,6 +43,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+// Registrar explícitamente las Razor Pages de ASP.NET Core Identity.
+builder.Services.AddRazorPages();
 
 // En desarrollo local no hay proveedor de correo configurado para
 // completar confirmaciones. Solo el entorno Development permite probar
@@ -137,13 +139,17 @@ var rutaMvc = app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-if (!app.Environment.IsDevelopment())
+// En modo SaaS cada acción MVC comercial pasa por FiltroPermisosComerciales.
+// No colocar un challenge global sobre la ruta convencional: cuando una URL
+// de Identity no coincide con su Razor Page, podría generar un bucle de Login.
+// Los controladores comerciales también tienen [Authorize] explícito.
+if (!app.Environment.IsDevelopment() && !activarTenancyValidada)
     rutaMvc.RequireAuthorization();
 
 // Las rutas con atributos (como el diagnóstico empresarial) también quedan
 // registradas explícitamente y exigen autenticación fuera de Development.
 var rutasAtributo = app.MapControllers();
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment() && !activarTenancyValidada)
     rutasAtributo.RequireAuthorization();
 
 app.MapRazorPages();
