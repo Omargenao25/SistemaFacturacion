@@ -44,7 +44,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Registrar explícitamente las Razor Pages de ASP.NET Core Identity.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    // Identity login/registro no requieren sesión ni contexto de empresa.
+    options.Conventions.AllowAnonymousToAreaPage("Identity", "/Account/Login");
+    options.Conventions.AllowAnonymousToAreaPage("Identity", "/Account/Register");
+    options.Conventions.AllowAnonymousToAreaPage("Identity", "/Account/ForgotPassword");
+    options.Conventions.AllowAnonymousToAreaPage("Identity", "/Account/AccessDenied");
+});
 
 // En desarrollo local no hay proveedor de correo configurado para
 // completar confirmaciones. Solo el entorno Development permite probar
@@ -151,6 +158,29 @@ if (!app.Environment.IsDevelopment() && !activarTenancyValidada)
 var rutasAtributo = app.MapControllers();
 if (!app.Environment.IsDevelopment() && !activarTenancyValidada)
     rutasAtributo.RequireAuthorization();
+
+// Diagnóstico exclusivamente del perfil aislado: confirma qué endpoint
+// resuelve ASP.NET Core para Login, sin publicar tokens ni datos de usuario.
+if (app.Environment.IsEnvironment("NexoraLab"))
+{
+    app.MapGet("/__nexora-lab/identity-route", (IEnumerable<EndpointDataSource> sources) =>
+    {
+        var routes = sources.SelectMany(source => source.Endpoints)
+            .OfType<RouteEndpoint>()
+            .Where(endpoint => endpoint.RoutePattern.RawText?.Contains(
+                "Identity/Account/Login", StringComparison.OrdinalIgnoreCase) == true)
+            .Select(endpoint => endpoint.RoutePattern.RawText)
+            .Distinct()
+            .ToArray();
+
+        return Results.Json(new
+        {
+            entorno = "NexoraLab",
+            paginaLoginRegistrada = routes.Length > 0,
+            rutasLogin = routes
+        });
+    }).AllowAnonymous();
+}
 
 app.MapRazorPages();
 
