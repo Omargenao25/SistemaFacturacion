@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SistemaFacturacion.Security
 {
@@ -22,6 +23,16 @@ namespace SistemaFacturacion.Security
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
+            // El filtro global MVC también puede ejecutarse durante Razor Pages.
+            // Identity (Login, Register, Logout y Manage) no son acciones
+            // comerciales; dejar que sus propios atributos/políticas de
+            // autorización gestionen el acceso. De lo contrario, un descriptor
+            // que no sea ControllerActionDescriptor cae en ChallengeResult y
+            // redirige Login hacia sí mismo indefinidamente.
+            if (context.ActionDescriptor is PageActionDescriptor pagina &&
+                string.Equals(pagina.AreaName, "Identity", StringComparison.OrdinalIgnoreCase))
+                return;
+
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
             // La persona invitada todavía NO pertenece a la empresa.
             // ÚNICA excepción al filtro tenant: aceptar invitación por Identity,
