@@ -76,10 +76,16 @@ Console.WriteLine("No compartas las nuevas contraseñas en el chat.");
 
 static string LeerOculto()
 {
+    if (Console.IsInputRedirected)
+        return Console.ReadLine() ?? string.Empty;
+
     var chars = new List<char>();
     while (true)
     {
         var k = Console.ReadKey(intercept: true);
+        // En Windows Terminal/Visual Studio, el pegado puede enviar una secuencia
+        // de eventos de teclado; permitir también entrada pegada por redirección
+        // cuando la terminal no soporta teclas interactivas.
         if (k.Key == ConsoleKey.Enter)
         {
             Console.WriteLine();
