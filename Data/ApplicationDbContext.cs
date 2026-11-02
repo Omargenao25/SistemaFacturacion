@@ -30,6 +30,8 @@ namespace SistemaFacturacion.Data
         public DbSet<Pago> Pagos { get; set; }
         public DbSet<CasoPosventa> CasosPosventa { get; set; }
         public DbSet<Reembolso> Reembolsos { get; set; }
+        public DbSet<NotaCredito> NotasCredito { get; set; }
+        public DbSet<DetalleNotaCredito> DetallesNotaCredito { get; set; }
         public DbSet<RecepcionAnulacion> RecepcionesAnulacion { get; set; }
 
         // Plataforma SaaS: aún no se utiliza para separar los datos comerciales.
@@ -149,6 +151,42 @@ namespace SistemaFacturacion.Data
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
+            // Fase 9: modelo de BORRADORES sin endpoints de emisión ni pagos.
+            // Cada relación exige el mismo IdEmpresa en ambos extremos.
+            modelBuilder.Entity<NotaCredito>(entidad =>
+            {
+                entidad.ToTable("NotasCredito", tabla =>
+                {
+                    tabla.HasCheckConstraint("CK_NotasCredito_Estado",
+                        "[Estado] = N'Borrador'");
+                    tabla.HasCheckConstraint("CK_NotasCredito_Importes",
+                        "[Subtotal] >= 0 AND [Impuesto] >= 0 AND [Descuento] >= 0 AND [Total] >= 0");
+                });
+                entidad.HasAlternateKey(n => new { n.IdEmpresa, n.IdNotaCredito });
+                entidad.HasIndex(n => new { n.IdEmpresa, n.IdFactura });
+                entidad.HasOne(n => n.Factura).WithMany()
+                    .HasForeignKey(n => new { n.IdEmpresa, n.IdFactura })
+                    .HasPrincipalKey(f => new { f.IdEmpresa, f.IdFactura })
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<DetalleNotaCredito>(entidad =>
+            {
+                entidad.ToTable("DetallesNotaCredito", tabla =>
+                    tabla.HasCheckConstraint("CK_DetallesNotaCredito_Importes",
+                        "[Cantidad] > 0 AND [Subtotal] >= 0 AND [Impuesto] >= 0 AND [Descuento] >= 0 AND [Total] >= 0"));
+                entidad.HasIndex(d => new { d.IdEmpresa, d.IdDetalleFactura });
+                entidad.HasOne(d => d.NotaCredito)
+                    .WithMany(n => n.Detalles)
+                    .HasForeignKey(d => new { d.IdEmpresa, d.IdNotaCredito })
+                    .HasPrincipalKey(n => new { n.IdEmpresa, n.IdNotaCredito })
+                    .OnDelete(DeleteBehavior.NoAction);
+                entidad.HasOne(d => d.DetalleFactura).WithMany()
+                    .HasForeignKey(d => new { d.IdEmpresa, d.IdDetalleFactura })
+                    .HasPrincipalKey(d => new { d.IdEmpresa, d.IdDetalle })
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
             // También permite comprobar cantidades de solicitudes por artículo.
             modelBuilder.Entity<CasoPosventa>()
                 .HasIndex(c => new { c.IdDetalle, c.Tipo, c.Estado });
@@ -197,6 +235,8 @@ namespace SistemaFacturacion.Data
             ConfigurarEmpresaInicial<Pago>(modelBuilder);
             ConfigurarEmpresaInicial<CasoPosventa>(modelBuilder);
             ConfigurarEmpresaInicial<Reembolso>(modelBuilder);
+            ConfigurarEmpresaInicial<NotaCredito>(modelBuilder);
+            ConfigurarEmpresaInicial<DetalleNotaCredito>(modelBuilder);
             ConfigurarEmpresaInicial<RecepcionAnulacion>(modelBuilder);
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
