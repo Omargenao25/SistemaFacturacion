@@ -53,8 +53,18 @@ public static class ValidadorLimitesCredito
                 borrador.Subtotal, borrador.Impuesto, borrador.Descuento))
             throw new InvalidOperationException("El total de la nota no concuerda con sus importes.");
 
-        var totalDetalles = borrador.Detalles.Sum(d =>
-            CalculadoraNotaCredito.CalcularTotal(d.Subtotal, d.Impuesto, d.Descuento));
+        // Validar cada total almacenado antes de sumar: de lo contrario,
+        // un detalle alterado puede pasar si sus componentes siguen correctos.
+        foreach (var detalle in borrador.Detalles)
+        {
+            var calculado = CalculadoraNotaCredito.CalcularTotal(
+                detalle.Subtotal, detalle.Impuesto, detalle.Descuento);
+            if (detalle.Total != calculado)
+                throw new InvalidOperationException(
+                    "El total de una linea no coincide con sus importes.");
+        }
+
+        var totalDetalles = borrador.Detalles.Sum(d => d.Total);
         if (totalDetalles != borrador.Total)
             throw new InvalidOperationException("El total de los detalles no concuerda con la cabecera.");
 
