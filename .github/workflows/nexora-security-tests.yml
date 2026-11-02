@@ -1,0 +1,25 @@
+name: Nexora security tests
+
+on:
+  push:
+    branches:
+      - feature/nexora-security-phase8-auth-navigation
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore security tests
+        run: dotnet restore tests/NexoraSecurity.Tests/NexoraSecurity.Tests.csproj
+      - name: Execute isolation and permission tests
+        run: dotnet test tests/NexoraSecurity.Tests/NexoraSecurity.Tests.csproj --no-restore --configuration Release
