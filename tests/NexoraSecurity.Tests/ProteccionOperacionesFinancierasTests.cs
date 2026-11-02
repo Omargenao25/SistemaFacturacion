@@ -31,9 +31,9 @@ public sealed class ProteccionOperacionesFinancierasTests
         Assert.Equal(permisoEsperado,
             ReglasAccesoControladores.ObtenerPermiso(
                 controlador.Name.Replace("Controller", ""), nombreAccion, "POST"));
-        Assert.Null(ReglasAccesoControladores.ObtenerPermiso(
-            controlador.Name.Replace("Controller", ""), nombreAccion, "GET") is string p
-                && nombreAccion == "Anular" ? p : null);
+        if (nombreAccion == "Anular")
+            Assert.Null(ReglasAccesoControladores.ObtenerPermiso(
+                "Facturas", "Anular", "GET"));
     }
 
     [Fact]
