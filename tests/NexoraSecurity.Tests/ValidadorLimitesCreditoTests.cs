@@ -61,6 +61,36 @@ public sealed class ValidadorLimitesCreditoTests
     }
 
     [Fact]
+    public void RechazaDescuadresCompensadosEntreLineas()
+    {
+        var (nota, originales) = Escenario();
+        // Dos líneas cuyo total agregado sigue coincidiendo con cabecera,
+        // pero con valores individuales manipulados.
+        nota.Subtotal = 200;
+        nota.Impuesto = 36;
+        nota.Total = 236;
+        nota.Detalles.Single().Subtotal = 100;
+        nota.Detalles.Single().Impuesto = 18;
+        nota.Detalles.Single().Total = 117;
+        nota.Detalles.Add(new DetalleNotaCredito
+        {
+            IdEmpresa = Empresa,
+            IdNotaCredito = 1,
+            IdDetalleFactura = 21,
+            Cantidad = 1,
+            Subtotal = 100,
+            Impuesto = 18,
+            Total = 119
+        });
+        var ventas = originales.Concat(new[]
+        {
+            new DetalleFactura { IdEmpresa = Empresa, IdFactura = 10, IdDetalle = 21, Cantidad = 2 }
+        }).ToArray();
+        Assert.Throws<InvalidOperationException>(() =>
+            ValidadorLimitesCredito.Validar(nota, 236, ventas, Array.Empty<NotaCredito>()));
+    }
+
+    [Fact]
     public void RechazaHistorialSinEmisionVerificada()
     {
         var (nota, originales) = Escenario();
