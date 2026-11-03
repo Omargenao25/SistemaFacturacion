@@ -45,12 +45,16 @@ public sealed class NotasCreditoModeloIntegridadTests
         Assert.Equal(2, relaciones.Length);
 
         var aNota = Assert.Single(relaciones.Where(x => x.PrincipalEntityType.ClrType == typeof(NotaCredito)));
-        Assert.Equal(new[] { "IdEmpresa", "IdNotaCredito" }, aNota.Properties.Select(p => p.Name));
+        Assert.Equal(new[] { "IdEmpresa", "IdFactura", "IdNotaCredito" }, aNota.Properties.Select(p => p.Name));
         Assert.Equal(DeleteBehavior.NoAction, aNota.DeleteBehavior);
 
         var aVenta = Assert.Single(relaciones.Where(x => x.PrincipalEntityType.ClrType == typeof(DetalleFactura)));
-        Assert.Equal(new[] { "IdEmpresa", "IdDetalleFactura" }, aVenta.Properties.Select(p => p.Name));
+        Assert.Equal(new[] { "IdEmpresa", "IdFactura", "IdDetalleFactura" }, aVenta.Properties.Select(p => p.Name));
         Assert.Equal(DeleteBehavior.NoAction, aVenta.DeleteBehavior);
+        Assert.Equal(new[] { "IdEmpresa", "IdFactura", "IdNotaCredito" },
+            aNota.PrincipalKey.Properties.Select(p => p.Name));
+        Assert.Equal(new[] { "IdEmpresa", "IdFactura", "IdDetalle" },
+            aVenta.PrincipalKey.Properties.Select(p => p.Name));
     }
 
     [Fact]
