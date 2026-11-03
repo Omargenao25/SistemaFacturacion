@@ -235,8 +235,9 @@ namespace SistemaFacturacion.Data
             ConfigurarEmpresaInicial<Pago>(modelBuilder);
             ConfigurarEmpresaInicial<CasoPosventa>(modelBuilder);
             ConfigurarEmpresaInicial<Reembolso>(modelBuilder);
-            ConfigurarEmpresaInicial<NotaCredito>(modelBuilder);
-            ConfigurarEmpresaInicial<DetalleNotaCredito>(modelBuilder);
+            // Las notas nuevas no heredan el DEFAULT SQL de la empresa inicial.
+            ConfigurarEmpresaSinDefault<NotaCredito>(modelBuilder);
+            ConfigurarEmpresaSinDefault<DetalleNotaCredito>(modelBuilder);
             ConfigurarEmpresaInicial<RecepcionAnulacion>(modelBuilder);
 
             // Factura -> Detalles/Pagos conserva su configuración existente.
@@ -263,6 +264,26 @@ namespace SistemaFacturacion.Data
             modelBuilder.Entity<T>()
                 .HasQueryFilter(registro =>
                     EF.Property<Guid>(registro, "IdEmpresa") == IdEmpresaActual);
+        }
+
+        // Para entidades SaaS nuevas: mismo aislamiento que los registros
+        // comerciales, pero sin asignacion empresarial predeterminada en SQL.
+        private void ConfigurarEmpresaSinDefault<T>(ModelBuilder modelBuilder)
+            where T : class, IEntidadEmpresa
+        {
+            modelBuilder.Entity<T>()
+                .Property(e => e.IdEmpresa)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<T>()
+                .HasOne<Empresa>()
+                .WithMany()
+                .HasForeignKey(e => e.IdEmpresa)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<T>().HasIndex(e => e.IdEmpresa);
+            modelBuilder.Entity<T>()
+                .HasQueryFilter(e => e.IdEmpresa == IdEmpresaActual);
         }
 
         public override int SaveChanges()
