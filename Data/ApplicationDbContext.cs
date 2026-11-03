@@ -55,6 +55,8 @@ namespace SistemaFacturacion.Data
                 .HasAlternateKey(f => new { f.IdEmpresa, f.IdFactura });
             modelBuilder.Entity<DetalleFactura>()
                 .HasAlternateKey(d => new { d.IdEmpresa, d.IdDetalle });
+            modelBuilder.Entity<DetalleFactura>()
+                .HasAlternateKey(d => new { d.IdEmpresa, d.IdFactura, d.IdDetalle });
 
             modelBuilder.Entity<Producto>()
                 .HasOne(p => p.Categoria)
@@ -163,6 +165,7 @@ namespace SistemaFacturacion.Data
                         "[Subtotal] >= 0 AND [Impuesto] >= 0 AND [Descuento] >= 0 AND [Total] >= 0");
                 });
                 entidad.HasAlternateKey(n => new { n.IdEmpresa, n.IdNotaCredito });
+                entidad.HasAlternateKey(n => new { n.IdEmpresa, n.IdFactura, n.IdNotaCredito });
                 entidad.HasIndex(n => new { n.IdEmpresa, n.IdFactura });
                 entidad.HasOne(n => n.Factura).WithMany()
                     .HasForeignKey(n => new { n.IdEmpresa, n.IdFactura })
@@ -175,15 +178,17 @@ namespace SistemaFacturacion.Data
                 entidad.ToTable("DetallesNotaCredito", tabla =>
                     tabla.HasCheckConstraint("CK_DetallesNotaCredito_Importes",
                         "[Cantidad] > 0 AND [Subtotal] >= 0 AND [Impuesto] >= 0 AND [Descuento] >= 0 AND [Total] >= 0"));
-                entidad.HasIndex(d => new { d.IdEmpresa, d.IdDetalleFactura });
+                entidad.HasIndex(d => new { d.IdEmpresa, d.IdFactura, d.IdDetalleFactura });
+                // Ambas FK incluyen factura + empresa; no acepta líneas
+                // acreditadas de una factura diferente.
                 entidad.HasOne(d => d.NotaCredito)
                     .WithMany(n => n.Detalles)
-                    .HasForeignKey(d => new { d.IdEmpresa, d.IdNotaCredito })
-                    .HasPrincipalKey(n => new { n.IdEmpresa, n.IdNotaCredito })
+                    .HasForeignKey(d => new { d.IdEmpresa, d.IdFactura, d.IdNotaCredito })
+                    .HasPrincipalKey(n => new { n.IdEmpresa, n.IdFactura, n.IdNotaCredito })
                     .OnDelete(DeleteBehavior.NoAction);
                 entidad.HasOne(d => d.DetalleFactura).WithMany()
-                    .HasForeignKey(d => new { d.IdEmpresa, d.IdDetalleFactura })
-                    .HasPrincipalKey(d => new { d.IdEmpresa, d.IdDetalle })
+                    .HasForeignKey(d => new { d.IdEmpresa, d.IdFactura, d.IdDetalleFactura })
+                    .HasPrincipalKey(d => new { d.IdEmpresa, d.IdFactura, d.IdDetalle })
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
