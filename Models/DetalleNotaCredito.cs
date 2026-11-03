@@ -11,6 +11,10 @@ public sealed class DetalleNotaCredito : IEntidadEmpresa
     [Key]
     public int IdDetalleNotaCredito { get; set; }
 
+    // Debe coincidir con la factura de la nota Y con la de la línea vendida.
+    // Ambas claves foráneas compuestas comparten este IdFactura.
+    public int IdFactura { get; set; }
+
     public int IdNotaCredito { get; set; }
     public NotaCredito? NotaCredito { get; set; }
 
